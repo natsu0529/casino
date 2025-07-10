@@ -23,8 +23,9 @@ ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE game_history ENABLE ROW LEVEL SECURITY;
 
 -- プロフィールのRLSポリシー
-CREATE POLICY "Users can view their own profile" ON profiles
-  FOR SELECT USING (auth.uid() = id);
+-- 全ユーザーがprofilesテーブルを読み取り可能（ランキング機能用）
+CREATE POLICY "Public profiles for ranking" ON profiles
+  FOR SELECT USING (true);
 
 CREATE POLICY "Users can update their own profile" ON profiles
   FOR UPDATE USING (auth.uid() = id);
