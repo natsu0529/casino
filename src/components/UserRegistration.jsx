@@ -105,6 +105,11 @@ const UserRegistration = ({ onBack, onLogin }) => {
           <p className="text-gray-300">
             {isLogin ? 'アカウントにログインしてください' : '新しいアカウントを作成してください'}
           </p>
+          {!isLogin && (
+            <p className="text-yellow-300 text-sm mt-2">
+              ※メールアドレスの認証がうまくいかない場合、Googleアカウントでの登録を推奨しています
+            </p>
+          )}
         </div>
 
         {/* フォーム */}
