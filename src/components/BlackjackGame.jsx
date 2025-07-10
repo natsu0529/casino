@@ -84,7 +84,6 @@ const BlackjackGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     }
 
     const newDeck = createDeck()
-    setDeck(newDeck)
     
     // 初期カード配布
     const playerCards = [newDeck.pop(), newDeck.pop()]
@@ -107,7 +106,7 @@ const BlackjackGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     // 残高から賭け金を引く
     onUpdateBalance(currentUser.balance - betAmount)
     
-    setDeck(newDeck.slice(0, -4)) // 配布した4枚を除く
+    setDeck(newDeck) // 残りのデッキをセット（既に4枚は取り除かれている）
   }
 
   // ヒット

@@ -81,13 +81,21 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
   };
 
   const dealCommunityCards = (count) => {
-    const newCommunityCards = [...communityCards];
-    for (let i = 0; i < count; i++) {
-      if (deck.length > 0) {
-        newCommunityCards.push(deck[0]);
-        setDeck(prev => prev.slice(1));
-      }
+    if (deck.length < count) {
+      console.error('デッキに十分なカードがありません');
+      return;
     }
+    
+    const newCommunityCards = [...communityCards];
+    const currentDeck = [...deck];
+    
+    // 必要な枚数のカードを一度に取得
+    for (let i = 0; i < count; i++) {
+      newCommunityCards.push(currentDeck[i]);
+    }
+    
+    // デッキから使用したカードを除去
+    setDeck(currentDeck.slice(count));
     setCommunityCards(newCommunityCards);
   };
 

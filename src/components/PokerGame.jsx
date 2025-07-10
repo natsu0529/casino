@@ -183,7 +183,6 @@ const PokerGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     }
 
     const newDeck = createDeck()
-    setDeck(newDeck)
     
     // 初期カード配布（プレイヤーとコンピュータに5枚ずつ）
     const playerCards = []
@@ -196,14 +195,13 @@ const PokerGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     
     setPlayerHand(playerCards)
     setComputerHand(computerCards)
+    setDeck(newDeck) // 残りのデッキをセット（既に10枚は取り除かれている）
     setGamePhase('draw')
     setMessage('交換したいカードを選択してください（最大5枚）')
     setSelectedCards([])
     
     // 残高から賭け金を引く
     onUpdateBalance(currentUser.balance - betAmount)
-    
-    setDeck(newDeck.slice(0, -10)) // 配布した10枚を除く
   }
 
   // カード選択の切り替え
