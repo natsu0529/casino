@@ -79,6 +79,31 @@ export const useAuth = () => {
     }
   }
 
+  // Google認証でログイン
+  const signInWithGoogle = async () => {
+    try {
+      console.log('useAuth: Starting Google signin...')
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}`
+        }
+      })
+
+      if (error) {
+        console.error('useAuth: Google signin error:', error)
+        throw error
+      }
+
+      console.log('useAuth: Google signin initiated')
+      return { data, error: null }
+    } catch (error) {
+      console.error('useAuth: Google signin error:', error)
+      return { data: null, error }
+    }
+  }
+
   // ログイン
   const signIn = async (email, password) => {
     try {
@@ -120,6 +145,7 @@ export const useAuth = () => {
     initialized,
     signUp,
     signIn,
+    signInWithGoogle,
     signOut
   }
 }

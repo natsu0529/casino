@@ -35,9 +35,21 @@ export const useProfile = (userId) => {
             
             // 認証ユーザーの情報から username を取得
             const { data: { user } } = await supabase.auth.getUser()
-            const username = user?.user_metadata?.username || `user_${userId.slice(0, 8)}`
             
-            console.log('useProfile: Creating profile with username:', username)
+            // Google認証の場合はfull_nameまたはemailから、通常認証の場合はuser_metadataから取得
+            let username
+            if (user?.app_metadata?.provider === 'google') {
+              // Google認証の場合
+              username = user?.user_metadata?.full_name || 
+                        user?.user_metadata?.name || 
+                        user?.email?.split('@')[0] || 
+                        `user_${userId.slice(0, 8)}`
+            } else {
+              // 通常のメール認証の場合
+              username = user?.user_metadata?.username || `user_${userId.slice(0, 8)}`
+            }
+            
+            console.log('useProfile: Creating profile with username:', username, 'provider:', user?.app_metadata?.provider)
             
             const { data: newProfile, error: createError } = await supabase
               .from('profiles')
