@@ -147,11 +147,7 @@ function App() {
       case 'bridge':
         return (
           <BridgeGame 
-            currentUser={profile}
-            user={user}
-            onBalanceUpdate={handleUpdateBalance} 
             onNavigateHome={() => setCurrentPage('home')}
-            onRecordGame={recordGameHistory}
           />
         )
       case 'texas_poker':
