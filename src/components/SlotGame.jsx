@@ -1,0 +1,348 @@
+import { useState, useEffect } from 'react'
+
+const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
+  // スロットシンボル
+  const symbols = [
+    { symbol: '🍒', name: 'チェリー', value: 1 },
+    { symbol: '🍋', name: 'レモン', value: 2 },
+    { symbol: '🍊', name: 'オレンジ', value: 3 },
+    { symbol: '🍇', name: 'ブドウ', value: 4 },
+    { symbol: '🔔', name: 'ベル', value: 5 },
+    { symbol: '⭐', name: 'スター', value: 10 },
+    { symbol: '💎', name: 'ダイヤモンド', value: 20 },
+    { symbol: '🎰', name: 'ジャックポット', value: 100 }
+  ]
+
+  // ゲーム状態
+  const [reels, setReels] = useState([0, 0, 0])
+  const [spinning, setSpinning] = useState(false)
+  const [betAmount, setBetAmount] = useState(10)
+  const [message, setMessage] = useState('')
+  const [lastWin, setLastWin] = useState(0)
+  const [gameHistory, setGameHistory] = useState([])
+
+  // ペイアウトテーブル
+  const getPayoutMultiplier = (reel1, reel2, reel3) => {
+    const symbol1 = symbols[reel1]
+    const symbol2 = symbols[reel2]
+    const symbol3 = symbols[reel3]
+
+    // 3つ同じシンボル（ジャックポット）
+    if (reel1 === reel2 && reel2 === reel3) {
+      if (symbol1.name === 'ジャックポット') return 1000 // 特別ボーナス
+      return symbol1.value * 50 // 通常の50倍
+    }
+
+    // 2つ同じシンボル
+    if (reel1 === reel2 || reel2 === reel3 || reel1 === reel3) {
+      const matchingSymbol = reel1 === reel2 ? symbol1 : 
+                           reel2 === reel3 ? symbol2 : symbol1
+      return matchingSymbol.value * 5 // 5倍
+    }
+
+    // 特別な組み合わせ
+    const sortedValues = [symbol1.value, symbol2.value, symbol3.value].sort((a, b) => a - b)
+    
+    // 連続する値（例：1,2,3 や 3,4,5）
+    if (sortedValues[1] === sortedValues[0] + 1 && sortedValues[2] === sortedValues[1] + 1) {
+      return Math.max(...sortedValues) * 3 // 最高値の3倍
+    }
+
+    // 高価値シンボルが2つ以上
+    const highValueCount = [symbol1, symbol2, symbol3].filter(s => s.value >= 10).length
+    if (highValueCount >= 2) {
+      return 10 // 固定10倍
+    }
+
+    return 0 // ハズレ
+  }
+
+  // スピン実行
+  const spin = () => {
+    if (betAmount > currentUser.balance) {
+      setMessage('残高が不足しています。')
+      return
+    }
+
+    setSpinning(true)
+    setMessage('スピン中...')
+    setLastWin(0)
+
+    // 残高から賭け金を引く
+    onUpdateBalance(currentUser.balance - betAmount)
+
+    // アニメーション効果のためのランダム回転
+    const spinDuration = 2000 + Math.random() * 1000 // 2-3秒
+    const spinInterval = 100 // 100msごとに更新
+
+    let elapsed = 0
+    const spinTimer = setInterval(() => {
+      setReels([
+        Math.floor(Math.random() * symbols.length),
+        Math.floor(Math.random() * symbols.length),
+        Math.floor(Math.random() * symbols.length)
+      ])
+
+      elapsed += spinInterval
+      if (elapsed >= spinDuration) {
+        clearInterval(spinTimer)
+        
+        // 最終結果を決定
+        const finalReels = [
+          Math.floor(Math.random() * symbols.length),
+          Math.floor(Math.random() * symbols.length),
+          Math.floor(Math.random() * symbols.length)
+        ]
+        
+        setReels(finalReels)
+        setSpinning(false)
+        
+        // 結果判定
+        setTimeout(() => {
+          checkResult(finalReels)
+        }, 500)
+      }
+    }, spinInterval)
+  }
+
+  // 結果判定
+  const checkResult = (finalReels) => {
+    const multiplier = getPayoutMultiplier(finalReels[0], finalReels[1], finalReels[2])
+    const winAmount = betAmount * multiplier
+
+    if (multiplier > 0) {
+      setLastWin(winAmount)
+      onUpdateBalance(currentUser.balance + winAmount)
+      
+      if (multiplier >= 1000) {
+        setMessage(`🎉 ジャックポット！ ${winAmount.toLocaleString()}コイン獲得！ 🎉`)
+      } else if (multiplier >= 50) {
+        setMessage(`🎊 大当たり！ ${winAmount.toLocaleString()}コイン獲得！ 🎊`)
+      } else {
+        setMessage(`🎈 当たり！ ${winAmount.toLocaleString()}コイン獲得！`)
+      }
+    } else {
+      setMessage('残念！もう一度挑戦してください。')
+    }
+
+    // ゲーム履歴に追加
+    const newHistory = {
+      reels: finalReels,
+      bet: betAmount,
+      win: winAmount,
+      multiplier: multiplier,
+      timestamp: new Date().toLocaleTimeString()
+    }
+    setGameHistory(prev => [newHistory, ...prev.slice(0, 4)]) // 最新5件まで保持
+  }
+
+  // オートプレイ機能
+  const [autoPlay, setAutoPlay] = useState(false)
+  const [autoSpinsLeft, setAutoSpinsLeft] = useState(0)
+
+  useEffect(() => {
+    if (autoPlay && autoSpinsLeft > 0 && !spinning) {
+      const timer = setTimeout(() => {
+        if (betAmount <= currentUser.balance) {
+          spin()
+          setAutoSpinsLeft(prev => prev - 1)
+        } else {
+          setAutoPlay(false)
+          setAutoSpinsLeft(0)
+          setMessage('残高不足のためオートプレイを停止しました。')
+        }
+      }, 3000) // 3秒間隔
+
+      return () => clearTimeout(timer)
+    }
+  }, [autoPlay, autoSpinsLeft, spinning, currentUser.balance])
+
+  const startAutoPlay = (spins) => {
+    setAutoPlay(true)
+    setAutoSpinsLeft(spins)
+  }
+
+  const stopAutoPlay = () => {
+    setAutoPlay(false)
+    setAutoSpinsLeft(0)
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 p-4">
+      <div className="max-w-4xl mx-auto">
+        {/* ヘッダー */}
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={() => onNavigateHome()}
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-300"
+          >
+            ← ホームに戻る
+          </button>
+          <h1 className="text-4xl font-bold text-white">🎰 スロット 🎰</h1>
+          <div className="text-white text-right">
+            <div className="text-lg font-bold">👤 {currentUser.username}</div>
+            <div className="text-yellow-300 font-bold">💰 {currentUser.balance.toLocaleString()}コイン</div>
+          </div>
+        </div>
+
+        {/* スロットマシン */}
+        <div className="bg-gradient-to-b from-yellow-400 to-yellow-600 rounded-lg p-8 mb-6 shadow-2xl">
+          <div className="bg-black rounded-lg p-6 mb-6">
+            <div className="flex justify-center space-x-4">
+              {reels.map((reelIndex, index) => (
+                <div key={index} className={`w-24 h-24 bg-white rounded-lg flex items-center justify-center text-4xl font-bold border-4 border-gray-300 ${
+                  spinning ? 'animate-pulse' : ''
+                }`}>
+                  {symbols[reelIndex].symbol}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ベットコントロール */}
+          <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-center space-x-4 mb-4">
+              <label className="text-white font-medium">賭け金:</label>
+              <select
+                value={betAmount}
+                onChange={(e) => setBetAmount(parseInt(e.target.value))}
+                disabled={spinning || autoPlay}
+                className="px-3 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
+              >
+                <option value={5}>5コイン</option>
+                <option value={10}>10コイン</option>
+                <option value={25}>25コイン</option>
+                <option value={50}>50コイン</option>
+                <option value={100}>100コイン</option>
+              </select>
+            </div>
+
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={spin}
+                disabled={spinning || autoPlay || betAmount > currentUser.balance}
+                className={`px-8 py-3 rounded-lg font-bold text-white transition-all duration-300 ${
+                  spinning || autoPlay || betAmount > currentUser.balance
+                    ? 'bg-gray-500 cursor-not-allowed'
+                    : 'bg-red-600 hover:bg-red-700 hover:scale-105'
+                }`}
+              >
+                {spinning ? 'スピン中...' : 'スピン'}
+              </button>
+
+              {!autoPlay ? (
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => startAutoPlay(10)}
+                    disabled={spinning || betAmount > currentUser.balance}
+                    className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-colors duration-300"
+                  >
+                    オート10回
+                  </button>
+                  <button
+                    onClick={() => startAutoPlay(25)}
+                    disabled={spinning || betAmount > currentUser.balance}
+                    className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-colors duration-300"
+                  >
+                    オート25回
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={stopAutoPlay}
+                  className="px-4 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-bold transition-colors duration-300"
+                >
+                  オート停止 ({autoSpinsLeft}回残り)
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* 最後の勝利金 */}
+          {lastWin > 0 && (
+            <div className="bg-green-500 text-white text-center py-2 rounded-lg mb-4">
+              <span className="text-xl font-bold">🎉 {lastWin.toLocaleString()}コイン獲得！ 🎉</span>
+            </div>
+          )}
+        </div>
+
+        {/* メッセージエリア */}
+        {message && (
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 mb-6">
+            <p className="text-white text-center text-lg font-bold">{message}</p>
+          </div>
+        )}
+
+        {/* ペイアウトテーブル */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-4">
+            <h3 className="text-white font-bold mb-4 text-center">ペイアウトテーブル</h3>
+            <div className="space-y-2 text-sm">
+              {symbols.map((symbol, index) => (
+                <div key={index} className="flex justify-between text-white">
+                  <span>{symbol.symbol} {symbol.name}</span>
+                  <span>3つ揃い: {symbol.value * 50}倍</span>
+                </div>
+              ))}
+              <div className="border-t border-white/30 pt-2 mt-2">
+                <div className="flex justify-between text-white">
+                  <span>2つ揃い</span>
+                  <span>5倍</span>
+                </div>
+                <div className="flex justify-between text-white">
+                  <span>連続数字</span>
+                  <span>3倍</span>
+                </div>
+                <div className="flex justify-between text-white">
+                  <span>高価値2つ以上</span>
+                  <span>10倍</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ゲーム履歴 */}
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-4">
+            <h3 className="text-white font-bold mb-4 text-center">最近のゲーム</h3>
+            <div className="space-y-2 text-sm">
+              {gameHistory.length === 0 ? (
+                <p className="text-gray-300 text-center">まだゲームをプレイしていません</p>
+              ) : (
+                gameHistory.map((game, index) => (
+                  <div key={index} className="bg-white/5 rounded p-2">
+                    <div className="flex justify-between items-center">
+                      <div className="flex space-x-1">
+                        {game.reels.map((reelIndex, i) => (
+                          <span key={i} className="text-lg">{symbols[reelIndex].symbol}</span>
+                        ))}
+                      </div>
+                      <div className="text-right">
+                        <div className={`font-bold ${game.win > 0 ? 'text-green-300' : 'text-red-300'}`}>
+                          {game.win > 0 ? `+${game.win}` : `-${game.bet}`}
+                        </div>
+                        <div className="text-xs text-gray-300">{game.timestamp}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ルール説明 */}
+        <div className="bg-white/5 backdrop-blur-md rounded-lg p-4">
+          <h4 className="text-white font-bold mb-2">ゲームルール:</h4>
+          <p className="text-gray-300 text-sm">
+            3つのリールを回転させ、同じシンボルを揃えてコインを獲得しましょう。
+            3つ揃いが最高配当、2つ揃いや特別な組み合わせでも配当があります。
+            オートプレイ機能で連続プレイも可能です。
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default SlotGame
+
