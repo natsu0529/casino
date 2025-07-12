@@ -168,11 +168,11 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     setGameHistory(prev => [newHistory, ...prev.slice(0, 4)]) // 最新5件まで保持
 
     // 自動スピン継続チェック
-    if (autoSpin && autoSpinRemaining > 1) {
+    if (autoSpin && autoSpinRemaining > 0) {
       setTimeout(() => {
         spin()
       }, 1000) // 1秒後に次のスピン
-    } else if (autoSpin && autoSpinRemaining <= 1) {
+    } else if (autoSpin) {
       stopAutoSpin()
     }
   }
@@ -228,12 +228,15 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
           {/* ベットコントロール */}
           <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 mb-4">
             <div className="flex items-center justify-center space-x-4 mb-4">
-              <label className="text-white font-medium">賭け金:</label>
+              <label htmlFor="bet-amount-select" className="text-white font-medium">賭け金:</label>
               <select
+                id="bet-amount-select"
+                name="betAmount"
                 value={betAmount}
                 onChange={(e) => setBetAmount(parseInt(e.target.value))}
                 disabled={spinning || autoSpin}
                 className="px-3 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
+                aria-label="賭け金選択"
               >
                 <option value={5}>5コイン</option>
                 <option value={10}>10コイン</option>
@@ -245,6 +248,7 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
 
             <div className="flex justify-center space-x-4">
               <button
+                id="slot-spin-button"
                 onClick={spin}
                 disabled={spinning || autoSpin || betAmount > currentUser.balance}
                 className={`px-8 py-3 rounded-lg font-bold text-white transition-all duration-300 ${
@@ -252,38 +256,47 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
                     ? 'bg-gray-500 cursor-not-allowed'
                     : 'bg-red-600 hover:bg-red-700 hover:scale-105'
                 }`}
+                aria-label={spinning ? 'スピン中' : 'スピン実行'}
               >
                 {spinning ? 'スピン中...' : 'スピン'}
               </button>
 
               {!autoSpin ? (
-                <div className="flex space-x-2">
+                <div className="flex space-x-2" role="group" aria-label="自動スピンオプション">
                   <button
+                    id="slot-auto-10"
                     onClick={() => startAutoSpin(10)}
                     disabled={spinning || betAmount > currentUser.balance}
                     className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-colors duration-300"
+                    aria-label="自動スピン10回"
                   >
                     自動10回
                   </button>
                   <button
+                    id="slot-auto-25"
                     onClick={() => startAutoSpin(25)}
                     disabled={spinning || betAmount > currentUser.balance}
                     className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-colors duration-300"
+                    aria-label="自動スピン25回"
                   >
                     自動25回
                   </button>
                   <button
+                    id="slot-auto-50"
                     onClick={() => startAutoSpin(50)}
                     disabled={spinning || betAmount > currentUser.balance}
                     className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-colors duration-300"
+                    aria-label="自動スピン50回"
                   >
                     自動50回
                   </button>
                 </div>
               ) : (
                 <button
+                  id="slot-stop-auto"
                   onClick={stopAutoSpin}
                   className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold"
+                  aria-label={`自動スピン停止 残り${autoSpinRemaining}回`}
                 >
                   停止 ({autoSpinRemaining}回残り)
                 </button>

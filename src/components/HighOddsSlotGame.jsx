@@ -248,11 +248,11 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     }
 
     // 自動スピン継続チェック
-    if (autoSpin && autoSpinRemaining > 1) {
+    if (autoSpin && autoSpinRemaining > 0) {
       setTimeout(() => {
         spin()
       }, 1500) // 1.5秒後に次のスピン
-    } else if (autoSpin && autoSpinRemaining <= 1) {
+    } else if (autoSpin) {
       stopAutoSpin()
     }
   }
@@ -317,33 +317,41 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
           <div className="bg-black/50 rounded-lg p-4">
             <div className="flex justify-between items-center mb-4">
               <div className="text-white">
-                <span className="text-lg font-bold">ベット額: {betAmount.toLocaleString()}コイン</span>
+                <label htmlFor="bet-amount" className="text-lg font-bold">ベット額: {betAmount.toLocaleString()}コイン</label>
                 {freeSpins > 0 && <span className="text-yellow-300 ml-4">フリースピン中！</span>}
               </div>
-              <div className="flex space-x-2">
+              <div className="flex space-x-2" role="group" aria-label="ベット額選択">
                 {!freeSpins && (
                   <>
                     <button
+                      id="bet-500"
                       onClick={() => setBetAmount(500)}
                       className={`px-3 py-2 rounded text-white ${betAmount === 500 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
+                      aria-label="ベット額500コイン"
                     >
                       500
                     </button>
                     <button
+                      id="bet-1000"
                       onClick={() => setBetAmount(1000)}
                       className={`px-3 py-2 rounded text-white ${betAmount === 1000 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
+                      aria-label="ベット額1000コイン"
                     >
                       1000
                     </button>
                     <button
+                      id="bet-2000"
                       onClick={() => setBetAmount(2000)}
                       className={`px-3 py-2 rounded text-white ${betAmount === 2000 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
+                      aria-label="ベット額2000コイン"
                     >
                       2000
                     </button>
                     <button
+                      id="bet-5000"
                       onClick={() => setBetAmount(5000)}
                       className={`px-3 py-2 rounded text-white ${betAmount === 5000 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
+                      aria-label="ベット額5000コイン"
                     >
                       5000
                     </button>
@@ -354,9 +362,11 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
 
             <div className="flex justify-center space-x-4">
               <button
+                id="main-spin-button"
                 onClick={spin}
                 disabled={spinning || autoSpin || (!freeSpins && betAmount > currentUser.balance)}
                 className="px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xl rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                aria-label={spinning ? 'スピン中' : freeSpins > 0 ? 'フリースピン実行' : 'スピン実行'}
               >
                 {spinning ? 'スピン中...' : freeSpins > 0 ? 'フリースピン' : 'スピン'}
               </button>
@@ -365,33 +375,41 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
               {!freeSpins && !spinning && (
                 <>
                   {!autoSpin ? (
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2" role="group" aria-label="自動スピンオプション">
                       <button
+                        id="auto-spin-10"
                         onClick={() => startAutoSpin(10)}
                         disabled={betAmount > currentUser.balance}
                         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-lg"
+                        aria-label="自動スピン10回"
                       >
                         自動10回
                       </button>
                       <button
+                        id="auto-spin-25"
                         onClick={() => startAutoSpin(25)}
                         disabled={betAmount > currentUser.balance}
                         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-lg"
+                        aria-label="自動スピン25回"
                       >
                         自動25回
                       </button>
                       <button
+                        id="auto-spin-50"
                         onClick={() => startAutoSpin(50)}
                         disabled={betAmount > currentUser.balance}
                         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-lg"
+                        aria-label="自動スピン50回"
                       >
                         自動50回
                       </button>
                     </div>
                   ) : (
                     <button
+                      id="stop-auto-spin"
                       onClick={stopAutoSpin}
                       className="px-6 py-4 bg-red-600 hover:bg-red-700 text-white font-bold text-xl rounded-lg"
+                      aria-label={`自動スピン停止 残り${autoSpinRemaining}回`}
                     >
                       停止 ({autoSpinRemaining}回残り)
                     </button>
