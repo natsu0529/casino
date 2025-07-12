@@ -6,6 +6,7 @@ import UserRegistration from './components/UserRegistration.jsx'
 import BlackjackGame from './components/BlackjackGame.jsx'
 import PokerGame from './components/PokerGame.jsx'
 import SlotGame from './components/SlotGame.jsx'
+import HighOddsSlotGame from './components/HighOddsSlotGame.jsx'
 import RouletteGame from './components/RouletteGame.jsx'
 import BaccaratGame from './components/BaccaratGame.jsx'
 import HighStakesBlackjack from './components/HighStakesBlackjack.jsx'
@@ -127,6 +128,16 @@ function App() {
       case 'baccarat':
         return (
           <BaccaratGame
+            currentUser={profile}
+            user={user}
+            onNavigateHome={() => setCurrentPage('home')}
+            onUpdateBalance={handleUpdateBalance}
+            onRecordGame={recordGameHistory}
+          />
+        )
+      case 'high_odds_slot':
+        return (
+          <HighOddsSlotGame
             currentUser={profile}
             user={user}
             onNavigateHome={() => setCurrentPage('home')}
