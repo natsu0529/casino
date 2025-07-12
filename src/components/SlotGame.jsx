@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
 
 const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
-  // スロットシンボル（マイジャグラー風）
+  // スロットシンボル（期待値1.1調整版）
   const symbols = [
-    { symbol: '🍒', name: 'チェリー', value: 1, weight: 30 },  // 高確率
-    { symbol: '🍋', name: 'レモン', value: 2, weight: 25 },    // 高確率
+    { symbol: '🍒', name: 'チェリー', value: 1, weight: 35 },  // 高確率
+    { symbol: '🍋', name: 'レモン', value: 2, weight: 30 },    // 高確率
     { symbol: '🍊', name: 'オレンジ', value: 3, weight: 20 }, // 中確率
-    { symbol: '🍇', name: 'ブドウ', value: 4, weight: 15 },   // 中確率
-    { symbol: '🔔', name: 'ベル', value: 5, weight: 8 },      // 低確率
-    { symbol: '⭐', name: 'スター', value: 10, weight: 1.5 }, // 超低確率
-    { symbol: '💎', name: 'ダイヤ', value: 20, weight: 0.4 }, // 激レア
-    { symbol: '7️⃣', name: 'ラッキーセブン', value: 77, weight: 0.1 } // 超激レア
+    { symbol: '🍇', name: 'ブドウ', value: 4, weight: 10 },   // 中確率
+    { symbol: '🔔', name: 'ベル', value: 5, weight: 4 },      // 低確率
+    { symbol: '⭐', name: 'スター', value: 10, weight: 0.8 }, // 超低確率
+    { symbol: '💎', name: 'ダイヤ', value: 15, weight: 0.15 }, // 激レア
+    { symbol: '7️⃣', name: 'ラッキーセブン', value: 50, weight: 0.05 } // 超激レア
   ]
 
   // 重み付きランダム選択
@@ -35,42 +35,38 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
   const [lastWin, setLastWin] = useState(0)
   const [gameHistory, setGameHistory] = useState([])
 
-  // ペイアウトテーブル（マイジャグラー風）
+  // ペイアウトテーブル（期待値1.1調整版）
   const getPayoutMultiplier = (reel1, reel2, reel3) => {
     const symbol1 = symbols[reel1]
     const symbol2 = symbols[reel2]
     const symbol3 = symbols[reel3]
 
-    // 3つ同じシンボルのみ当たり（マイジャグラー仕様）
+    // 3つ同じシンボルのみ当たり（調整版）
     if (reel1 === reel2 && reel2 === reel3) {
       switch (symbol1.name) {
-        case 'ラッキーセブン': return 77  // 7が3つ揃い
-        case 'ダイヤ': return 20         // ダイヤ3つ
-        case 'スター': return 15         // スター3つ
-        case 'ベル': return 10           // ベル3つ
-        case 'ブドウ': return 8          // ブドウ3つ
-        case 'オレンジ': return 6        // オレンジ3つ
-        case 'レモン': return 4          // レモン3つ
-        case 'チェリー': return 2        // チェリー3つ
+        case 'ラッキーセブン': return 50  // 7が3つ揃い（77→50に減額）
+        case 'ダイヤ': return 15         // ダイヤ3つ（20→15に減額）
+        case 'スター': return 10         // スター3つ（15→10に減額）
+        case 'ベル': return 8            // ベル3つ（10→8に減額）
+        case 'ブドウ': return 6          // ブドウ3つ（8→6に減額）
+        case 'オレンジ': return 4        // オレンジ3つ（6→4に減額）
+        case 'レモン': return 3          // レモン3つ（4→3に減額）
+        case 'チェリー': return 2        // チェリー3つ（2→2のまま）
         default: return 0
       }
     }
 
-    // チェリーの特別ルール（左リールにチェリーがあれば小当たり）
+    // チェリーの特別ルール（大幅削減）
     if (reel1 === 0) { // チェリーは0番目
       if (reel2 === 0) { // 左2つがチェリー
-        return 4
+        return 2 // 4→2に減額
       } else { // 左1つだけチェリー
-        return 2
+        return 1 // 2→1に減額
       }
     }
 
-    // ベルの特別ルール（どこか2つがベルなら小当たり）
-    const bellCount = [reel1, reel2, reel3].filter(reel => symbols[reel].name === 'ベル').length
-    if (bellCount >= 2) {
-      return 3
-    }
-
+    // ベルの特別ルール削除（期待値調整のため）
+    
     return 0 // ハズレ
   }
 

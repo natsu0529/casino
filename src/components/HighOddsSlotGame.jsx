@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
 
 const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }) => {
-  // 高級シンボル（Cash Express風）
+  // 高級シンボル（期待値1.0調整版）
   const symbols = [
-    { symbol: '💸', name: 'キャッシュ', value: 100, weight: 5 },      // 超高価値
-    { symbol: '💎', name: 'ダイヤモンド', value: 50, weight: 8 },      // 高価値
-    { symbol: '👑', name: 'クラウン', value: 30, weight: 12 },         // 高価値
-    { symbol: '🏆', name: 'トロフィー', value: 20, weight: 15 },       // 中高価値
-    { symbol: '⭐', name: 'ゴールドスター', value: 15, weight: 20 },    // 中価値
-    { symbol: '🎰', name: 'ラッキー7', value: 10, weight: 25 },        // 中価値
-    { symbol: '🔔', name: 'ゴールドベル', value: 8, weight: 30 },      // 中価値
-    { symbol: '🍀', name: 'ラッキークローバー', value: 5, weight: 35 }, // 低価値
+    { symbol: '💸', name: 'キャッシュ', value: 50, weight: 5 },       // 高価値（100→50に減額）
+    { symbol: '💎', name: 'ダイヤモンド', value: 25, weight: 8 },     // 高価値（50→25に減額）
+    { symbol: '👑', name: 'クラウン', value: 15, weight: 12 },        // 高価値（30→15に減額）
+    { symbol: '🏆', name: 'トロフィー', value: 10, weight: 15 },      // 中高価値（20→10に減額）
+    { symbol: '⭐', name: 'ゴールドスター', value: 8, weight: 20 },   // 中価値（15→8に減額）
+    { symbol: '🎰', name: 'ラッキー7', value: 5, weight: 25 },        // 中価値（10→5に減額）
+    { symbol: '🔔', name: 'ゴールドベル', value: 4, weight: 30 },     // 中価値（8→4に減額）
+    { symbol: '🍀', name: 'ラッキークローバー', value: 2, weight: 35 }, // 低価値（5→2に減額）
   ]
 
   // ゲーム状態
@@ -38,14 +38,13 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     return 0
   }
 
-  // ペイライン判定（5リール版）
+  // ペイライン判定（期待値1.0調整版：3ラインに減少）
   const checkPaylines = (reels) => {
     const paylines = [
       [0, 1, 2, 3, 4], // 中央ライン
       [0, 0, 1, 2, 3], // 上昇ライン
       [4, 3, 2, 1, 0], // 下降ライン
-      [0, 1, 1, 1, 0], // V字ライン
-      [4, 3, 3, 3, 4], // 逆V字ライン
+      // V字ラインと逆V字ラインを削除して期待値調整
     ]
 
     let totalMultiplier = 0
@@ -85,23 +84,23 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
 
     console.log(`First symbol: ${symbols[firstSymbol].symbol}, Consecutive: ${consecutiveCount}`)
 
-    // キャッシュシンボル（💸）の特別ルール：2つ以上連続で勝利
+    // キャッシュシンボル（💸）の特別ルール：2つ以上連続で勝利（調整版）
     if (firstSymbol === 0 && consecutiveCount >= 2) { // キャッシュは0番目
-      const winAmount = symbols[0].value * consecutiveCount * 2
+      const winAmount = symbols[0].value * consecutiveCount * 1 // 倍率を2→1に減額
       console.log(`Cash special rule win: ${winAmount}`)
       return winAmount
     }
 
-    // 一般シンボル：3つ以上連続している場合のみ勝利
+    // 一般シンボル：3つ以上連続している場合のみ勝利（調整版）
     if (consecutiveCount >= 3) {
       const symbol = symbols[firstSymbol]
       const baseMultiplier = symbol.value
       
-      // 連続数に応じて倍率アップ
+      // 連続数に応じて倍率アップ（大幅減額）
       let countMultiplier = 1
-      if (consecutiveCount === 5) countMultiplier = 10
-      else if (consecutiveCount === 4) countMultiplier = 5
-      else if (consecutiveCount === 3) countMultiplier = 2
+      if (consecutiveCount === 5) countMultiplier = 3      // 10→3に減額
+      else if (consecutiveCount === 4) countMultiplier = 2 // 5→2に減額
+      else if (consecutiveCount === 3) countMultiplier = 1 // 2→1に減額
       
       const winAmount = baseMultiplier * countMultiplier
       console.log(`Normal win: ${symbol.symbol} x${consecutiveCount} = ${winAmount}`)
