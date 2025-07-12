@@ -23,11 +23,6 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
   const [multiplier, setMultiplier] = useState(1)
   const [bonusRound, setBonusRound] = useState(false)
   const [freeSpins, setFreeSpins] = useState(0)
-  
-  // 連続スピン機能
-  const [autoSpin, setAutoSpin] = useState(false)
-  const [autoSpinCount, setAutoSpinCount] = useState(0)
-  const [autoSpinRemaining, setAutoSpinRemaining] = useState(0)
 
   // 重み付きランダム選択
   const getWeightedRandomSymbol = () => {
@@ -128,18 +123,10 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     return false
   }
 
-  // スピン実行（連続スピン対応）
+  // スピン実行
   const spin = () => {
-    console.log('=== spin関数開始 ===')
-    console.log('autoSpin:', autoSpin)
-    console.log('autoSpinRemaining:', autoSpinRemaining)
-    console.log('betAmount:', betAmount)
-    console.log('currentUser.balance:', currentUser.balance)
-    console.log('spinning:', spinning)
-    
     // 既にスピン中の場合は処理しない
     if (spinning) {
-      console.log('既にスピン中のため処理をスキップ')
       return
     }
     
@@ -147,16 +134,11 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     
     if (currentBet > currentUser.balance) {
       setMessage('残高が不足しています。')
-      if (autoSpin) {
-        console.log('残高不足のため自動スピンを停止')
-        stopAutoSpin()
-      }
       return
     }
 
-    console.log('スピン開始 - spinning状態をtrueに設定')
     setSpinning(true)
-    setMessage(autoSpin ? `自動スピン中... (残り${autoSpinRemaining}回)` : 'スピン中...')
+    setMessage('スピン中...')
     setLastWin(0)
 
     // フリースピンでない場合のみ残高を減らす
@@ -259,49 +241,6 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         winAmount > originalBetAmount ? 'win' : 'lose'
       )
     }
-
-    // 自動スピン継続チェック
-    console.log('=== 自動スピン継続チェック ===')
-    console.log('autoSpin:', autoSpin)
-    console.log('autoSpinRemaining (現在):', autoSpinRemaining)
-    
-    if (autoSpin) {
-      // 残り回数を減らす
-      const newRemaining = autoSpinRemaining - 1
-      setAutoSpinRemaining(newRemaining)
-      console.log('残り回数更新:', autoSpinRemaining, '->', newRemaining)
-      
-      if (newRemaining > 0) {
-        console.log('次のスピンを1.5秒後に実行します')
-        setTimeout(() => {
-          console.log('自動スピン継続実行中... 残り:', newRemaining)
-          spin()
-        }, 1500)
-      } else {
-        console.log('自動スピン完了 - 停止します')
-        stopAutoSpin()
-      }
-    }
-  }
-
-  // 自動スピン開始
-  const startAutoSpin = (count) => {
-    console.log('=== 自動スピン開始 ===')
-    console.log('カウント:', count)
-    setAutoSpin(true)
-    setAutoSpinCount(count)
-    setAutoSpinRemaining(count)
-    console.log('初回スピンを実行します')
-    spin()
-  }
-
-  // 自動スピン停止
-  const stopAutoSpin = () => {
-    console.log('=== 自動スピン停止 ===')
-    setAutoSpin(false)
-    setAutoSpinCount(0)
-    setAutoSpinRemaining(0)
-    setMessage('自動スピンを停止しました。')
   }
 
   return (
@@ -395,58 +334,12 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
               <button
                 id="main-spin-button"
                 onClick={spin}
-                disabled={spinning || autoSpin || (!freeSpins && betAmount > currentUser.balance)}
+                disabled={spinning || (!freeSpins && betAmount > currentUser.balance)}
                 className="px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xl rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
                 aria-label={spinning ? 'スピン中' : freeSpins > 0 ? 'フリースピン実行' : 'スピン実行'}
               >
                 {spinning ? 'スピン中...' : freeSpins > 0 ? 'フリースピン' : 'スピン'}
               </button>
-              
-              {/* 自動スピンボタン */}
-              {!freeSpins && !spinning && (
-                <>
-                  {!autoSpin ? (
-                    <div className="flex space-x-2" role="group" aria-label="自動スピンオプション">
-                      <button
-                        id="auto-spin-10"
-                        onClick={() => startAutoSpin(10)}
-                        disabled={betAmount > currentUser.balance}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-lg"
-                        aria-label="自動スピン10回"
-                      >
-                        自動10回
-                      </button>
-                      <button
-                        id="auto-spin-25"
-                        onClick={() => startAutoSpin(25)}
-                        disabled={betAmount > currentUser.balance}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-lg"
-                        aria-label="自動スピン25回"
-                      >
-                        自動25回
-                      </button>
-                      <button
-                        id="auto-spin-50"
-                        onClick={() => startAutoSpin(50)}
-                        disabled={betAmount > currentUser.balance}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-lg"
-                        aria-label="自動スピン50回"
-                      >
-                        自動50回
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      id="stop-auto-spin"
-                      onClick={stopAutoSpin}
-                      className="px-6 py-4 bg-red-600 hover:bg-red-700 text-white font-bold text-xl rounded-lg"
-                      aria-label={`自動スピン停止 残り${autoSpinRemaining}回`}
-                    >
-                      停止 ({autoSpinRemaining}回残り)
-                    </button>
-                  )}
-                </>
-              )}
             </div>
           </div>
 
