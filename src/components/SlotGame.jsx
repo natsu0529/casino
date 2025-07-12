@@ -1,17 +1,31 @@
 import { useState, useEffect } from 'react'
 
 const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
-  // スロットシンボル
+  // スロットシンボル（マイジャグラー風）
   const symbols = [
-    { symbol: '🍒', name: 'チェリー', value: 1 },
-    { symbol: '🍋', name: 'レモン', value: 2 },
-    { symbol: '🍊', name: 'オレンジ', value: 3 },
-    { symbol: '🍇', name: 'ブドウ', value: 4 },
-    { symbol: '🔔', name: 'ベル', value: 5 },
-    { symbol: '⭐', name: 'スター', value: 10 },
-    { symbol: '💎', name: 'ダイヤモンド', value: 20 },
-    { symbol: '🎰', name: 'ジャックポット', value: 100 }
+    { symbol: '🍒', name: 'チェリー', value: 1, weight: 30 },  // 高確率
+    { symbol: '🍋', name: 'レモン', value: 2, weight: 25 },    // 高確率
+    { symbol: '🍊', name: 'オレンジ', value: 3, weight: 20 }, // 中確率
+    { symbol: '🍇', name: 'ブドウ', value: 4, weight: 15 },   // 中確率
+    { symbol: '🔔', name: 'ベル', value: 5, weight: 8 },      // 低確率
+    { symbol: '⭐', name: 'スター', value: 10, weight: 1.5 }, // 超低確率
+    { symbol: '💎', name: 'ダイヤ', value: 20, weight: 0.4 }, // 激レア
+    { symbol: '7️⃣', name: 'ラッキーセブン', value: 77, weight: 0.1 } // 超激レア
   ]
+
+  // 重み付きランダム選択
+  const getWeightedRandomSymbol = () => {
+    const totalWeight = symbols.reduce((sum, symbol) => sum + symbol.weight, 0)
+    let random = Math.random() * totalWeight
+    
+    for (let i = 0; i < symbols.length; i++) {
+      random -= symbols[i].weight
+      if (random <= 0) {
+        return i
+      }
+    }
+    return 0 // フォールバック
+  }
 
   // ゲーム状態
   const [reels, setReels] = useState([0, 0, 0])
@@ -21,37 +35,40 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
   const [lastWin, setLastWin] = useState(0)
   const [gameHistory, setGameHistory] = useState([])
 
-  // ペイアウトテーブル
+  // ペイアウトテーブル（マイジャグラー風）
   const getPayoutMultiplier = (reel1, reel2, reel3) => {
     const symbol1 = symbols[reel1]
     const symbol2 = symbols[reel2]
     const symbol3 = symbols[reel3]
 
-    // 3つ同じシンボル（ジャックポット）
+    // 3つ同じシンボルのみ当たり（マイジャグラー仕様）
     if (reel1 === reel2 && reel2 === reel3) {
-      if (symbol1.name === 'ジャックポット') return 1000 // 特別ボーナス
-      return symbol1.value * 50 // 通常の50倍
+      switch (symbol1.name) {
+        case 'ラッキーセブン': return 77  // 7が3つ揃い
+        case 'ダイヤ': return 20         // ダイヤ3つ
+        case 'スター': return 15         // スター3つ
+        case 'ベル': return 10           // ベル3つ
+        case 'ブドウ': return 8          // ブドウ3つ
+        case 'オレンジ': return 6        // オレンジ3つ
+        case 'レモン': return 4          // レモン3つ
+        case 'チェリー': return 2        // チェリー3つ
+        default: return 0
+      }
     }
 
-    // 2つ同じシンボル
-    if (reel1 === reel2 || reel2 === reel3 || reel1 === reel3) {
-      const matchingSymbol = reel1 === reel2 ? symbol1 : 
-                           reel2 === reel3 ? symbol2 : symbol1
-      return matchingSymbol.value * 5 // 5倍
+    // チェリーの特別ルール（左リールにチェリーがあれば小当たり）
+    if (reel1 === 0) { // チェリーは0番目
+      if (reel2 === 0) { // 左2つがチェリー
+        return 4
+      } else { // 左1つだけチェリー
+        return 2
+      }
     }
 
-    // 特別な組み合わせ
-    const sortedValues = [symbol1.value, symbol2.value, symbol3.value].sort((a, b) => a - b)
-    
-    // 連続する値（例：1,2,3 や 3,4,5）
-    if (sortedValues[1] === sortedValues[0] + 1 && sortedValues[2] === sortedValues[1] + 1) {
-      return Math.max(...sortedValues) * 3 // 最高値の3倍
-    }
-
-    // 高価値シンボルが2つ以上
-    const highValueCount = [symbol1, symbol2, symbol3].filter(s => s.value >= 10).length
-    if (highValueCount >= 2) {
-      return 10 // 固定10倍
+    // ベルの特別ルール（どこか2つがベルなら小当たり）
+    const bellCount = [reel1, reel2, reel3].filter(reel => symbols[reel].name === 'ベル').length
+    if (bellCount >= 2) {
+      return 3
     }
 
     return 0 // ハズレ
@@ -87,11 +104,11 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
       if (elapsed >= spinDuration) {
         clearInterval(spinTimer)
         
-        // 最終結果を決定
+        // 最終結果を決定（重み付きランダム）
         const finalReels = [
-          Math.floor(Math.random() * symbols.length),
-          Math.floor(Math.random() * symbols.length),
-          Math.floor(Math.random() * symbols.length)
+          getWeightedRandomSymbol(),
+          getWeightedRandomSymbol(),
+          getWeightedRandomSymbol()
         ]
         
         setReels(finalReels)
@@ -114,12 +131,14 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
       setLastWin(winAmount)
       onUpdateBalance(currentUser.balance + winAmount)
       
-      if (multiplier >= 1000) {
-        setMessage(`🎉 ジャックポット！ ${winAmount.toLocaleString()}コイン獲得！ 🎉`)
-      } else if (multiplier >= 50) {
-        setMessage(`🎊 大当たり！ ${winAmount.toLocaleString()}コイン獲得！ 🎊`)
+      if (multiplier >= 77) {
+        setMessage(`🎉 ラッキーセブン！ ${winAmount.toLocaleString()}コイン獲得！ 🎉`)
+      } else if (multiplier >= 20) {
+        setMessage(`💎 大当たり！ ${winAmount.toLocaleString()}コイン獲得！ 💎`)
+      } else if (multiplier >= 10) {
+        setMessage(`⭐ 当たり！ ${winAmount.toLocaleString()}コイン獲得！ ⭐`)
       } else {
-        setMessage(`🎈 当たり！ ${winAmount.toLocaleString()}コイン獲得！`)
+        setMessage(`� 小当たり！ ${winAmount.toLocaleString()}コイン獲得！`)
       }
     } else {
       setMessage('残念！もう一度挑戦してください。')
@@ -278,24 +297,53 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
           <div className="bg-white/10 backdrop-blur-md rounded-lg p-4">
             <h3 className="text-white font-bold mb-4 text-center">ペイアウトテーブル</h3>
             <div className="space-y-2 text-sm">
-              {symbols.map((symbol, index) => (
-                <div key={index} className="flex justify-between text-white">
-                  <span>{symbol.symbol} {symbol.name}</span>
-                  <span>3つ揃い: {symbol.value * 50}倍</span>
-                </div>
-              ))}
+              <div className="text-white font-bold border-b border-white/30 pb-2">3つ揃い</div>
+              <div className="flex justify-between text-white">
+                <span>7️⃣ ラッキーセブン</span>
+                <span className="text-yellow-300 font-bold">77倍</span>
+              </div>
+              <div className="flex justify-between text-white">
+                <span>💎 ダイヤ</span>
+                <span className="text-purple-300 font-bold">20倍</span>
+              </div>
+              <div className="flex justify-between text-white">
+                <span>⭐ スター</span>
+                <span className="text-blue-300">15倍</span>
+              </div>
+              <div className="flex justify-between text-white">
+                <span>🔔 ベル</span>
+                <span>10倍</span>
+              </div>
+              <div className="flex justify-between text-white">
+                <span>🍇 ブドウ</span>
+                <span>8倍</span>
+              </div>
+              <div className="flex justify-between text-white">
+                <span>🍊 オレンジ</span>
+                <span>6倍</span>
+              </div>
+              <div className="flex justify-between text-white">
+                <span>🍋 レモン</span>
+                <span>4倍</span>
+              </div>
+              <div className="flex justify-between text-white">
+                <span>🍒 チェリー</span>
+                <span>2倍</span>
+              </div>
+              
               <div className="border-t border-white/30 pt-2 mt-2">
-                <div className="flex justify-between text-white">
-                  <span>2つ揃い</span>
-                  <span>5倍</span>
+                <div className="text-white font-bold">特別ルール</div>
+                <div className="flex justify-between text-white text-xs">
+                  <span>🍒 左リール1個</span>
+                  <span>2倍</span>
                 </div>
-                <div className="flex justify-between text-white">
-                  <span>連続数字</span>
+                <div className="flex justify-between text-white text-xs">
+                  <span>🍒 左リール2個</span>
+                  <span>4倍</span>
+                </div>
+                <div className="flex justify-between text-white text-xs">
+                  <span>🔔 ベル2個以上</span>
                   <span>3倍</span>
-                </div>
-                <div className="flex justify-between text-white">
-                  <span>高価値2つ以上</span>
-                  <span>10倍</span>
                 </div>
               </div>
             </div>

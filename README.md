@@ -1,1 +1,127 @@
-# casino
+# Casino App
+
+オンラインでカジノゲーム（ブラックジャック、ポーカー、スロットなど）が楽しめるWebアプリです。  
+Supabaseでデータベース・認証を管理し、Vercelで本番運用しています。
+
+---
+
+## 🚀 本番環境URL
+
+[https://casino-beta-pearl.vercel.app/](https://casino-beta-pearl.vercel.app/)
+
+---
+
+## 🎮 ゲーム一覧
+
+- **ブラックジャック** - クラシックなカードゲーム
+- **ポーカー** - 5カードポーカー
+- **テキサスホールデム** - 本格的なポーカーゲーム
+- **バカラ** - シンプルで奥深いカードゲーム
+- **スロット** - マイジャグラー風のスロットマシン
+- **ルーレット** - ヨーロピアンルーレット
+- **ハイステークスブラックジャック** - 高額ベット版
+- **ブリッジ** - Coming Soon
+
+---
+
+## ✨ 主な機能
+
+- 🔐 Google認証・メール認証によるログイン
+- 💰 仮想コインによる資産管理
+- 🏆 ユーザーランキング機能
+- 📊 ゲーム履歴の記録
+- 📱 レスポンシブデザイン（モバイル対応）
+- 🎯 リアルタイムな残高更新
+
+---
+
+## 🛠 技術スタック
+
+- **フロントエンド**: React 18 + Vite
+- **バックエンド**: Supabase (PostgreSQL + Auth)
+- **デプロイ**: Vercel
+- **UI**: Tailwind CSS + Shadcn/UI
+- **認証**: Supabase Auth (Google OAuth + Email)
+
+
+
+## 🔧 開発者向けセットアップ
+
+### 前提条件
+- Node.js 18+
+- npm または pnpm
+
+### インストール手順
+
+1. リポジトリをクローン
+```bash
+git clone <repository-url>
+cd casino-app
+```
+
+2. 依存パッケージをインストール
+```bash
+npm install
+# または
+pnpm install
+```
+
+3. 環境変数を設定
+```bash
+cp .env.example .env.local
+```
+
+`.env.local` に以下を設定：
+```bash
+VITE_SUPABASE_URL=your-supabase-url
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+4. 開発サーバーを起動
+```bash
+npm run dev
+# または
+pnpm dev
+```
+
+### Supabaseセットアップ
+
+1. [Supabase](https://supabase.com)でプロジェクトを作成
+2. `database-schema.sql` を実行してテーブルを作成
+3. Authentication → Providers でGoogle認証を有効化（オプション）
+4. RLSポリシーでランキング機能を有効化
+
+---
+
+## 🔒 セキュリティ
+
+- Row Level Security (RLS) によるデータ保護
+- 認証必須のゲームプレイ
+- クライアントサイドでの入力検証
+- セッション管理によるセキュアな認証
+
+---
+
+## ⚠️ 注意事項
+
+- 本アプリは**仮想コインのみ**を使用し、実際のお金のやり取りはありません
+- ギャンブル依存症にご注意ください
+- 18歳未満の方はご利用をお控えください
+- Google認証がうまくいかない場合は、メールアドレス認証をお試しください
+
+---
+
+## 📄 ライセンス
+
+このプロジェクトはMITライセンスです。
+
+---
+
+## 🤝 コントリビューション
+
+バグ報告や機能要望はIssueでお知らせください。  
+プルリクエストも歓迎します！
+
+---
+
+**楽しいカジノゲームライフを！** 🎲✨
