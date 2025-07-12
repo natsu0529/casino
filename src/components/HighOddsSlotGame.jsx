@@ -187,18 +187,19 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         setSpinning(false)
         
         setTimeout(() => {
-          checkResult(finalReels, currentBet)
+          checkResult(finalReels, betAmount) // 常にbetAmountを渡す（フリースピンでも記録用）
         }, 500)
       }
     }, spinInterval)
   }
 
   // 結果判定
-  const checkResult = (finalReels, betAmount) => {
+  const checkResult = (finalReels, originalBetAmount) => {
     const { totalMultiplier, winningLines } = checkPaylines(finalReels)
     const bonusTriggered = checkBonus(finalReels)
     
-    let winAmount = betAmount * totalMultiplier * multiplier
+    // フリースピン時もオリジナルのベット額で計算
+    let winAmount = originalBetAmount * totalMultiplier * multiplier
 
     if (totalMultiplier > 0) {
       setLastWin(winAmount)
@@ -228,7 +229,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     // ゲーム履歴に追加
     const newHistory = {
       reels: finalReels,
-      bet: betAmount,
+      bet: originalBetAmount,
       win: winAmount,
       multiplier: totalMultiplier,
       winningLines: winningLines,
@@ -238,12 +239,12 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
 
     // ゲーム記録
     if (onRecordGame) {
-      onRecordGame({
-        game_type: 'high_odds_slot',
-        bet_amount: betAmount,
-        win_amount: winAmount,
-        result: winAmount > betAmount ? 'win' : 'lose'
-      })
+      onRecordGame(
+        'high_odds_slot',
+        originalBetAmount,
+        winAmount,
+        winAmount > originalBetAmount ? 'win' : 'lose'
+      )
     }
 
     // 自動スピン継続チェック
