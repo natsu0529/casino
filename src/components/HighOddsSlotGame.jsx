@@ -23,6 +23,11 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
   const [multiplier, setMultiplier] = useState(1)
   const [bonusRound, setBonusRound] = useState(false)
   const [freeSpins, setFreeSpins] = useState(0)
+  
+  // 連続スピン機能
+  const [autoSpin, setAutoSpin] = useState(false)
+  const [autoSpinCount, setAutoSpinCount] = useState(0)
+  const [autoSpinRemaining, setAutoSpinRemaining] = useState(0)
 
   // 重み付きランダム選択
   const getWeightedRandomSymbol = () => {
@@ -64,21 +69,35 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     return { totalMultiplier, winningLines }
   }
 
-  // ライン勝利計算（修正版）
+  // ライン勝利計算（厳格版）
   const calculateLineWin = (lineSymbols) => {
+    // デバッグ用ログ
+    console.log('Line symbols:', lineSymbols.map(i => symbols[i].symbol), 'Indexes:', lineSymbols)
+    
     // 左から連続している同じシンボルをチェック
     const firstSymbol = lineSymbols[0]
     let consecutiveCount = 1
     
+    // 厳格な連続チェック：左から順番に同じシンボルでないと途切れる
     for (let i = 1; i < lineSymbols.length; i++) {
       if (lineSymbols[i] === firstSymbol) {
         consecutiveCount++
       } else {
-        break // 連続が途切れたら終了
+        // 連続が途切れたら即座に終了
+        break
       }
     }
 
-    // 3つ以上連続している場合のみ勝利
+    console.log(`First symbol: ${symbols[firstSymbol].symbol}, Consecutive: ${consecutiveCount}`)
+
+    // キャッシュシンボル（💸）の特別ルール：2つ以上連続で勝利
+    if (firstSymbol === 0 && consecutiveCount >= 2) { // キャッシュは0番目
+      const winAmount = symbols[0].value * consecutiveCount * 2
+      console.log(`Cash special rule win: ${winAmount}`)
+      return winAmount
+    }
+
+    // 一般シンボル：3つ以上連続している場合のみ勝利
     if (consecutiveCount >= 3) {
       const symbol = symbols[firstSymbol]
       const baseMultiplier = symbol.value
@@ -89,14 +108,12 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       else if (consecutiveCount === 4) countMultiplier = 5
       else if (consecutiveCount === 3) countMultiplier = 2
       
-      return baseMultiplier * countMultiplier
+      const winAmount = baseMultiplier * countMultiplier
+      console.log(`Normal win: ${symbol.symbol} x${consecutiveCount} = ${winAmount}`)
+      return winAmount
     }
 
-    // キャッシュシンボルの特別ルール（左から2つ以上連続）
-    if (firstSymbol === 0 && consecutiveCount >= 2) { // キャッシュは0番目
-      return symbols[0].value * consecutiveCount * 2
-    }
-
+    console.log('No win - insufficient consecutive symbols')
     return 0
   }
 
@@ -111,17 +128,20 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     return false
   }
 
-  // スピン実行
+  // スピン実行（連続スピン対応）
   const spin = () => {
     const currentBet = freeSpins > 0 ? 0 : betAmount
     
     if (currentBet > currentUser.balance) {
       setMessage('残高が不足しています。')
+      if (autoSpin) {
+        stopAutoSpin()
+      }
       return
     }
 
     setSpinning(true)
-    setMessage('スピン中...')
+    setMessage(autoSpin ? `自動スピン中... (残り${autoSpinRemaining}回)` : 'スピン中...')
     setLastWin(0)
 
     // フリースピンでない場合のみ残高を減らす
@@ -129,6 +149,11 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       onUpdateBalance(currentUser.balance - currentBet)
     } else {
       setFreeSpins(prev => prev - 1)
+    }
+
+    // 自動スピンのカウント減少
+    if (autoSpin && autoSpinRemaining > 0) {
+      setAutoSpinRemaining(prev => prev - 1)
     }
 
     // スピンアニメーション
@@ -220,6 +245,31 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         result: winAmount > betAmount ? 'win' : 'lose'
       })
     }
+
+    // 自動スピン継続チェック
+    if (autoSpin && autoSpinRemaining > 0) {
+      setTimeout(() => {
+        spin()
+      }, 1500) // 1.5秒後に次のスピン
+    } else if (autoSpin && autoSpinRemaining <= 0) {
+      stopAutoSpin()
+    }
+  }
+
+  // 自動スピン開始
+  const startAutoSpin = (count) => {
+    setAutoSpin(true)
+    setAutoSpinCount(count)
+    setAutoSpinRemaining(count)
+    spin()
+  }
+
+  // 自動スピン停止
+  const stopAutoSpin = () => {
+    setAutoSpin(false)
+    setAutoSpinCount(0)
+    setAutoSpinRemaining(0)
+    setMessage('自動スピンを停止しました。')
   }
 
   return (
@@ -301,14 +351,52 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
               </div>
             </div>
 
-            <div className="flex justify-center">
+            <div className="flex justify-center space-x-4">
               <button
                 onClick={spin}
-                disabled={spinning || (!freeSpins && betAmount > currentUser.balance)}
+                disabled={spinning || autoSpin || (!freeSpins && betAmount > currentUser.balance)}
                 className="px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xl rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 {spinning ? 'スピン中...' : freeSpins > 0 ? 'フリースピン' : 'スピン'}
               </button>
+              
+              {/* 自動スピンボタン */}
+              {!freeSpins && !spinning && (
+                <>
+                  {!autoSpin ? (
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => startAutoSpin(10)}
+                        disabled={betAmount > currentUser.balance}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-lg"
+                      >
+                        自動10回
+                      </button>
+                      <button
+                        onClick={() => startAutoSpin(25)}
+                        disabled={betAmount > currentUser.balance}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-lg"
+                      >
+                        自動25回
+                      </button>
+                      <button
+                        onClick={() => startAutoSpin(50)}
+                        disabled={betAmount > currentUser.balance}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-lg"
+                      >
+                        自動50回
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={stopAutoSpin}
+                      className="px-6 py-4 bg-red-600 hover:bg-red-700 text-white font-bold text-xl rounded-lg"
+                    >
+                      停止 ({autoSpinRemaining}回残り)
+                    </button>
+                  )}
+                </>
+              )}
             </div>
           </div>
 

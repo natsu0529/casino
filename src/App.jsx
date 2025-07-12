@@ -11,7 +11,6 @@ import BaccaratGame from './components/BaccaratGame.jsx'
 import HighStakesBlackjack from './components/HighStakesBlackjack.jsx'
 import BridgeGame from './components/BridgeGame.jsx'
 import TexasPokerGame from './components/TexasPokerGame.jsx'
-import HighOddsSlotGame from './components/HighOddsSlotGame.jsx'
 import './App.css'
 
 function App() {
@@ -142,16 +141,6 @@ function App() {
             user={user}
             onBalanceUpdate={handleUpdateBalance} 
             onNavigateHome={() => setCurrentPage('home')}
-            onRecordGame={recordGameHistory}
-          />
-        )
-      case 'high_odds_slot':
-        return (
-          <HighOddsSlotGame 
-            currentUser={profile}
-            user={user}
-            onNavigateHome={() => setCurrentPage('home')}
-            onUpdateBalance={handleUpdateBalance}
             onRecordGame={recordGameHistory}
           />
         )

@@ -38,7 +38,7 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
   const [playerScore, setPlayerScore] = useState(0)
   const [dealerScore, setDealerScore] = useState(0)
   const [gameStatus, setGameStatus] = useState('betting') // betting, playing, dealer, finished
-  const [betAmount, setBetAmount] = useState(1000) // ハイステークスなので最低ベット額は1000
+  const [betAmount, setBetAmount] = useState(5000) // ハイステークスなので最低ベット額は5000
   const [message, setMessage] = useState('')
   const [gameHistory, setGameHistory] = useState([])
 
@@ -284,7 +284,7 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
           <div className="bg-purple-800/50 p-6 rounded-lg mb-6">
             <h3 className="text-xl font-bold text-white mb-4 text-center">ベット額を選択</h3>
             <div className="flex justify-center gap-4 mb-4">
-              {[1000, 2500, 5000, 10000, 20000].map(amount => (
+              {[5000, 10000, 20000, 40000, 80000].map(amount => (
                 <button
                   key={amount}
                   onClick={() => setBetAmount(amount)}
