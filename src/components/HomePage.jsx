@@ -92,6 +92,16 @@ const HomePage = ({ currentUser, user, onNavigation, onLogout }) => {
             <h3 className="text-lg font-bold">スロット</h3>
           </div>
 
+          {/* 高オッズスロット */}
+          <div 
+            className={`h-full bg-gradient-to-br from-amber-600 to-orange-800 border border-amber-400 rounded-lg hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col items-center justify-center text-white ${!currentUser ? 'opacity-75' : ''}`}
+            onClick={() => handleGameClick('high_odds_slot')}
+          >
+            <div className="text-3xl mb-2">💸</div>
+            <h3 className="text-lg font-bold">高オッズスロット</h3>
+            <p className="text-xs opacity-80 text-center">高額ベット専用</p>
+          </div>
+
           {/* 中央右上 - ポーカー */}
           <div 
             className={`h-full bg-gradient-to-br from-blue-600 to-blue-800 border border-blue-400 rounded-lg hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col items-center justify-center text-white ${!currentUser ? 'opacity-75' : ''}`}
