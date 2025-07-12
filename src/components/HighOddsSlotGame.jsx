@@ -38,27 +38,21 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     return 0
   }
 
-  // ペイライン判定（期待値1.0調整版：3ラインに減少）
+  // ペイライン判定（5リール×1行の正しい実装）
   const checkPaylines = (reels) => {
-    const paylines = [
-      [0, 1, 2, 3, 4], // 中央ライン
-      [0, 0, 1, 2, 3], // 上昇ライン
-      [4, 3, 2, 1, 0], // 下降ライン
-      // V字ラインと逆V字ラインを削除して期待値調整
-    ]
-
+    // 5リール×1行スロットでは、1つのペイラインのみ存在
+    // reelsは[シンボル0, シンボル1, シンボル2, シンボル3, シンボル4]の配列
+    
     let totalMultiplier = 0
     let winningLines = []
 
-    paylines.forEach((line, lineIndex) => {
-      const symbols = line.map(pos => reels[pos])
-      const lineMultiplier = calculateLineWin(symbols)
-      
-      if (lineMultiplier > 0) {
-        totalMultiplier += lineMultiplier
-        winningLines.push({ line: lineIndex + 1, multiplier: lineMultiplier })
-      }
-    })
+    // メインペイライン（左から右への連続一致判定）
+    const lineMultiplier = calculateLineWin(reels)
+    
+    if (lineMultiplier > 0) {
+      totalMultiplier += lineMultiplier
+      winningLines.push({ line: 1, multiplier: lineMultiplier })
+    }
 
     return { totalMultiplier, winningLines }
   }
