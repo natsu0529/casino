@@ -168,11 +168,11 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     setGameHistory(prev => [newHistory, ...prev.slice(0, 4)]) // 最新5件まで保持
 
     // 自動スピン継続チェック
-    if (autoSpin && autoSpinRemaining > 0) {
+    if (autoSpin && autoSpinRemaining > 1) {
       setTimeout(() => {
         spin()
       }, 1000) // 1秒後に次のスピン
-    } else if (autoSpin && autoSpinRemaining <= 0) {
+    } else if (autoSpin && autoSpinRemaining <= 1) {
       stopAutoSpin()
     }
   }

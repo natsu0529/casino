@@ -248,11 +248,11 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     }
 
     // 自動スピン継続チェック
-    if (autoSpin && autoSpinRemaining > 0) {
+    if (autoSpin && autoSpinRemaining > 1) {
       setTimeout(() => {
         spin()
       }, 1500) // 1.5秒後に次のスピン
-    } else if (autoSpin && autoSpinRemaining <= 0) {
+    } else if (autoSpin && autoSpinRemaining <= 1) {
       stopAutoSpin()
     }
   }
