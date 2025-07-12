@@ -130,11 +130,18 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
 
   // スピン実行（連続スピン対応）
   const spin = () => {
+    console.log('=== spin関数開始 ===')
+    console.log('autoSpin:', autoSpin)
+    console.log('autoSpinRemaining:', autoSpinRemaining)
+    console.log('betAmount:', betAmount)
+    console.log('currentUser.balance:', currentUser.balance)
+    
     const currentBet = freeSpins > 0 ? 0 : betAmount
     
     if (currentBet > currentUser.balance) {
       setMessage('残高が不足しています。')
       if (autoSpin) {
+        console.log('残高不足のため自動スピンを停止')
         stopAutoSpin()
       }
       return
@@ -149,11 +156,6 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       onUpdateBalance(currentUser.balance - currentBet)
     } else {
       setFreeSpins(prev => prev - 1)
-    }
-
-    // 自動スピンのカウント減少
-    if (autoSpin && autoSpinRemaining > 0) {
-      setAutoSpinRemaining(prev => prev - 1)
     }
 
     // スピンアニメーション
@@ -248,25 +250,47 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     }
 
     // 自動スピン継続チェック
+    console.log('=== 自動スピン継続チェック ===')
+    console.log('autoSpin:', autoSpin)
+    console.log('autoSpinRemaining (減算前):', autoSpinRemaining)
+    console.log('winAmount:', winAmount)
+    console.log('originalBetAmount:', originalBetAmount)
+    
+    // 自動スピンのカウント減少（継続判定の前に実行）
     if (autoSpin && autoSpinRemaining > 0) {
+      setAutoSpinRemaining(prev => {
+        const newValue = prev - 1
+        console.log('autoSpinRemaining 更新:', prev, '->', newValue)
+        return newValue
+      })
+    }
+    
+    if (autoSpin && autoSpinRemaining > 1) { // 減算前の値で判定
+      console.log('次のスピンを1.5秒後に実行します')
       setTimeout(() => {
+        console.log('自動スピン継続実行中...')
         spin()
       }, 1500) // 1.5秒後に次のスピン
     } else if (autoSpin) {
+      console.log('自動スピンを停止します')
       stopAutoSpin()
     }
   }
 
   // 自動スピン開始
   const startAutoSpin = (count) => {
+    console.log('=== 自動スピン開始 ===')
+    console.log('カウント:', count)
     setAutoSpin(true)
     setAutoSpinCount(count)
     setAutoSpinRemaining(count)
+    console.log('初回スピンを実行します')
     spin()
   }
 
   // 自動スピン停止
   const stopAutoSpin = () => {
+    console.log('=== 自動スピン停止 ===')
     setAutoSpin(false)
     setAutoSpinCount(0)
     setAutoSpinRemaining(0)

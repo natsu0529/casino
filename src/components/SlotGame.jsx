@@ -96,11 +96,6 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     // 残高から賭け金を引く
     onUpdateBalance(currentUser.balance - betAmount)
 
-    // 自動スピンのカウント減少
-    if (autoSpin && autoSpinRemaining > 0) {
-      setAutoSpinRemaining(prev => prev - 1)
-    }
-
     // アニメーション効果のためのランダム回転（自動スピン時は短縮）
     const spinDuration = autoSpin ? 1000 : 2000 + Math.random() * 1000
     const spinInterval = 100 // 100msごとに更新
@@ -168,7 +163,12 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     setGameHistory(prev => [newHistory, ...prev.slice(0, 4)]) // 最新5件まで保持
 
     // 自動スピン継続チェック
+    // 自動スピンのカウント減少（継続判定の前に実行）
     if (autoSpin && autoSpinRemaining > 0) {
+      setAutoSpinRemaining(prev => prev - 1)
+    }
+    
+    if (autoSpin && autoSpinRemaining > 1) { // 減算前の値で判定
       setTimeout(() => {
         spin()
       }, 1000) // 1秒後に次のスピン
