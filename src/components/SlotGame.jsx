@@ -81,6 +81,11 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
 
   // スピン実行（連続スピン対応）
   const spin = () => {
+    // 既にスピン中の場合は処理しない
+    if (spinning) {
+      return
+    }
+    
     if (betAmount > currentUser.balance) {
       setMessage('残高が不足しています。')
       if (autoSpin) {
@@ -120,7 +125,6 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
         ]
         
         setReels(finalReels)
-        setSpinning(false)
         
         // 結果判定
         setTimeout(() => {
@@ -132,6 +136,8 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
 
   // 結果判定
   const checkResult = (finalReels) => {
+    setSpinning(false) // 確実にspinning状態を解除
+    
     const multiplier = getPayoutMultiplier(finalReels[0], finalReels[1], finalReels[2])
     const winAmount = betAmount * multiplier
 
@@ -163,17 +169,18 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     setGameHistory(prev => [newHistory, ...prev.slice(0, 4)]) // 最新5件まで保持
 
     // 自動スピン継続チェック
-    // 自動スピンのカウント減少（継続判定の前に実行）
-    if (autoSpin && autoSpinRemaining > 0) {
-      setAutoSpinRemaining(prev => prev - 1)
-    }
-    
-    if (autoSpin && autoSpinRemaining > 1) { // 減算前の値で判定
-      setTimeout(() => {
-        spin()
-      }, 1000) // 1秒後に次のスピン
-    } else if (autoSpin) {
-      stopAutoSpin()
+    if (autoSpin) {
+      // 残り回数を減らす
+      const newRemaining = autoSpinRemaining - 1
+      setAutoSpinRemaining(newRemaining)
+      
+      if (newRemaining > 0) {
+        setTimeout(() => {
+          spin()
+        }, 1000) // 1秒後に次のスピン
+      } else {
+        stopAutoSpin()
+      }
     }
   }
 

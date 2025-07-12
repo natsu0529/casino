@@ -135,6 +135,13 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     console.log('autoSpinRemaining:', autoSpinRemaining)
     console.log('betAmount:', betAmount)
     console.log('currentUser.balance:', currentUser.balance)
+    console.log('spinning:', spinning)
+    
+    // 既にスピン中の場合は処理しない
+    if (spinning) {
+      console.log('既にスピン中のため処理をスキップ')
+      return
+    }
     
     const currentBet = freeSpins > 0 ? 0 : betAmount
     
@@ -147,6 +154,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       return
     }
 
+    console.log('スピン開始 - spinning状態をtrueに設定')
     setSpinning(true)
     setMessage(autoSpin ? `自動スピン中... (残り${autoSpinRemaining}回)` : 'スピン中...')
     setLastWin(0)
@@ -186,7 +194,6 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         ]
         
         setReels(finalReels)
-        setSpinning(false)
         
         setTimeout(() => {
           checkResult(finalReels, betAmount) // 常にbetAmountを渡す（フリースピンでも記録用）
@@ -197,6 +204,10 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
 
   // 結果判定
   const checkResult = (finalReels, originalBetAmount) => {
+    console.log('=== checkResult関数開始 ===')
+    console.log('spinning状態をfalseに設定')
+    setSpinning(false) // 確実にspinning状態を解除
+    
     const { totalMultiplier, winningLines } = checkPaylines(finalReels)
     const bonusTriggered = checkBonus(finalReels)
     
@@ -252,28 +263,24 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     // 自動スピン継続チェック
     console.log('=== 自動スピン継続チェック ===')
     console.log('autoSpin:', autoSpin)
-    console.log('autoSpinRemaining (減算前):', autoSpinRemaining)
-    console.log('winAmount:', winAmount)
-    console.log('originalBetAmount:', originalBetAmount)
+    console.log('autoSpinRemaining (現在):', autoSpinRemaining)
     
-    // 自動スピンのカウント減少（継続判定の前に実行）
-    if (autoSpin && autoSpinRemaining > 0) {
-      setAutoSpinRemaining(prev => {
-        const newValue = prev - 1
-        console.log('autoSpinRemaining 更新:', prev, '->', newValue)
-        return newValue
-      })
-    }
-    
-    if (autoSpin && autoSpinRemaining > 1) { // 減算前の値で判定
-      console.log('次のスピンを1.5秒後に実行します')
-      setTimeout(() => {
-        console.log('自動スピン継続実行中...')
-        spin()
-      }, 1500) // 1.5秒後に次のスピン
-    } else if (autoSpin) {
-      console.log('自動スピンを停止します')
-      stopAutoSpin()
+    if (autoSpin) {
+      // 残り回数を減らす
+      const newRemaining = autoSpinRemaining - 1
+      setAutoSpinRemaining(newRemaining)
+      console.log('残り回数更新:', autoSpinRemaining, '->', newRemaining)
+      
+      if (newRemaining > 0) {
+        console.log('次のスピンを1.5秒後に実行します')
+        setTimeout(() => {
+          console.log('自動スピン継続実行中... 残り:', newRemaining)
+          spin()
+        }, 1500)
+      } else {
+        console.log('自動スピン完了 - 停止します')
+        stopAutoSpin()
+      }
     }
   }
 
