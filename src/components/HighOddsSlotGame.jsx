@@ -16,7 +16,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
   // ゲーム状態
   const [reels, setReels] = useState([0, 0, 0, 0, 0]) // 5リール
   const [spinning, setSpinning] = useState(false)
-  const [betAmount, setBetAmount] = useState(200) // 通常スロットの20倍
+  const [betAmount, setBetAmount] = useState(500) // 最低500コイン
   const [message, setMessage] = useState('')
   const [lastWin, setLastWin] = useState(0)
   const [gameHistory, setGameHistory] = useState([])
@@ -64,26 +64,37 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     return { totalMultiplier, winningLines }
   }
 
-  // ライン勝利計算
+  // ライン勝利計算（修正版）
   const calculateLineWin = (lineSymbols) => {
-    // 3つ以上同じシンボルが連続している場合
-    for (let count = 5; count >= 3; count--) {
-      for (let start = 0; start <= 5 - count; start++) {
-        const symbolsToCheck = lineSymbols.slice(start, start + count)
-        if (symbolsToCheck.every(s => s === symbolsToCheck[0])) {
-          const symbol = symbols[symbolsToCheck[0]]
-          // 連続数に応じて倍率アップ
-          const baseMultiplier = symbol.value
-          const countMultiplier = count === 5 ? 10 : count === 4 ? 5 : 2
-          return baseMultiplier * countMultiplier
-        }
+    // 左から連続している同じシンボルをチェック
+    const firstSymbol = lineSymbols[0]
+    let consecutiveCount = 1
+    
+    for (let i = 1; i < lineSymbols.length; i++) {
+      if (lineSymbols[i] === firstSymbol) {
+        consecutiveCount++
+      } else {
+        break // 連続が途切れたら終了
       }
     }
 
-    // キャッシュシンボルの特別ルール（2つ以上で勝利）
-    const cashCount = lineSymbols.filter(s => s === 0).length // キャッシュは0番目
-    if (cashCount >= 2) {
-      return symbols[0].value * cashCount * 2
+    // 3つ以上連続している場合のみ勝利
+    if (consecutiveCount >= 3) {
+      const symbol = symbols[firstSymbol]
+      const baseMultiplier = symbol.value
+      
+      // 連続数に応じて倍率アップ
+      let countMultiplier = 1
+      if (consecutiveCount === 5) countMultiplier = 10
+      else if (consecutiveCount === 4) countMultiplier = 5
+      else if (consecutiveCount === 3) countMultiplier = 2
+      
+      return baseMultiplier * countMultiplier
+    }
+
+    // キャッシュシンボルの特別ルール（左から2つ以上連続）
+    if (firstSymbol === 0 && consecutiveCount >= 2) { // キャッシュは0番目
+      return symbols[0].value * consecutiveCount * 2
     }
 
     return 0
@@ -262,12 +273,6 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                 {!freeSpins && (
                   <>
                     <button
-                      onClick={() => setBetAmount(200)}
-                      className={`px-3 py-2 rounded text-white ${betAmount === 200 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
-                    >
-                      200
-                    </button>
-                    <button
                       onClick={() => setBetAmount(500)}
                       className={`px-3 py-2 rounded text-white ${betAmount === 500 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
                     >
@@ -278,6 +283,18 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                       className={`px-3 py-2 rounded text-white ${betAmount === 1000 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
                     >
                       1000
+                    </button>
+                    <button
+                      onClick={() => setBetAmount(2000)}
+                      className={`px-3 py-2 rounded text-white ${betAmount === 2000 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
+                    >
+                      2000
+                    </button>
+                    <button
+                      onClick={() => setBetAmount(5000)}
+                      className={`px-3 py-2 rounded text-white ${betAmount === 5000 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
+                    >
+                      5000
                     </button>
                   </>
                 )}

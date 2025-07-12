@@ -38,7 +38,7 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
   const [playerScore, setPlayerScore] = useState(0)
   const [dealerScore, setDealerScore] = useState(0)
   const [gameStatus, setGameStatus] = useState('betting') // betting, playing, dealer, finished
-  const [betAmount, setBetAmount] = useState(100) // ハイステークスなので最低ベット額は100
+  const [betAmount, setBetAmount] = useState(1000) // ハイステークスなので最低ベット額は1000
   const [message, setMessage] = useState('')
   const [gameHistory, setGameHistory] = useState([])
 
@@ -284,7 +284,7 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
           <div className="bg-purple-800/50 p-6 rounded-lg mb-6">
             <h3 className="text-xl font-bold text-white mb-4 text-center">ベット額を選択</h3>
             <div className="flex justify-center gap-4 mb-4">
-              {[100, 250, 500, 1000, 2500].map(amount => (
+              {[1000, 2500, 5000, 10000, 20000].map(amount => (
                 <button
                   key={amount}
                   onClick={() => setBetAmount(amount)}
@@ -297,7 +297,7 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
                         : 'bg-red-600 hover:bg-red-700 text-white'
                   }`}
                 >
-                  {amount}
+                  {amount.toLocaleString()}
                 </button>
               ))}
             </div>
@@ -307,7 +307,7 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
                 disabled={betAmount > currentUser.balance}
                 className="bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white px-8 py-3 rounded-lg font-bold text-lg"
               >
-                ゲーム開始 ({betAmount}コイン)
+                ゲーム開始 ({betAmount.toLocaleString()}コイン)
               </button>
             </div>
           </div>
@@ -362,7 +362,7 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
                   {gameHistory.map(game => (
                     <tr key={game.id} className="border-b border-gray-700">
                       <td className="p-2">{game.timestamp}</td>
-                      <td className="p-2">{game.betAmount}</td>
+                      <td className="p-2">{game.betAmount.toLocaleString()}</td>
                       <td className="p-2">
                         <span className={`font-bold ${
                           game.result === 'win' ? 'text-green-400' : 
@@ -371,7 +371,7 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
                           {game.result === 'win' ? '勝利' : game.result === 'lose' ? '敗北' : '引分'}
                         </span>
                       </td>
-                      <td className="p-2">{game.winAmount}</td>
+                      <td className="p-2">{game.winAmount.toLocaleString()}</td>
                       <td className="p-2">{game.playerScore} vs {game.dealerScore}</td>
                     </tr>
                   ))}
