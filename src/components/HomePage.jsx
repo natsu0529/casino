@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useProfile } from '../hooks/useProfile'
 import UsernameUpdate from './UsernameUpdate'
+import MessageBoard from './MessageBoard'
 
 const HomePage = ({ currentUser, user, onNavigation, onLogout }) => {
   const [showUsernameUpdate, setShowUsernameUpdate] = useState(false)
@@ -174,21 +175,31 @@ const HomePage = ({ currentUser, user, onNavigation, onLogout }) => {
           <div></div>
         </div>
 
-        {/* 資産ランキング */}
-        <div className="bg-gradient-to-br from-amber-600 to-amber-800 border border-amber-400 rounded-lg p-6">
-          <div className="text-center">
-            <div className="text-4xl mb-4 text-yellow-300">🏆</div>
-            <h3 className="text-xl font-bold mb-4 text-white">資産ランキング TOP3</h3>
-            <div className="grid grid-cols-3 gap-4">
-              {topUsers.map((user, index) => (
-                <div key={index} className="bg-black/20 rounded-lg p-4 text-white">
-                  <div className="font-bold text-lg">{index + 1}位</div>
-                  <div className="font-medium">{user.username}</div>
-                  <div className="text-yellow-300 font-bold">{user.balance.toLocaleString()}コイン</div>
-                </div>
-              ))}
+        {/* 資産ランキングと掲示板 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* 資産ランキング */}
+          <div className="bg-gradient-to-br from-amber-600 to-amber-800 border border-amber-400 rounded-lg p-6">
+            <div className="text-center">
+              <div className="text-4xl mb-4 text-yellow-300">🏆</div>
+              <h3 className="text-xl font-bold mb-4 text-white">資産ランキング TOP3</h3>
+              <div className="space-y-3">
+                {topUsers.map((user, index) => (
+                  <div key={index} className="bg-black/20 rounded-lg p-4 text-white">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-3">
+                        <div className="font-bold text-lg text-yellow-300">{index + 1}位</div>
+                        <div className="font-medium">{user.username}</div>
+                      </div>
+                      <div className="text-yellow-300 font-bold">{user.balance.toLocaleString()}コイン</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
+
+          {/* 掲示板 */}
+          <MessageBoard currentUser={currentUser} user={user} />
         </div>
       </div>
 
