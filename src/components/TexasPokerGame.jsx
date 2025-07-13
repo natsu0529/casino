@@ -411,16 +411,19 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       const newBalance = currentUser.balance - raiseAmount;
       onBalanceUpdate(newBalance);
       
+      console.log(`Player raises - Raise amount: ${raiseAmount}, New pot will be: ${pot + raiseAmount}, Player bet will be: ${playerBet + raiseAmount}`);
+      
       // レイズに対するコンピュータのアクションを決定（レイズ専用ロジック使用）
       const computerActionType = getComputerAction(true); // レイズに対する判断
       setComputerAction(computerActionType);
       
       if (computerActionType === 'fold') {
         // レイズ後は常にポット全体を獲得（追加ベットが発生している）
-        const winAmount = pot;
+        const winAmount = pot + raiseAmount; // 更新後のポット値を正しく計算
         const finalBalance = newBalance + winAmount;
         onBalanceUpdate(finalBalance);
-        const totalPlayerBet = playerBet + raiseAmount;
+        // playerBetは既にraiseAmountが加算済みなので、二重計算を避ける
+        const totalPlayerBet = playerBet + raiseAmount; // レイズ後のプレイヤー総ベット額
         const profit = winAmount - totalPlayerBet;
         console.log(`Computer folded after raise - Win amount: ${winAmount}, Total player bet: ${totalPlayerBet}, Profit: ${profit}, New balance: ${finalBalance}`);
         setMessage(`コンピュータがフォールドしました。あなたの勝利です！ ${winAmount}コイン獲得（利益: ${profit}コイン）`);
@@ -432,14 +435,18 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
         setPot(0);
         return;
       } else if (computerActionType === 'call') {
-        setPot(prev => prev + raiseAmount);
-        setComputerBet(prev => prev + raiseAmount);
+        const newPot = pot + raiseAmount;
+        const newComputerBet = computerBet + raiseAmount;
+        setPot(newPot);
+        setComputerBet(newComputerBet);
         setMessage(`コンピュータがコールしました`);
         proceedToNextPhase();
       } else if (computerActionType === 'raise') {
         // コンピュータが再レイズ
-        setPot(prev => prev + raiseAmount * 2);
-        setComputerBet(prev => prev + raiseAmount * 2);
+        const newPot = pot + raiseAmount * 2;
+        const newComputerBet = computerBet + raiseAmount * 2;
+        setPot(newPot);
+        setComputerBet(newComputerBet);
         setMessage(`コンピュータがレイズしました！`);
         proceedToNextPhase();
       }
@@ -491,6 +498,9 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
   const showdown = () => {
     setGameState('showdown');
     
+    console.log(`=== SHOWDOWN DEBUG ===`);
+    console.log(`Pot: ${pot}, Player bet: ${playerBet}, Computer bet: ${computerBet}`);
+    
     const playerBestHand = getBestHand(playerCards, communityCards);
     const computerBestHand = getBestHand(computerCards, communityCards);
     
@@ -503,16 +513,17 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       // プレイヤーの勝利
       winner = 'あなた';
       winAmount = pot; // ポット全体を獲得
-      profit = winAmount - playerBet; // 実際の利益
+      // 利益 = 獲得金額 - プレイヤーがゲーム中に支払った総額
+      profit = winAmount - playerBet;
       const newBalance = currentUser.balance + winAmount;
       onBalanceUpdate(newBalance);
-      console.log(`Player wins! Pot: ${pot}, Player bet: ${playerBet}, Win amount: ${winAmount}, Profit: ${profit}`);
+      console.log(`Player wins! Pot: ${pot}, Player bet: ${playerBet}, Win amount: ${winAmount}, Profit: ${profit}, New balance: ${newBalance}`);
     } else if (computerBestHand.rank > playerBestHand.rank || 
                (computerBestHand.rank === playerBestHand.rank && computerBestHand.highCard > playerBestHand.highCard)) {
       // コンピュータの勝利
       winner = 'コンピュータ';
-      winAmount = 0;
-      profit = -playerBet; // プレイヤーの損失
+      winAmount = 0; // プレイヤーは何も獲得しない
+      profit = -playerBet; // プレイヤーの損失（支払った分がすべて損失）
       console.log(`Computer wins! Player bet: ${playerBet}, Loss: ${profit}`);
     } else {
       // 引き分け
@@ -521,10 +532,10 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       profit = 0; // 損益なし
       const newBalance = currentUser.balance + winAmount;
       onBalanceUpdate(newBalance);
-      console.log(`Draw! Player gets back: ${winAmount}`);
+      console.log(`Draw! Player gets back: ${winAmount}, New balance: ${newBalance}`);
     }
     
-    setMessage(`ショーダウン！ ${winner}の勝利！ あなた: ${playerBestHand.description}, コンピュータ: ${computerBestHand.description}`);
+    setMessage(`ショーダウン！ ${winner}の勝利！ あなた: ${playerBestHand.description}, コンピュータ: ${computerBestHand.description}${winner === 'あなた' ? ` (利益: ${profit}コイン)` : ''}`);
     addToHistory('ショーダウン', winner, profit);
     
     setTimeout(() => {
