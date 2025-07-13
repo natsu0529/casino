@@ -352,10 +352,14 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     setPlayerAction(action);
     
     if (action === 'fold') {
-      // プレイヤーがフォールドした場合、賭けた金額は戻ってこない
-      const loss = -playerBet;
-      setMessage('あなたがフォールドしました。コンピュータの勝利です。賭けた金額は没収されます。');
-      addToHistory('フォールド', 'コンピュータ', loss);
+      // プレイヤーがフォールドした場合は引き分け（参加料を返還）
+      const returnAmount = betAmount; // 初期参加料のみ返還
+      const newBalance = currentUser.balance + returnAmount;
+      onBalanceUpdate(newBalance);
+      console.log(`=== PLAYER FOLDED - DRAW ===`);
+      console.log(`Player folded - Return amount: ${returnAmount}, New balance: ${newBalance}`);
+      setMessage('あなたがフォールドしました。引き分けです。参加料が返還されました。');
+      addToHistory('フォールド', '引き分け', 0); // 損益なし
       setGameState('betting');
       // ベット額をリセット
       setPlayerBet(0);
@@ -370,25 +374,16 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       setComputerAction(computerActionType);
       
       if (computerActionType === 'fold') {
-        // プリフロップで初期ベットのみの場合とそれ以外で処理を分ける
-        if (gameState === 'preflop' && playerBet === betAmount && computerBet === betAmount) {
-          // プリフロップで追加ベットなし：プレイヤーのベット分のみ返還
-          const returnAmount = betAmount;
-          const newBalance = currentUser.balance + returnAmount;
-          onBalanceUpdate(newBalance);
-          console.log(`Computer folded in preflop (no additional bets) - Return amount: ${returnAmount}, New balance: ${newBalance}`);
-          setMessage(`コンピュータがフォールドしました。次のゲームへ進みます。ベット分（${returnAmount}コイン）が返還されました。`);
-          addToHistory('コール', 'あなた', 0); // 損益なし
-        } else {
-          // 追加ベットがある場合またはフロップ以降：ポット全体を獲得
-          const winAmount = pot;
-          const newBalance = currentUser.balance + winAmount;
-          onBalanceUpdate(newBalance);
-          const profit = winAmount - playerBet;
-          console.log(`Computer folded after call - Win amount: ${winAmount}, Player bet: ${playerBet}, Profit: ${profit}, New balance: ${newBalance}`);
-          setMessage(`コンピュータがフォールドしました。あなたの勝利です！ ${winAmount}コイン獲得（利益: ${profit}コイン）`);
-          addToHistory('コール', 'あなた', profit);
-        }
+        // プレイヤーがコール・レイズ後のコンピュータフォールド
+        // → プレイヤーがプール金全額を獲得
+        const winAmount = pot;
+        const newBalance = currentUser.balance + winAmount;
+        onBalanceUpdate(newBalance);
+        const profit = winAmount - playerBet;
+        console.log(`=== COMPUTER FOLDED AFTER PLAYER CALL ===`);
+        console.log(`Computer folded after player's call - Win amount: ${winAmount}, Player bet: ${playerBet}, Profit: ${profit}, New balance: ${newBalance}`);
+        setMessage(`コンピュータがフォールドしました。あなたの勝利です！ プール金${winAmount}コイン獲得（利益: ${profit}コイン）`);
+        addToHistory('コール', 'あなた', profit);
         setGameState('betting');
         // ベット額をリセット
         setPlayerBet(0);
@@ -418,18 +413,18 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       setComputerAction(computerActionType);
       
       if (computerActionType === 'fold') {
-        // レイズ後は常にポット全体を獲得（追加ベットが発生している）
+        // プレイヤーがレイズ後のコンピュータフォールド
+        // → プレイヤーがプール金全額を獲得
         const winAmount = pot + raiseAmount; // 更新後のポット値を正しく計算
-        // 残高更新を1回にまとめる：レイズ分を引いて勝利金を加算
+        // 残高更新を1回にまとめる：レイズ分を引いてプール金全額を加算
         const finalBalance = currentUser.balance - raiseAmount + winAmount;
-        console.log(`=== COMPUTER FOLDED AFTER RAISE ===`);
+        console.log(`=== COMPUTER FOLDED AFTER PLAYER RAISE ===`);
         console.log(`Before: ${currentUser.balance}, Raise: ${raiseAmount}, Win: ${winAmount}, After: ${finalBalance}`);
         onBalanceUpdate(finalBalance);
-        // playerBetは既にraiseAmountが加算済みなので、二重計算を避ける
         const totalPlayerBet = playerBet + raiseAmount; // レイズ後のプレイヤー総ベット額
         const profit = winAmount - totalPlayerBet;
         console.log(`Computer folded after raise - Win amount: ${winAmount}, Total player bet: ${totalPlayerBet}, Profit: ${profit}, New balance: ${finalBalance}`);
-        setMessage(`コンピュータがフォールドしました。あなたの勝利です！ ${winAmount}コイン獲得（利益: ${profit}コイン）`);
+        setMessage(`コンピュータがフォールドしました。あなたの勝利です！ プール金${winAmount}コイン獲得（利益: ${profit}コイン）`);
         addToHistory('レイズ', 'あなた', profit);
         setGameState('betting');
         // ベット額をリセット
@@ -481,13 +476,16 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       setComputerAction(computerActionType);
       
       if (computerActionType === 'fold') {
-        // プリフロップで初期ベットのみ：プレイヤーのベット分を返還
-        const returnAmount = betAmount;
-        const newBalance = currentUser.balance + returnAmount;
+        // プリフロップでコンピュータが自発的にフォールド
+        // → プレイヤーがプール金全額を獲得
+        const winAmount = pot;
+        const newBalance = currentUser.balance + winAmount;
         onBalanceUpdate(newBalance);
-        console.log(`Computer folded in preflop (initial bet only) - Return amount: ${returnAmount}, New balance: ${newBalance}`);
-        setMessage(`コンピュータがプリフロップでフォールドしました。次のゲームへ進みます。ベット分（${returnAmount}コイン）が返還されました。`);
-        addToHistory('プリフロップ', 'あなた', 0); // 損益なし
+        const profit = winAmount - playerBet;
+        console.log(`=== COMPUTER FOLDED IN PREFLOP (SPONTANEOUS) ===`);
+        console.log(`Computer folded in preflop (spontaneous) - Win amount: ${winAmount}, Player bet: ${playerBet}, Profit: ${profit}, New balance: ${newBalance}`);
+        setMessage(`コンピュータがプリフロップでフォールドしました。あなたの勝利です！ プール金${winAmount}コイン獲得（利益: ${profit}コイン）`);
+        addToHistory('プリフロップ', 'あなた', profit);
         setGameState('betting');
         setPlayerBet(0);
         setComputerBet(0);
@@ -514,10 +512,9 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     
     if (playerBestHand.rank > computerBestHand.rank || 
         (playerBestHand.rank === computerBestHand.rank && playerBestHand.highCard > computerBestHand.highCard)) {
-      // プレイヤーの勝利
+      // プレイヤーの勝利 - プール金全額を獲得
       winner = 'あなた';
-      winAmount = pot; // ポット全体を獲得
-      // 利益 = 獲得金額 - プレイヤーがゲーム中に支払った総額
+      winAmount = pot; // プール金全額を獲得
       profit = winAmount - playerBet;
       const newBalance = currentUser.balance + winAmount;
       console.log(`=== PLAYER WINS (SHOWDOWN) ===`);
@@ -526,22 +523,29 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       console.log(`Player wins! Pot: ${pot}, Player bet: ${playerBet}, Win amount: ${winAmount}, Profit: ${profit}, New balance: ${newBalance}`);
     } else if (computerBestHand.rank > playerBestHand.rank || 
                (computerBestHand.rank === playerBestHand.rank && computerBestHand.highCard > playerBestHand.highCard)) {
-      // コンピュータの勝利
+      // コンピュータの勝利 - プレイヤーは何も獲得しない
       winner = 'コンピュータ';
       winAmount = 0; // プレイヤーは何も獲得しない
       profit = -playerBet; // プレイヤーの損失（支払った分がすべて損失）
       console.log(`Computer wins! Player bet: ${playerBet}, Loss: ${profit}`);
     } else {
-      // 引き分け
+      // 引き分け - プレイヤーの参加料のみ返還
       winner = '引き分け';
-      winAmount = playerBet; // プレイヤーのベット分だけ戻る
+      winAmount = playerBet; // プレイヤーの参加料のみ戻る
       profit = 0; // 損益なし
       const newBalance = currentUser.balance + winAmount;
       onBalanceUpdate(newBalance);
+      console.log(`=== DRAW (SHOWDOWN) ===`);
       console.log(`Draw! Player gets back: ${winAmount}, New balance: ${newBalance}`);
     }
     
-    setMessage(`ショーダウン！ ${winner}の勝利！ あなた: ${playerBestHand.description}, コンピュータ: ${computerBestHand.description}${winner === 'あなた' ? ` (利益: ${profit}コイン)` : ''}`);
+    const resultMessage = winner === 'あなた' 
+      ? `ショーダウン！ ${winner}の勝利！ プール金${winAmount}コイン獲得（利益: ${profit}コイン）`
+      : winner === '引き分け'
+      ? `ショーダウン！ 引き分けです！ 参加料${winAmount}コイン返還`
+      : `ショーダウン！ ${winner}の勝利！ 参加料${Math.abs(profit)}コイン没収`;
+    
+    setMessage(`${resultMessage} あなた: ${playerBestHand.description}, コンピュータ: ${computerBestHand.description}`);
     addToHistory('ショーダウン', winner, profit);
     
     setTimeout(() => {
@@ -646,12 +650,17 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
                 <li>リバー: 5枚目のコミュニティカードが公開された後のベッティング</li>
                 <li>ショーダウン: 手札を比較して勝敗を決定</li>
               </ul>
-              <p><strong>フォールドのルール:</strong></p>
+              <p><strong>参加料とプール金:</strong></p>
+              <ul className="list-disc list-inside space-y-1 ml-4 text-green-600">
+                <li>ゲーム開始時に両プレイヤーが参加料（ベット額）をプールに投入</li>
+                <li>プール金は参加料の合計（通常は20コイン）</li>
+              </ul>
+              <p><strong>勝敗のルール:</strong></p>
               <ul className="list-disc list-inside space-y-1 ml-4 text-red-600">
-                <li><strong>プリフロップで追加ベットなし:</strong> フォールドした場合、次のゲームに進み、ベット分が返還されます</li>
-                <li><strong>追加ベット後またはフロップ以降:</strong> フォールドした側は賭け金を失い、勝った側がポット全体を獲得します</li>
-                <li><strong>プレイヤーがフォールド:</strong> 賭けた金額は一切戻ってきません</li>
-                <li><strong>コンピュータがフォールド:</strong> プレイヤーがポット全体を獲得します</li>
+                <li><strong>プレイヤーがフォールド:</strong> 引き分け（参加料が返還）</li>
+                <li><strong>コンピュータがフォールド:</strong> プレイヤーがプール金全額獲得</li>
+                <li><strong>両者がリバーまで残る:</strong> ハンドが強い方がプール金全額獲得</li>
+                <li><strong>ショーダウンで引き分け:</strong> 各自の参加料のみ返還</li>
               </ul>
               <p><strong>アクション:</strong></p>
               <ul className="list-disc list-inside space-y-1 ml-4">
