@@ -196,7 +196,10 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
 
   // 結果判定
   const checkResult = (finalReels, originalBetAmount) => {
-    console.log('=== checkResult関数開始 ===')
+    console.log('=== 高オッズcheckResult関数開始 ===')
+    console.log(`autoSpin状態: ${autoSpin}, autoSpinRef.current: ${autoSpinRef.current}`)
+    console.log(`autoSpinCount: ${autoSpinCount}, maxAutoSpins: ${maxAutoSpins}`)
+    console.log(`freeSpins: ${freeSpins}`)
     console.log('spinning状態をfalseに設定')
     setSpinning(false) // 確実にspinning状態を解除
     
@@ -231,6 +234,9 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       setMessage(defaultMessage)
     }
 
+    console.log(`=== 高オッズ連続スピン条件チェック ===`)
+    console.log(`autoSpin: ${autoSpin}, freeSpins: ${freeSpins}`)
+    
     // 連続スピンの処理（フリースピン中は除く）
     if (autoSpin && freeSpins === 0) {
       const newCount = autoSpinCount + 1
@@ -271,6 +277,8 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
           }
         }, 1500) // 1.5秒後に次のスピン
       }
+    } else {
+      console.log(`高オッズ連続スピン処理をスキップ（autoSpin: ${autoSpin}, freeSpins: ${freeSpins}）`)
     }
 
     // フリースピン終了チェック

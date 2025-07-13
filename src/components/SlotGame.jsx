@@ -37,6 +37,7 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
   const [autoSpin, setAutoSpin] = useState(false)
   const [autoSpinCount, setAutoSpinCount] = useState(0)
   const [maxAutoSpins, setMaxAutoSpins] = useState(10)
+  const [autoSpinInterval, setAutoSpinInterval] = useState(null)
   
   // 最新の残高を追跡するref
   const currentBalanceRef = useRef(currentUser.balance)
@@ -71,6 +72,7 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
 
   const stopAutoSpin = () => {
     console.log(`=== 連続スピン手動停止 ===`)
+    console.trace('stopAutoSpin called from:') // 呼び出し元を特定
     setAutoSpin(false)
     autoSpinRef.current = false
     setAutoSpinCount(0)
@@ -199,6 +201,10 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
 
   // 結果判定
   const checkResult = (finalReels) => {
+    console.log(`=== checkResult関数開始 ===`)
+    console.log(`autoSpin状態: ${autoSpin}, autoSpinRef.current: ${autoSpinRef.current}`)
+    console.log(`autoSpinCount: ${autoSpinCount}, maxAutoSpins: ${maxAutoSpins}`)
+    
     setSpinning(false) // 確実にspinning状態を解除
     
     const multiplier = getPayoutMultiplier(finalReels[0], finalReels[1], finalReels[2])
@@ -226,6 +232,9 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
       setMessage('残念！もう一度挑戦してください。')
     }
 
+    console.log(`=== 連続スピン条件チェック ===`)
+    console.log(`autoSpin: ${autoSpin}`)
+    
     // 連続スピンの処理
     if (autoSpin) {
       const newCount = autoSpinCount + 1
@@ -266,6 +275,8 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
           }
         }, 1000) // 1秒後に次のスピン
       }
+    } else {
+      console.log(`連続スピン処理をスキップ（autoSpin: ${autoSpin}）`)
     }
 
     // ゲーム履歴に追加
