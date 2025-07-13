@@ -31,15 +31,14 @@ const TitleDisplay = ({ title, className = "" }) => {
 const UserNameWithTitle = ({ username, title, className = "" }) => {
   return (
     <span className={className}>
-      {title && (
-        <>
-          <TitleDisplay title={title} />
-          <span className="mx-1 text-gray-400">·</span>
-        </>
-      )}
       {username}
+      {title && (
+        <span className="ml-1">
+          <TitleDisplay title={title} />
+        </span>
+      )}
     </span>
-  )
+  );
 }
 
 export { TitleDisplay, UserNameWithTitle }
