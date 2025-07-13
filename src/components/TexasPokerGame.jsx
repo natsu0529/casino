@@ -10,6 +10,7 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
   const [playerBet, setPlayerBet] = useState(0);
   const [computerBet, setComputerBet] = useState(0);
   const [betAmount, setBetAmount] = useState(10);
+  const [raiseAmount, setRaiseAmount] = useState(10);
   const [message, setMessage] = useState('');
   const [gameHistory, setGameHistory] = useState([]);
   const [showRules, setShowRules] = useState(false);
@@ -232,7 +233,7 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     // レイズに対する特別な判断ロジック
     const handInfo = evaluateComputerHandStrength();
     const currentBetSize = Math.max(playerBet, computerBet);
-    const initialBet = betAmount; // 初期掛金
+    const initialBet = 10; // 固定初期ベット額
     const raiseFactor = currentBetSize / initialBet; // 現在のベット倍率
     
     console.log(`Computer hand evaluation: rank=${handInfo.rank}, type=${handInfo.type}, raiseFactor=${raiseFactor}`);
@@ -386,7 +387,6 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     }
     
     if (action === 'raise') {
-      const raiseAmount = betAmount;
       if (currentUser.balance < raiseAmount) {
         setMessage('残高が不足しています');
         return;
@@ -742,6 +742,20 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
           {gameState !== 'betting' && gameState !== 'showdown' && (
             <div className="text-center">
               <h3 className="text-base xs:text-lg sm:text-xl font-bold mb-2 xs:mb-3 sm:mb-4">アクションを選択してください</h3>
+              
+              {/* レイズ額入力 */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">レイズ額 (10-1000コイン):</label>
+                <input 
+                  type="number"
+                  min="10"
+                  max="1000"
+                  value={raiseAmount}
+                  onChange={(e) => setRaiseAmount(Math.max(10, Math.min(1000, parseInt(e.target.value) || 10)))}
+                  className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-center"
+                />
+              </div>
+              
               <div className="flex flex-col xs:flex-row justify-center gap-2 xs:gap-3 sm:gap-4">
                 <button 
                   onClick={() => handlePlayerAction('fold')}
@@ -757,10 +771,10 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
                 </button>
                 <button 
                   onClick={() => handlePlayerAction('raise')}
-                  disabled={currentUser.balance < betAmount}
+                  disabled={currentUser.balance < raiseAmount}
                   className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-2 xs:px-4 xs:py-2 sm:px-6 sm:py-3 rounded-lg font-bold text-xs xs:text-sm sm:text-base"
                 >
-                  レイズ (+{betAmount})
+                  レイズ (+{raiseAmount})
                 </button>
               </div>
             </div>
