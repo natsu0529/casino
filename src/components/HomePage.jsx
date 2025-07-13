@@ -43,13 +43,17 @@ const HomePage = ({ currentUser, user, onNavigation, onLogout }) => {
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-4">
                 <div className="text-white">
-                  <span className="text-lg font-bold">
-                    👤 <UserNameWithTitle 
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg font-bold">👤</span>
+                    <UserNameWithTitle 
                       username={currentUser.username} 
                       title={currentUser.title}
+                      className="text-lg font-bold"
                     />
-                  </span>
-                  <span className="ml-4 text-yellow-300 font-bold">💰 {currentUser.balance.toLocaleString()}コイン</span>
+                  </div>
+                  <div className="mt-1">
+                    <span className="text-yellow-300 font-bold">💰 {currentUser.balance.toLocaleString()}コイン</span>
+                  </div>
                 </div>
                 <button
                   onClick={() => setShowUsernameUpdate(true)}
