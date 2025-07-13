@@ -48,6 +48,7 @@ const HomePage = ({ currentUser, user, onNavigation, onLogout }) => {
                     <UserNameWithTitle 
                       username={currentUser.username} 
                       title={currentUser.title}
+                      format="postfix"
                       className="text-lg font-bold"
                     />
                   </div>
@@ -211,6 +212,7 @@ const HomePage = ({ currentUser, user, onNavigation, onLogout }) => {
                           <UserNameWithTitle 
                             username={user.username} 
                             title={user.title}
+                            format="postfix"
                           />
                         </div>
                       </div>

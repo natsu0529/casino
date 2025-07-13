@@ -132,6 +132,7 @@ const MessageBoard = ({ currentUser, user }) => {
                     👤 <UserNameWithTitle 
                       username={message.username} 
                       title={message.title} 
+                      format="postfix"
                     />
                   </span>
                   {message.balance && (

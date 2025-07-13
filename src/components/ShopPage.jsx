@@ -230,6 +230,7 @@ const ShopPage = ({ user, onNavigateHome }) => {
               </ul>
             </div>
           </div>
+          <p className="text-sm text-gray-500 mt-4">爵位は段階的にしか購入できません。例えば、男爵保持者のみ子爵を購入できます。</p>
         </div>
       </div>
     </div>
