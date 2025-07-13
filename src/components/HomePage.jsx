@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useProfile } from '../hooks/useProfile'
 import UsernameUpdate from './UsernameUpdate'
 import MessageBoard from './MessageBoard'
+import { UserNameWithTitle } from './TitleDisplay'
 
 const HomePage = ({ currentUser, user, onNavigation, onLogout }) => {
   const [showUsernameUpdate, setShowUsernameUpdate] = useState(false)
@@ -42,7 +43,12 @@ const HomePage = ({ currentUser, user, onNavigation, onLogout }) => {
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-4">
                 <div className="text-white">
-                  <span className="text-lg font-bold">👤 {currentUser.username}</span>
+                  <span className="text-lg font-bold">
+                    👤 <UserNameWithTitle 
+                      username={currentUser.username} 
+                      title={currentUser.title}
+                    />
+                  </span>
                   <span className="ml-4 text-yellow-300 font-bold">💰 {currentUser.balance.toLocaleString()}コイン</span>
                 </div>
                 <button
@@ -169,8 +175,17 @@ const HomePage = ({ currentUser, user, onNavigation, onLogout }) => {
             </h3>
           </div>
 
-          {/* 残りの3つは空白 */}
-          <div></div>
+          {/* ショップ */}
+          <div 
+            className="h-full bg-gradient-to-br from-indigo-600 to-purple-800 border border-indigo-400 rounded-lg hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col items-center justify-center text-white"
+            onClick={() => onNavigation('shop')}
+          >
+            <div className="text-3xl mb-2">🏛️</div>
+            <h3 className="text-lg font-bold">ショップ</h3>
+            <p className="text-xs opacity-80 text-center">爵位を購入</p>
+          </div>
+
+          {/* 残りの2つは空白 */}
           <div></div>
           <div></div>
         </div>
@@ -188,7 +203,12 @@ const HomePage = ({ currentUser, user, onNavigation, onLogout }) => {
                     <div className="flex justify-between items-center">
                       <div className="flex items-center space-x-3">
                         <div className="font-bold text-lg text-yellow-300">{index + 1}位</div>
-                        <div className="font-medium">{user.username}</div>
+                        <div className="font-medium">
+                          <UserNameWithTitle 
+                            username={user.username} 
+                            title={user.title}
+                          />
+                        </div>
                       </div>
                       <div className="text-yellow-300 font-bold">{user.balance.toLocaleString()}コイン</div>
                     </div>

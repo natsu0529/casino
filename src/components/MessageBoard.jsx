@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useProfile } from '../hooks/useProfile'
+import { UserNameWithTitle } from './TitleDisplay'
 
 const MessageBoard = ({ currentUser, user }) => {
   const [messages, setMessages] = useState([])
@@ -127,8 +128,12 @@ const MessageBoard = ({ currentUser, user }) => {
             >
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center space-x-2">
-                  <span className="text-white font-bold">
-                    👤 {message.username}
+                  <span className="text-white font-bold flex items-center">
+                    👤 <UserNameWithTitle 
+                      username={message.username} 
+                      title={message.title}
+                      className="ml-1"
+                    />
                   </span>
                   {message.balance && (
                     <span className="text-yellow-300 text-sm">

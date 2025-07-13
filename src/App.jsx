@@ -3,6 +3,7 @@ import { useAuth } from './hooks/useAuth'
 import { useProfile } from './hooks/useProfile'
 import HomePage from './components/HomePage.jsx'
 import UserRegistration from './components/UserRegistration.jsx'
+import ShopPage from './components/ShopPage.jsx'
 import BlackjackGame from './components/BlackjackGame.jsx'
 import PokerGame from './components/PokerGame.jsx'
 import SlotGame from './components/SlotGame.jsx'
@@ -83,6 +84,13 @@ function App() {
           <UserRegistration 
             onBack={() => setCurrentPage('home')}
             onLogin={handleLogin}
+          />
+        )
+      case 'shop':
+        return (
+          <ShopPage
+            user={user}
+            onNavigateHome={() => setCurrentPage('home')}
           />
         )
       case 'blackjack':

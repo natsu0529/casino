@@ -188,7 +188,7 @@ export const useProfile = (userId) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('username, balance')
+        .select('username, balance, title')
         .order('balance', { ascending: false })
         .limit(limit)
 
@@ -213,7 +213,7 @@ export const useProfile = (userId) => {
           id,
           content,
           created_at,
-          profiles!inner(username, balance)
+          profiles!inner(username, balance, title)
         `)
         .order('created_at', { ascending: false })
         .limit(limit)
@@ -229,7 +229,8 @@ export const useProfile = (userId) => {
         content: message.content,
         created_at: message.created_at,
         username: message.profiles.username,
-        balance: message.profiles.balance
+        balance: message.profiles.balance,
+        title: message.profiles.title
       })) || []
 
       return formattedData
@@ -268,6 +269,63 @@ export const useProfile = (userId) => {
     }
   }, [userId])
 
+  // 爵位購入関数
+  const purchaseTitle = useCallback(async (titleName, price) => {
+    try {
+      if (!userId) {
+        throw new Error('User not authenticated')
+      }
+
+      // トランザクション的に処理するため、まず残高チェック
+      const { data: currentProfile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('balance, title')
+        .eq('id', userId)
+        .single()
+
+      if (fetchError) throw fetchError
+
+      if (currentProfile.balance < price) {
+        throw new Error('Insufficient balance')
+      }
+
+      // 残高を減らして爵位を設定
+      const newBalance = currentProfile.balance - price
+      const { data: updatedProfile, error: updateError } = await supabase
+        .from('profiles')
+        .update({ 
+          balance: newBalance,
+          title: titleName
+        })
+        .eq('id', userId)
+        .select()
+        .single()
+
+      if (updateError) throw updateError
+
+      // 購入履歴を記録
+      const { error: historyError } = await supabase
+        .from('title_purchases')
+        .insert({
+          user_id: userId,
+          title: titleName,
+          price: price
+        })
+
+      if (historyError) {
+        console.warn('Failed to record purchase history:', historyError)
+        // 履歴記録の失敗は致命的ではないので続行
+      }
+
+      setProfile(updatedProfile)
+      console.log('Title purchased successfully:', updatedProfile)
+      return { data: updatedProfile, error: null }
+    } catch (error) {
+      console.error('Error in purchaseTitle:', error)
+      return { data: null, error }
+    }
+  }, [userId])
+
   return {
     profile,
     loading,
@@ -276,6 +334,7 @@ export const useProfile = (userId) => {
     recordGameHistory,
     getTopUsers,
     getMessages,
-    postMessage
+    postMessage,
+    purchaseTitle
   }
 }
