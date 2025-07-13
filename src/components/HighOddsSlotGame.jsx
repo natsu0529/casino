@@ -3,12 +3,12 @@ import { useState, useEffect } from 'react'
 const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }) => {
   // 高級シンボル（プレイヤー有利版 RTP119.4%）
   const symbols = [
-    { symbol: '', name: 'ダイヤモンド', value: 12, weight: 8 },     // 12倍（25→12）
-    { symbol: '�', name: 'ファイア', value: 10, weight: 10 },        // 10倍（新規）
+    { symbol: '💎', name: 'ダイヤモンド', value: 12, weight: 8 },     // 12倍（25→12）
+    { symbol: '🔥', name: 'ファイア', value: 10, weight: 10 },        // 10倍（新規）
     { symbol: '⭐', name: 'ゴールドスター', value: 8, weight: 12 },   // 8倍（8→8）
-    { symbol: '�', name: 'チェリー', value: 6, weight: 15 },         // 6倍（新規）
+    { symbol: '🍒', name: 'チェリー', value: 6, weight: 15 },         // 6倍（新規）
     { symbol: '🍋', name: 'レモン', value: 4, weight: 20 },           // 4倍（新規）
-    { symbol: '�', name: 'オレンジ', value: 3, weight: 25 },         // 3倍（新規）
+    { symbol: '🍊', name: 'オレンジ', value: 3, weight: 25 },         // 3倍（新規）
   ]
 
   // ゲーム状態
@@ -373,7 +373,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                 </div>
                 <div className="border-t border-white/30 pt-1 mt-1">
                   <div className="flex justify-between text-white text-xs">
-                    <span>💎🔥⭐ 3個以上</span>
+                    <span>{symbols[0].symbol}{symbols[1].symbol}{symbols[2].symbol} 3個以上</span>
                     <span className="text-purple-300">フリースピン10回</span>
                   </div>
                 </div>
