@@ -246,29 +246,29 @@ const RouletteGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 via-emerald-900 to-green-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-900 via-emerald-900 to-green-900 p-1 xs:p-2 sm:p-4">
       <div className="max-w-6xl mx-auto">
         {/* ヘッダー */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col xs:flex-row justify-between items-center mb-2 xs:mb-4 sm:mb-6 gap-2 xs:gap-0">
           <button
             onClick={() => onNavigateHome()}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-300"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 xs:px-3 xs:py-2 sm:px-4 sm:py-2 rounded-lg transition-colors duration-300 text-xs xs:text-sm sm:text-base order-1 xs:order-none"
           >
             ← ホームに戻る
           </button>
-          <h1 className="text-4xl font-bold text-white">🎯 ルーレット 🎯</h1>
-          <div className="text-white text-right">
-            <div className="text-lg font-bold">👤 {currentUser.username}</div>
-            <div className="text-yellow-300 font-bold">💰 {currentUser.balance.toLocaleString()}コイン</div>
+          <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white flex items-center gap-1 xs:gap-2 order-2 xs:order-none text-center">🎯 ルーレット 🎯</h1>
+          <div className="text-white text-center xs:text-right order-3 xs:order-none">
+            <div className="text-xs xs:text-sm sm:text-lg font-bold">👤 {currentUser.username}</div>
+            <div className="text-xs xs:text-sm sm:text-xl font-bold text-yellow-300">💰 {currentUser.balance.toLocaleString()}コイン</div>
           </div>
         </div>
 
         {/* ルーレットホイール */}
-        <div className="bg-gradient-to-br from-amber-600 to-amber-800 rounded-full w-80 h-80 mx-auto mb-6 relative flex items-center justify-center shadow-2xl">
-          <div className={`bg-gradient-to-br from-amber-400 to-amber-600 rounded-full w-64 h-64 flex items-center justify-center ${
+        <div className="bg-gradient-to-br from-amber-600 to-amber-800 rounded-full w-48 h-48 xs:w-56 xs:h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 mx-auto mb-2 xs:mb-3 sm:mb-4 lg:mb-6 relative flex items-center justify-center shadow-2xl">
+          <div className={`bg-gradient-to-br from-amber-400 to-amber-600 rounded-full w-36 h-36 xs:w-42 xs:h-42 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 flex items-center justify-center ${
             spinning ? 'animate-spin' : ''
           }`}>
-            <div className="bg-white rounded-full w-32 h-32 flex items-center justify-center text-4xl font-bold">
+            <div className="bg-white rounded-full w-20 h-20 xs:w-24 xs:h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 flex items-center justify-center text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold">
               {result ? (
                 <span className={`${
                   result.color === 'red' ? 'text-red-600' : 
@@ -280,28 +280,28 @@ const RouletteGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
             </div>
           </div>
           {/* ボール */}
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rounded-full shadow-lg"></div>
+          <div className="absolute top-2 xs:top-3 sm:top-4 left-1/2 transform -translate-x-1/2 w-2 h-2 xs:w-3 xs:h-3 sm:w-4 sm:h-4 bg-white rounded-full shadow-lg"></div>
         </div>
 
         {/* ベットエリア */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 xs:gap-3 sm:gap-4 lg:gap-6 mb-2 xs:mb-3 sm:mb-4 lg:mb-6">
           {/* 数字ベット */}
-          <div className="bg-white/10 backdrop-blur-md rounded-lg p-4">
-            <h3 className="text-white font-bold mb-4 text-center">数字ベット (35倍)</h3>
-            <div className="grid grid-cols-6 gap-1">
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-2 xs:p-3 sm:p-4">
+            <h3 className="text-white font-bold mb-2 xs:mb-3 sm:mb-4 text-center text-sm xs:text-base sm:text-lg">数字ベット (35倍)</h3>
+            <div className="grid grid-cols-6 gap-0.5 xs:gap-1">
               {Array.from({ length: 37 }, (_, i) => i).map(number => (
                 <button
                   key={number}
                   onClick={() => placeBet('straight', number)}
                   disabled={spinning}
-                  className={`w-12 h-12 rounded text-white font-bold text-sm transition-all duration-300 ${
+                  className={`w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 rounded text-white font-bold text-xs xs:text-sm transition-all duration-300 ${
                     spinning ? 'cursor-not-allowed opacity-50' : 'hover:scale-105'
                   } ${
                     number === 0 ? 'bg-green-600 hover:bg-green-700' :
                     getNumberColor(number) === 'red' ? 'bg-red-600 hover:bg-red-700' :
                     'bg-gray-800 hover:bg-gray-700'
                   } ${
-                    bets[`straight_${number}`] ? 'ring-2 ring-yellow-400' : ''
+                    bets[`straight_${number}`] ? 'ring-1 xs:ring-2 ring-yellow-400' : ''
                   }`}
                 >
                   {number}
@@ -316,101 +316,101 @@ const RouletteGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
           </div>
 
           {/* 外側ベット */}
-          <div className="bg-white/10 backdrop-blur-md rounded-lg p-4">
-            <h3 className="text-white font-bold mb-4 text-center">外側ベット</h3>
-            <div className="space-y-2">
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-2 xs:p-3 sm:p-4">
+            <h3 className="text-white font-bold mb-2 xs:mb-3 sm:mb-4 text-center text-sm xs:text-base sm:text-lg">外側ベット</h3>
+            <div className="space-y-1 xs:space-y-2">
               {/* 色ベット */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1 xs:gap-2">
                 <button
                   onClick={() => placeBet('red')}
                   disabled={spinning}
-                  className={`bg-red-600 hover:bg-red-700 text-white py-3 rounded font-bold transition-all duration-300 ${
+                  className={`bg-red-600 hover:bg-red-700 text-white py-2 xs:py-3 rounded font-bold transition-all duration-300 text-xs xs:text-sm ${
                     spinning ? 'cursor-not-allowed opacity-50' : ''
-                  } ${bets.red ? 'ring-2 ring-yellow-400' : ''}`}
+                  } ${bets.red ? 'ring-1 xs:ring-2 ring-yellow-400' : ''}`}
                 >
                   赤 (2倍) {bets.red && `[${bets.red}]`}
                 </button>
                 <button
                   onClick={() => placeBet('black')}
                   disabled={spinning}
-                  className={`bg-gray-800 hover:bg-gray-700 text-white py-3 rounded font-bold transition-all duration-300 ${
+                  className={`bg-gray-800 hover:bg-gray-700 text-white py-2 xs:py-3 rounded font-bold transition-all duration-300 text-xs xs:text-sm ${
                     spinning ? 'cursor-not-allowed opacity-50' : ''
-                  } ${bets.black ? 'ring-2 ring-yellow-400' : ''}`}
+                  } ${bets.black ? 'ring-1 xs:ring-2 ring-yellow-400' : ''}`}
                 >
                   黒 (2倍) {bets.black && `[${bets.black}]`}
                 </button>
               </div>
 
               {/* 偶数/奇数 */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1 xs:gap-2">
                 <button
                   onClick={() => placeBet('even')}
                   disabled={spinning}
-                  className={`bg-blue-600 hover:bg-blue-700 text-white py-3 rounded font-bold transition-all duration-300 ${
+                  className={`bg-blue-600 hover:bg-blue-700 text-white py-2 xs:py-3 rounded font-bold transition-all duration-300 text-xs xs:text-sm ${
                     spinning ? 'cursor-not-allowed opacity-50' : ''
-                  } ${bets.even ? 'ring-2 ring-yellow-400' : ''}`}
+                  } ${bets.even ? 'ring-1 xs:ring-2 ring-yellow-400' : ''}`}
                 >
                   偶数 (2倍) {bets.even && `[${bets.even}]`}
                 </button>
                 <button
                   onClick={() => placeBet('odd')}
                   disabled={spinning}
-                  className={`bg-purple-600 hover:bg-purple-700 text-white py-3 rounded font-bold transition-all duration-300 ${
+                  className={`bg-purple-600 hover:bg-purple-700 text-white py-2 xs:py-3 rounded font-bold transition-all duration-300 text-xs xs:text-sm ${
                     spinning ? 'cursor-not-allowed opacity-50' : ''
-                  } ${bets.odd ? 'ring-2 ring-yellow-400' : ''}`}
+                  } ${bets.odd ? 'ring-1 xs:ring-2 ring-yellow-400' : ''}`}
                 >
                   奇数 (2倍) {bets.odd && `[${bets.odd}]`}
                 </button>
               </div>
 
               {/* ハイ/ロー */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1 xs:gap-2">
                 <button
                   onClick={() => placeBet('low')}
                   disabled={spinning}
-                  className={`bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded font-bold transition-all duration-300 ${
+                  className={`bg-indigo-600 hover:bg-indigo-700 text-white py-2 xs:py-3 rounded font-bold transition-all duration-300 text-xs xs:text-sm ${
                     spinning ? 'cursor-not-allowed opacity-50' : ''
-                  } ${bets.low ? 'ring-2 ring-yellow-400' : ''}`}
+                  } ${bets.low ? 'ring-1 xs:ring-2 ring-yellow-400' : ''}`}
                 >
                   1-18 (2倍) {bets.low && `[${bets.low}]`}
                 </button>
                 <button
                   onClick={() => placeBet('high')}
                   disabled={spinning}
-                  className={`bg-pink-600 hover:bg-pink-700 text-white py-3 rounded font-bold transition-all duration-300 ${
+                  className={`bg-pink-600 hover:bg-pink-700 text-white py-2 xs:py-3 rounded font-bold transition-all duration-300 text-xs xs:text-sm ${
                     spinning ? 'cursor-not-allowed opacity-50' : ''
-                  } ${bets.high ? 'ring-2 ring-yellow-400' : ''}`}
+                  } ${bets.high ? 'ring-1 xs:ring-2 ring-yellow-400' : ''}`}
                 >
                   19-36 (2倍) {bets.high && `[${bets.high}]`}
                 </button>
               </div>
 
               {/* ダズン */}
-              <div className="grid grid-cols-3 gap-1">
+              <div className="grid grid-cols-3 gap-0.5 xs:gap-1">
                 <button
                   onClick={() => placeBet('dozen1')}
                   disabled={spinning}
-                  className={`bg-orange-600 hover:bg-orange-700 text-white py-2 rounded text-sm font-bold transition-all duration-300 ${
+                  className={`bg-orange-600 hover:bg-orange-700 text-white py-1 xs:py-2 rounded text-xs font-bold transition-all duration-300 ${
                     spinning ? 'cursor-not-allowed opacity-50' : ''
-                  } ${bets.dozen1 ? 'ring-2 ring-yellow-400' : ''}`}
+                  } ${bets.dozen1 ? 'ring-1 xs:ring-2 ring-yellow-400' : ''}`}
                 >
                   1-12 (3倍) {bets.dozen1 && `[${bets.dozen1}]`}
                 </button>
                 <button
                   onClick={() => placeBet('dozen2')}
                   disabled={spinning}
-                  className={`bg-orange-600 hover:bg-orange-700 text-white py-2 rounded text-sm font-bold transition-all duration-300 ${
+                  className={`bg-orange-600 hover:bg-orange-700 text-white py-1 xs:py-2 rounded text-xs font-bold transition-all duration-300 ${
                     spinning ? 'cursor-not-allowed opacity-50' : ''
-                  } ${bets.dozen2 ? 'ring-2 ring-yellow-400' : ''}`}
+                  } ${bets.dozen2 ? 'ring-1 xs:ring-2 ring-yellow-400' : ''}`}
                 >
                   13-24 (3倍) {bets.dozen2 && `[${bets.dozen2}]`}
                 </button>
                 <button
                   onClick={() => placeBet('dozen3')}
                   disabled={spinning}
-                  className={`bg-orange-600 hover:bg-orange-700 text-white py-2 rounded text-sm font-bold transition-all duration-300 ${
+                  className={`bg-orange-600 hover:bg-orange-700 text-white py-1 xs:py-2 rounded text-xs font-bold transition-all duration-300 ${
                     spinning ? 'cursor-not-allowed opacity-50' : ''
-                  } ${bets.dozen3 ? 'ring-2 ring-yellow-400' : ''}`}
+                  } ${bets.dozen3 ? 'ring-1 xs:ring-2 ring-yellow-400' : ''}`}
                 >
                   25-36 (3倍) {bets.dozen3 && `[${bets.dozen3}]`}
                 </button>
@@ -420,15 +420,15 @@ const RouletteGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
         </div>
 
         {/* コントロールエリア */}
-        <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 mb-6">
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <div className="flex items-center space-x-2">
-              <label className="text-white font-medium">ベット額:</label>
+        <div className="bg-white/10 backdrop-blur-md rounded-lg p-2 xs:p-3 sm:p-4 mb-2 xs:mb-3 sm:mb-4 lg:mb-6">
+          <div className="flex flex-col xs:flex-row flex-wrap items-center justify-center gap-2 xs:gap-3 sm:gap-4">
+            <div className="flex flex-col xs:flex-row items-center gap-1 xs:gap-2">
+              <label className="text-white font-medium text-xs xs:text-sm sm:text-base">ベット額:</label>
               <select
                 value={selectedBetAmount}
                 onChange={(e) => setSelectedBetAmount(parseInt(e.target.value))}
                 disabled={spinning}
-                className="px-3 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
+                className="px-2 py-1 xs:px-3 xs:py-2 rounded-lg bg-white/20 border border-white/30 text-white text-xs xs:text-sm sm:text-base"
               >
                 <option value={5}>5コイン</option>
                 <option value={10}>10コイン</option>
@@ -438,14 +438,14 @@ const RouletteGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
               </select>
             </div>
 
-            <div className="text-white font-bold">
+            <div className="text-white font-bold text-xs xs:text-sm sm:text-base">
               総ベット: {totalBet.toLocaleString()}コイン
             </div>
 
             <button
               onClick={clearBets}
               disabled={spinning}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-bold transition-colors duration-300"
+              className="bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 xs:px-3 xs:py-2 sm:px-4 sm:py-2 rounded-lg font-bold transition-colors duration-300 text-xs xs:text-sm sm:text-base"
             >
               ベットクリア
             </button>
@@ -453,7 +453,7 @@ const RouletteGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
             <button
               onClick={spin}
               disabled={spinning || totalBet === 0}
-              className={`px-8 py-3 rounded-lg font-bold text-white transition-all duration-300 ${
+              className={`px-4 py-2 xs:px-6 xs:py-2 sm:px-8 sm:py-3 rounded-lg font-bold text-white transition-all duration-300 text-xs xs:text-sm sm:text-base ${
                 spinning || totalBet === 0
                   ? 'bg-gray-500 cursor-not-allowed'
                   : 'bg-green-600 hover:bg-green-700 hover:scale-105'
@@ -466,35 +466,35 @@ const RouletteGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
 
         {/* メッセージエリア */}
         {message && (
-          <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 mb-6">
-            <p className="text-white text-center text-lg font-bold">{message}</p>
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-2 xs:p-3 sm:p-4 mb-2 xs:mb-3 sm:mb-4 lg:mb-6">
+            <p className="text-white text-center text-sm xs:text-base sm:text-lg font-bold">{message}</p>
           </div>
         )}
 
         {/* ゲーム履歴 */}
-        <div className="bg-white/10 backdrop-blur-md rounded-lg p-4">
-          <h3 className="text-white font-bold mb-4 text-center">最近のゲーム</h3>
-          <div className="space-y-2">
+        <div className="bg-white/10 backdrop-blur-md rounded-lg p-2 xs:p-3 sm:p-4">
+          <h3 className="text-white font-bold mb-2 xs:mb-3 sm:mb-4 text-center text-sm xs:text-base sm:text-lg">最近のゲーム</h3>
+          <div className="space-y-1 xs:space-y-2">
             {gameHistory.length === 0 ? (
-              <p className="text-gray-300 text-center">まだゲームをプレイしていません</p>
+              <p className="text-gray-300 text-center text-xs xs:text-sm sm:text-base">まだゲームをプレイしていません</p>
             ) : (
               gameHistory.map((game, index) => (
-                <div key={index} className="bg-white/5 rounded p-3">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+                <div key={index} className="bg-white/5 rounded p-2 xs:p-3">
+                  <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center gap-2 xs:gap-4">
+                    <div className="flex items-center gap-2 xs:gap-4">
+                      <div className={`w-6 h-6 xs:w-8 xs:h-8 rounded-full flex items-center justify-center text-white font-bold text-xs xs:text-sm ${
                         game.result.color === 'red' ? 'bg-red-600' :
                         game.result.color === 'black' ? 'bg-gray-800' : 'bg-green-600'
                       }`}>
                         {game.result.number}
                       </div>
-                      <div className="text-white text-sm">
+                      <div className="text-white text-xs xs:text-sm">
                         <div>ベット: {game.totalBet}コイン</div>
                         <div>当選: {game.winningBets.length}件</div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className={`font-bold ${game.totalWin > 0 ? 'text-green-300' : 'text-red-300'}`}>
+                      <div className={`font-bold text-xs xs:text-sm ${game.totalWin > 0 ? 'text-green-300' : 'text-red-300'}`}>
                         {game.totalWin > 0 ? `+${game.totalWin}` : `-${game.totalBet}`}
                       </div>
                       <div className="text-xs text-gray-300">{game.timestamp}</div>
@@ -507,9 +507,9 @@ const RouletteGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
         </div>
 
         {/* ルール説明 */}
-        <div className="bg-white/5 backdrop-blur-md rounded-lg p-4 mt-6">
-          <h4 className="text-white font-bold mb-2">ゲームルール:</h4>
-          <p className="text-gray-300 text-sm">
+        <div className="bg-white/5 backdrop-blur-md rounded-lg p-2 xs:p-3 sm:p-4 mt-2 xs:mt-3 sm:mt-4 lg:mt-6">
+          <h4 className="text-white font-bold mb-1 xs:mb-2 text-xs xs:text-sm sm:text-base">ゲームルール:</h4>
+          <p className="text-gray-300 text-xs xs:text-sm">
             ヨーロピアンルーレット（0-36）。数字、色、偶数/奇数、ハイ/ローなど様々なベットが可能です。
             数字ベットは35倍、色・偶数奇数・ハイローは2倍、ダズンは3倍の配当です。
           </p>

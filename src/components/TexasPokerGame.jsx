@@ -570,7 +570,7 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
   const renderCard = (card, hidden = false) => {
     if (hidden) {
       return (
-        <div className="w-16 h-24 bg-blue-600 border-2 border-blue-800 rounded-lg flex items-center justify-center text-white font-bold">
+        <div className="w-8 h-12 xs:w-10 xs:h-14 sm:w-12 sm:h-16 md:w-14 md:h-20 lg:w-16 lg:h-24 bg-blue-600 border-2 border-blue-800 rounded-lg flex items-center justify-center text-white font-bold text-xs xs:text-sm sm:text-base">
           ?
         </div>
       );
@@ -578,9 +578,9 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     
     const isRed = card.suit === '♥' || card.suit === '♦';
     return (
-      <div className={`w-16 h-24 bg-white border-2 border-gray-300 rounded-lg flex flex-col items-center justify-center ${isRed ? 'text-red-600' : 'text-black'} font-bold shadow-md`}>
-        <div className="text-sm">{card.rank}</div>
-        <div className="text-lg">{card.suit}</div>
+      <div className={`w-8 h-12 xs:w-10 xs:h-14 sm:w-12 sm:h-16 md:w-14 md:h-20 lg:w-16 lg:h-24 bg-white border-2 border-gray-300 rounded-lg flex flex-col items-center justify-center ${isRed ? 'text-red-600' : 'text-black'} font-bold shadow-md`}>
+        <div className="text-xs xs:text-sm sm:text-base">{card.rank}</div>
+        <div className="text-sm xs:text-base sm:text-lg">{card.suit}</div>
       </div>
     );
   };
@@ -602,30 +602,30 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-800 to-green-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-800 to-green-900 p-1 xs:p-2 sm:p-4">
       <div className="max-w-6xl mx-auto">
         {/* ヘッダー */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col xs:flex-row justify-between items-center mb-2 xs:mb-4 sm:mb-6 gap-2 xs:gap-0">
           <button 
             onClick={() => onNavigateHome()}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 xs:px-3 xs:py-2 sm:px-4 sm:py-2 rounded-lg text-xs xs:text-sm sm:text-base order-1 xs:order-none"
           >
             ← ホームに戻る
           </button>
-          <h1 className="text-3xl font-bold text-white flex items-center">
-            🃏 テキサスホールデムポーカー
+          <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold text-white flex items-center gap-1 xs:gap-2 order-2 xs:order-none text-center">
+            🃏 テキサスポーカー
           </h1>
-          <div className="text-white text-right">
-            <div>ユーザー: {currentUser.username}</div>
-            <div>残高: {currentUser.balance}コイン</div>
+          <div className="text-white text-center xs:text-right order-3 xs:order-none">
+            <div className="text-xs xs:text-sm sm:text-base">ユーザー: {currentUser.username}</div>
+            <div className="text-xs xs:text-sm sm:text-base">残高: {currentUser.balance}コイン</div>
           </div>
         </div>
 
         {/* ルール説明ボタン */}
-        <div className="mb-4">
+        <div className="mb-2 xs:mb-3 sm:mb-4">
           <button 
             onClick={() => setShowRules(!showRules)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 xs:px-3 xs:py-2 sm:px-4 sm:py-2 rounded-lg text-xs xs:text-sm sm:text-base"
           >
             {showRules ? 'ルールを隠す' : 'ルールを表示'}
           </button>
@@ -633,17 +633,17 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
 
         {/* ルール説明 */}
         {showRules && (
-          <div className="bg-white p-6 rounded-lg mb-6">
-            <h3 className="text-xl font-bold mb-4">テキサスホールデムポーカーのルール</h3>
-            <div className="space-y-2 text-sm">
+          <div className="bg-white p-2 xs:p-3 sm:p-4 lg:p-6 rounded-lg mb-2 xs:mb-3 sm:mb-4 lg:mb-6">
+            <h3 className="text-base xs:text-lg sm:text-xl font-bold mb-2 xs:mb-3 sm:mb-4">テキサスポーカーのルール</h3>
+            <div className="space-y-1 xs:space-y-2 text-xs xs:text-sm">
               <p><strong>基本ルール:</strong></p>
-              <ul className="list-disc list-inside space-y-1 ml-4">
+              <ul className="list-disc list-inside space-y-0.5 xs:space-y-1 ml-2 xs:ml-4">
                 <li>各プレイヤーは2枚のホールカード（手札）を受け取ります</li>
                 <li>5枚のコミュニティカードが段階的に公開されます</li>
                 <li>ホールカード2枚とコミュニティカード5枚から最高の5枚を選んで役を作ります</li>
               </ul>
               <p><strong>ゲームの流れ:</strong></p>
-              <ul className="list-disc list-inside space-y-1 ml-4">
+              <ul className="list-disc list-inside space-y-0.5 xs:space-y-1 ml-2 xs:ml-4">
                 <li>プリフロップ: ホールカード2枚が配られた後のベッティング</li>
                 <li>フロップ: コミュニティカード3枚が公開された後のベッティング</li>
                 <li>ターン: 4枚目のコミュニティカードが公開された後のベッティング</li>
@@ -673,11 +673,11 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
         )}
 
         {/* ゲームエリア */}
-        <div className="bg-green-700 rounded-lg p-6 mb-6">
+        <div className="bg-green-700 rounded-lg p-2 xs:p-3 sm:p-4 lg:p-6 mb-2 xs:mb-3 sm:mb-4 lg:mb-6">
           {/* コンピュータのカード */}
-          <div className="text-center mb-6">
-            <h3 className="text-white text-lg mb-2">コンピュータ</h3>
-            <div className="flex justify-center gap-2">
+          <div className="text-center mb-4 xs:mb-6">
+            <h3 className="text-white text-sm xs:text-base sm:text-lg mb-1 xs:mb-2">コンピュータ</h3>
+            <div className="flex justify-center gap-1 xs:gap-2">
               {computerCards.map((card, index) => (
                 <div key={index}>
                   {renderCard(card, gameState !== 'showdown')}
@@ -685,14 +685,14 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
               ))}
             </div>
             {computerAction && (
-              <div className="text-yellow-300 mt-2">アクション: {computerAction}</div>
+              <div className="text-yellow-300 mt-1 xs:mt-2 text-xs xs:text-sm">アクション: {computerAction}</div>
             )}
           </div>
 
           {/* コミュニティカード */}
-          <div className="text-center mb-6">
-            <h3 className="text-white text-lg mb-2">コミュニティカード</h3>
-            <div className="flex justify-center gap-2">
+          <div className="text-center mb-4 xs:mb-6">
+            <h3 className="text-white text-sm xs:text-base sm:text-lg mb-1 xs:mb-2">コミュニティカード</h3>
+            <div className="flex justify-center gap-1 xs:gap-2 overflow-x-auto">
               {communityCards.map((card, index) => (
                 <div key={index}>
                   {renderCard(card)}
@@ -700,16 +700,16 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
               ))}
               {/* 空のスロット */}
               {Array.from({ length: 5 - communityCards.length }).map((_, index) => (
-                <div key={`empty-${index}`} className="w-16 h-24 border-2 border-dashed border-gray-400 rounded-lg"></div>
+                <div key={`empty-${index}`} className="w-8 h-12 xs:w-10 xs:h-14 sm:w-12 sm:h-16 md:w-14 md:h-20 lg:w-16 lg:h-24 border-2 border-dashed border-gray-400 rounded-lg flex-shrink-0"></div>
               ))}
             </div>
           </div>
 
           {/* ポット情報 */}
-          <div className="text-center mb-6">
-            <div className="text-white text-xl">ポット: {pot}コイン</div>
+          <div className="text-center mb-4 xs:mb-6">
+            <div className="text-white text-base xs:text-lg sm:text-xl">ポット: {pot}コイン</div>
             {gameState !== 'betting' && (
-              <div className="text-yellow-300">
+              <div className="text-yellow-300 text-xs xs:text-sm sm:text-base">
                 あなたのベット: {playerBet}コイン | コンピュータのベット: {computerBet}コイン
               </div>
             )}
@@ -717,8 +717,8 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
 
           {/* プレイヤーのカード */}
           <div className="text-center">
-            <h3 className="text-white text-lg mb-2">あなたの手札</h3>
-            <div className="flex justify-center gap-2">
+            <h3 className="text-white text-sm xs:text-base sm:text-lg mb-1 xs:mb-2">あなたの手札</h3>
+            <div className="flex justify-center gap-1 xs:gap-2">
               {playerCards.map((card, index) => (
                 <div key={index}>
                   {renderCard(card)}
@@ -726,24 +726,24 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
               ))}
             </div>
             {playerAction && (
-              <div className="text-yellow-300 mt-2">あなたのアクション: {playerAction}</div>
+              <div className="text-yellow-300 mt-1 xs:mt-2 text-xs xs:text-sm">あなたのアクション: {playerAction}</div>
             )}
           </div>
         </div>
 
         {/* ゲームコントロール */}
-        <div className="bg-white rounded-lg p-6 mb-6">
+        <div className="bg-white rounded-lg p-2 xs:p-3 sm:p-4 lg:p-6 mb-2 xs:mb-3 sm:mb-4 lg:mb-6">
           {gameState === 'betting' && (
             <div className="text-center">
-              <h3 className="text-xl font-bold mb-4">新しいゲームを開始</h3>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">ベット額を選択:</label>
-                <div className="flex justify-center gap-2 flex-wrap">
+              <h3 className="text-base xs:text-lg sm:text-xl font-bold mb-2 xs:mb-3 sm:mb-4">新しいゲームを開始</h3>
+              <div className="mb-2 xs:mb-3 sm:mb-4">
+                <label className="block text-xs xs:text-sm font-medium mb-1 xs:mb-2">ベット額を選択:</label>
+                <div className="flex justify-center gap-1 xs:gap-2 flex-wrap">
                   {[10, 25, 50, 100, 250].map(amount => (
                     <button
                       key={amount}
                       onClick={() => setBetAmount(amount)}
-                      className={`px-4 py-2 rounded-lg ${betAmount === amount ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                      className={`px-2 py-1 xs:px-3 xs:py-2 sm:px-4 sm:py-2 rounded-lg text-xs xs:text-sm sm:text-base ${betAmount === amount ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
                     >
                       {amount}
                     </button>
@@ -753,7 +753,7 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
               <button 
                 onClick={startNewGame}
                 disabled={currentUser.balance < betAmount}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-8 py-3 rounded-lg text-lg font-bold"
+                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 xs:px-6 xs:py-2 sm:px-8 sm:py-3 rounded-lg text-sm xs:text-base sm:text-lg font-bold"
               >
                 ゲーム開始 ({betAmount}コイン)
               </button>
@@ -762,24 +762,24 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
 
           {gameState !== 'betting' && gameState !== 'showdown' && (
             <div className="text-center">
-              <h3 className="text-xl font-bold mb-4">アクションを選択してください</h3>
-              <div className="flex justify-center gap-4">
+              <h3 className="text-base xs:text-lg sm:text-xl font-bold mb-2 xs:mb-3 sm:mb-4">アクションを選択してください</h3>
+              <div className="flex flex-col xs:flex-row justify-center gap-2 xs:gap-3 sm:gap-4">
                 <button 
                   onClick={() => handlePlayerAction('fold')}
-                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-bold"
+                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 xs:px-4 xs:py-2 sm:px-6 sm:py-3 rounded-lg font-bold text-xs xs:text-sm sm:text-base"
                 >
                   フォールド
                 </button>
                 <button 
                   onClick={() => handlePlayerAction('call')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 xs:px-4 xs:py-2 sm:px-6 sm:py-3 rounded-lg font-bold text-xs xs:text-sm sm:text-base"
                 >
                   コール
                 </button>
                 <button 
                   onClick={() => handlePlayerAction('raise')}
                   disabled={currentUser.balance < betAmount}
-                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-bold"
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-2 xs:px-4 xs:py-2 sm:px-6 sm:py-3 rounded-lg font-bold text-xs xs:text-sm sm:text-base"
                 >
                   レイズ (+{betAmount})
                 </button>
@@ -788,23 +788,23 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
           )}
 
           {message && (
-            <div className="mt-4 p-4 bg-blue-100 border border-blue-300 rounded-lg text-center">
-              <p className="text-blue-800 font-medium">{message}</p>
+            <div className="mt-2 xs:mt-3 sm:mt-4 p-2 xs:p-3 sm:p-4 bg-blue-100 border border-blue-300 rounded-lg text-center">
+              <p className="text-blue-800 font-medium text-xs xs:text-sm sm:text-base">{message}</p>
             </div>
           )}
         </div>
 
         {/* ゲーム履歴 */}
         {gameHistory.length > 0 && (
-          <div className="bg-white rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">ゲーム履歴</h3>
-            <div className="space-y-2">
+          <div className="bg-white rounded-lg p-2 xs:p-3 sm:p-4 lg:p-6">
+            <h3 className="text-base xs:text-lg sm:text-xl font-bold mb-2 xs:mb-3 sm:mb-4">ゲーム履歴</h3>
+            <div className="space-y-1 xs:space-y-2">
               {gameHistory.map((entry, index) => (
-                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                  <span>{entry.timestamp}</span>
-                  <span>{entry.action}</span>
-                  <span>勝者: {entry.winner}</span>
-                  <span className={entry.profit >= 0 ? 'text-green-600' : 'text-red-600'}>
+                <div key={index} className="flex flex-col xs:flex-row justify-between items-start xs:items-center p-2 bg-gray-50 rounded gap-1 xs:gap-2">
+                  <span className="text-xs xs:text-sm">{entry.timestamp}</span>
+                  <span className="text-xs xs:text-sm">{entry.action}</span>
+                  <span className="text-xs xs:text-sm">勝者: {entry.winner}</span>
+                  <span className={`text-xs xs:text-sm ${entry.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {entry.profit >= 0 ? '+' : ''}{entry.profit}コイン
                   </span>
                 </div>
