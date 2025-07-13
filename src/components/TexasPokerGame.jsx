@@ -216,18 +216,91 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     return bestHand;
   };
 
-  const getComputerAction = () => {
-    const handStrength = evaluateComputerHandStrength();
-    const potOdds = pot > 0 ? betAmount / pot : 0;
+  const getComputerActionForRaise = () => {
+    // レイズに対する特別な判断ロジック
+    const handInfo = evaluateComputerHandStrength();
+    const currentBetSize = Math.max(playerBet, computerBet);
+    const initialBet = betAmount; // 初期掛金
+    const raiseFactor = currentBetSize / initialBet; // 現在のベット倍率
     
-    if (handStrength >= 0.8) {
-      return Math.random() < 0.8 ? 'raise' : 'call';
-    } else if (handStrength >= 0.6) {
-      return Math.random() < 0.6 ? 'call' : 'fold';
-    } else if (handStrength >= 0.4) {
-      return Math.random() < 0.4 ? 'call' : 'fold';
-    } else {
-      return Math.random() < 0.2 ? 'call' : 'fold';
+    console.log(`Computer hand evaluation: rank=${handInfo.rank}, type=${handInfo.type}, raiseFactor=${raiseFactor}`);
+    
+    // レイズに対する判断
+    if (handInfo.rank >= 3) { // スリーカード以上
+      console.log('Strong hand (3+ of a kind) - never fold');
+      return Math.random() < 0.3 ? 'raise' : 'call'; // 絶対降りない、むしろ反撃も
+    } else if (handInfo.rank === 2) { // ツーペア
+      if (raiseFactor <= 10) {
+        console.log('Two pair within 10x limit - staying in');
+        return Math.random() < 0.8 ? 'call' : 'raise'; // 10倍以内なら積極的にコール
+      } else {
+        console.log('Two pair but raise too high - considering fold');
+        return Math.random() < 0.4 ? 'call' : 'fold';
+      }
+    } else if (handInfo.rank === 1) { // ワンペア
+      if (raiseFactor <= 5) {
+        console.log('One pair within 5x limit - staying in');
+        return Math.random() < 0.7 ? 'call' : 'fold'; // 5倍以内なら基本的にコール
+      } else {
+        console.log('One pair but raise too high - likely fold');
+        return Math.random() < 0.15 ? 'call' : 'fold'; // 5倍超えたらほぼ降りる
+      }
+    } else { // ハイカードのみ
+      if (handInfo.highCard >= 13) { // K以上
+        if (raiseFactor <= 2) {
+          console.log('High card (K+) with small raise - might call');
+          return Math.random() < 0.4 ? 'call' : 'fold';
+        } else {
+          console.log('High card (K+) but big raise - fold');
+          return 'fold';
+        }
+      } else {
+        console.log('Weak hand - fold to raise');
+        return 'fold'; // 弱いハンドはレイズに対して即フォールド
+      }
+    }
+  };
+
+  const getComputerAction = (isResponseToRaise = false) => {
+    if (isResponseToRaise) {
+      return getComputerActionForRaise();
+    }
+    
+    const handInfo = evaluateComputerHandStrength();
+    const currentBetSize = Math.max(playerBet, computerBet);
+    const initialBet = betAmount; // 初期掛金
+    const raiseFactor = currentBetSize / initialBet; // 現在のベット倍率
+    
+    // ハンドの強さに応じた判断
+    if (handInfo.rank >= 3) { // スリーカード以上
+      return Math.random() < 0.8 ? 'raise' : 'call'; // 絶対降りない
+    } else if (handInfo.rank === 2) { // ツーペア
+      if (raiseFactor <= 10) { // 10倍以内なら降りない
+        return Math.random() < 0.6 ? 'call' : 'raise';
+      } else {
+        return Math.random() < 0.3 ? 'call' : 'fold'; // 10倍超えたら慎重に
+      }
+    } else if (handInfo.rank === 1) { // ワンペア
+      if (raiseFactor <= 5) { // 5倍以内なら降りない
+        return Math.random() < 0.7 ? 'call' : 'raise';
+      } else {
+        return Math.random() < 0.2 ? 'call' : 'fold'; // 5倍超えたらほぼ降りる
+      }
+    } else { // ハイカードのみ
+      if (handInfo.highCard >= 12) { // Q以上のハイカード
+        if (raiseFactor <= 2) {
+          return Math.random() < 0.5 ? 'call' : 'fold';
+        } else {
+          return Math.random() < 0.2 ? 'call' : 'fold';
+        }
+      } else {
+        // 弱いハンド
+        if (raiseFactor <= 1.5) {
+          return Math.random() < 0.3 ? 'call' : 'fold';
+        } else {
+          return 'fold';
+        }
+      }
     }
   };
 
@@ -237,16 +310,39 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       const card1 = computerCards[0];
       const card2 = computerCards[1];
       
-      if (card1.value === card2.value) return 0.9; // ポケットペア
-      if (card1.suit === card2.suit) return 0.7; // スーテッド
-      if (Math.abs(card1.value - card2.value) <= 4) return 0.6; // コネクター
-      if (card1.value >= 11 || card2.value >= 11) return 0.5; // ハイカード
-      return 0.3;
+      if (card1.value === card2.value) {
+        // ポケットペア - ペアの強さに応じて評価
+        return { rank: 1, highCard: card1.value, type: 'pocket_pair' };
+      }
+      
+      // ハイカードのみ
+      const highCard = Math.max(card1.value, card2.value);
+      return { rank: 0, highCard: highCard, type: 'high_card' };
     } else {
-      // コミュニティカードがある場合の評価
+      // コミュニティカードがある場合の実際のハンド評価
       const bestHand = getBestHand(computerCards, communityCards);
-      return Math.min(0.9, bestHand.rank / 9 + 0.1);
+      return {
+        rank: bestHand.rank,
+        highCard: bestHand.highCard,
+        type: getHandTypeName(bestHand.rank)
+      };
     }
+  };
+
+  const getHandTypeName = (rank) => {
+    const handTypes = [
+      'high_card',      // 0
+      'one_pair',       // 1
+      'two_pair',       // 2
+      'three_of_kind',  // 3
+      'straight',       // 4
+      'flush',          // 5
+      'full_house',     // 6
+      'four_of_kind',   // 7
+      'straight_flush', // 8
+      'royal_flush'     // 9
+    ];
+    return handTypes[rank] || 'unknown';
   };
 
   const handlePlayerAction = (action) => {
@@ -260,8 +356,8 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     }
     
     if (action === 'call') {
-      // コンピュータのアクションを決定
-      const computerActionType = getComputerAction();
+      // コンピュータのアクションを決定（通常のロジック使用）
+      const computerActionType = getComputerAction(false);
       setComputerAction(computerActionType);
       
       if (computerActionType === 'fold') {
@@ -292,8 +388,8 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       setUser(updatedUser);
       onBalanceUpdate(updatedUser.balance);
       
-      // コンピュータのアクションを決定
-      const computerActionType = getComputerAction();
+      // レイズに対するコンピュータのアクションを決定（レイズ専用ロジック使用）
+      const computerActionType = getComputerAction(true); // レイズに対する判断
       setComputerAction(computerActionType);
       
       if (computerActionType === 'fold') {
@@ -305,9 +401,16 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
         addToHistory('レイズ', 'あなた', winAmount - betAmount - raiseAmount);
         setGameState('betting');
         return;
-      } else {
+      } else if (computerActionType === 'call') {
         setPot(prev => prev + raiseAmount);
         setComputerBet(prev => prev + raiseAmount);
+        setMessage(`コンピュータがコールしました`);
+        proceedToNextPhase();
+      } else if (computerActionType === 'raise') {
+        // コンピュータが再レイズ
+        setPot(prev => prev + raiseAmount * 2);
+        setComputerBet(prev => prev + raiseAmount * 2);
+        setMessage(`コンピュータがレイズしました！`);
         proceedToNextPhase();
       }
     }
