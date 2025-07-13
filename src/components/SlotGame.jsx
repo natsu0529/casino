@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
   // スロットシンボル（期待値1.1調整版）
@@ -37,11 +37,19 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
   const [autoSpin, setAutoSpin] = useState(false)
   const [autoSpinCount, setAutoSpinCount] = useState(0)
   const [maxAutoSpins, setMaxAutoSpins] = useState(10)
+  
+  // 最新の残高を追跡するref
+  const currentBalanceRef = useRef(currentUser.balance)
+  
+  // 残高の更新を追跡
+  useEffect(() => {
+    currentBalanceRef.current = currentUser.balance
+  }, [currentUser.balance])
 
   // 連続スピン制御関数
   const startAutoSpin = (count) => {
     if (spinning || autoSpin) return
-    if (currentUser.balance < betAmount) {
+    if (currentBalanceRef.current < betAmount) {
       setMessage('残高が不足しています。')
       return
     }
@@ -128,7 +136,7 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
       return
     }
     
-    if (betAmount > currentUser.balance) {
+    if (betAmount > currentBalanceRef.current) {
       setMessage('残高が不足しています。')
       setAutoSpin(false)
       setAutoSpinCount(0)
@@ -140,7 +148,9 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     setLastWin(0)
 
     // 残高から賭け金を引く
-    onUpdateBalance(currentUser.balance - betAmount)
+    const newBalance = currentBalanceRef.current - betAmount
+    onUpdateBalance(newBalance)
+    currentBalanceRef.current = newBalance
 
     // アニメーション効果のためのランダム回転
     const spinDuration = autoSpin ? 1000 : 2000 + Math.random() * 1000 // 連続スピン時は短縮
@@ -185,6 +195,8 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     if (multiplier > 0) {
       setLastWin(winAmount)
       onUpdateBalance(currentUser.balance + winAmount)
+      // 内部残高も更新
+      currentBalanceRef.current = currentUser.balance + winAmount
       
       if (!autoSpin) {
         // 連続スピン中でない場合のみメッセージを表示
@@ -207,19 +219,19 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
       const newCount = autoSpinCount + 1
       setAutoSpinCount(newCount)
       
-      // 連続スピン中のメッセージを更新
-      setMessage(`連続スピン中... (${newCount}/${maxAutoSpins})`)
-      
       if (newCount >= maxAutoSpins) {
         // 連続スピン終了
         setAutoSpin(false)
         setAutoSpinCount(0)
         setMessage(`連続スピン完了！ ${maxAutoSpins}回実行しました。`)
       } else {
+        // 連続スピン中のメッセージを更新
+        setMessage(`連続スピン中... (${newCount}/${maxAutoSpins})`)
+        
         // 次のスピンを実行
         setTimeout(() => {
-          // 最新の残高を確認
-          if (betAmount <= currentUser.balance) {
+          // refから最新の残高を確認
+          if (betAmount <= currentBalanceRef.current && autoSpin) { // autoSpinの状態も再チェック
             spin()
           } else {
             setAutoSpin(false)
