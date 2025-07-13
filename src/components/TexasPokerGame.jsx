@@ -78,6 +78,8 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     const updatedUser = { ...user, balance: user.balance - betAmount };
     setUser(updatedUser);
     onBalanceUpdate(updatedUser.balance);
+    
+    console.log(`New game started - Initial bet: ${betAmount}, Pot: ${betAmount * 2}, Player balance: ${updatedUser.balance}`);
   };
 
   const dealCommunityCards = (count) => {
@@ -349,9 +351,14 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     setPlayerAction(action);
     
     if (action === 'fold') {
+      const loss = -playerBet;
       setMessage('あなたがフォールドしました。コンピュータの勝利です。');
-      addToHistory('フォールド', 'コンピュータ', -betAmount);
+      addToHistory('フォールド', 'コンピュータ', loss);
       setGameState('betting');
+      // ベット額をリセット
+      setPlayerBet(0);
+      setComputerBet(0);
+      setPot(0);
       return;
     }
     
@@ -365,9 +372,14 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
         const updatedUser = { ...user, balance: user.balance + winAmount };
         setUser(updatedUser);
         onBalanceUpdate(updatedUser.balance);
-        setMessage(`コンピュータがフォールドしました。あなたの勝利です！ ${winAmount}コイン獲得`);
-        addToHistory('コール', 'あなた', winAmount - betAmount);
+        const profit = winAmount - playerBet;
+        setMessage(`コンピュータがフォールドしました。あなたの勝利です！ ${winAmount}コイン獲得（利益: ${profit}コイン）`);
+        addToHistory('コール', 'あなた', profit);
         setGameState('betting');
+        // ベット額をリセット
+        setPlayerBet(0);
+        setComputerBet(0);
+        setPot(0);
         return;
       }
       
@@ -397,9 +409,15 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
         const finalUser = { ...updatedUser, balance: updatedUser.balance + winAmount };
         setUser(finalUser);
         onBalanceUpdate(finalUser.balance);
-        setMessage(`コンピュータがフォールドしました。あなたの勝利です！ ${winAmount}コイン獲得`);
-        addToHistory('レイズ', 'あなた', winAmount - betAmount - raiseAmount);
+        const totalPlayerBet = playerBet + raiseAmount;
+        const profit = winAmount - totalPlayerBet;
+        setMessage(`コンピュータがフォールドしました。あなたの勝利です！ ${winAmount}コイン獲得（利益: ${profit}コイン）`);
+        addToHistory('レイズ', 'あなた', profit);
         setGameState('betting');
+        // ベット額をリセット
+        setPlayerBet(0);
+        setComputerBet(0);
+        setPot(0);
         return;
       } else if (computerActionType === 'call') {
         setPot(prev => prev + raiseAmount);
@@ -442,31 +460,45 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     
     let winner = '';
     let winAmount = 0;
+    let profit = 0;
     
     if (playerBestHand.rank > computerBestHand.rank || 
         (playerBestHand.rank === computerBestHand.rank && playerBestHand.highCard > computerBestHand.highCard)) {
+      // プレイヤーの勝利
       winner = 'あなた';
-      winAmount = pot;
+      winAmount = pot; // ポット全体を獲得
+      profit = winAmount - playerBet; // 実際の利益
       const updatedUser = { ...user, balance: user.balance + winAmount };
       setUser(updatedUser);
       onBalanceUpdate(updatedUser.balance);
+      console.log(`Player wins! Pot: ${pot}, Player bet: ${playerBet}, Win amount: ${winAmount}, Profit: ${profit}`);
     } else if (computerBestHand.rank > playerBestHand.rank || 
                (computerBestHand.rank === playerBestHand.rank && computerBestHand.highCard > playerBestHand.highCard)) {
+      // コンピュータの勝利
       winner = 'コンピュータ';
       winAmount = 0;
+      profit = -playerBet; // プレイヤーの損失
+      console.log(`Computer wins! Player bet: ${playerBet}, Loss: ${profit}`);
     } else {
+      // 引き分け
       winner = '引き分け';
-      winAmount = pot / 2;
+      winAmount = playerBet; // プレイヤーのベット分だけ戻る
+      profit = 0; // 損益なし
       const updatedUser = { ...user, balance: user.balance + winAmount };
       setUser(updatedUser);
       onBalanceUpdate(updatedUser.balance);
+      console.log(`Draw! Player gets back: ${winAmount}`);
     }
     
     setMessage(`ショーダウン！ ${winner}の勝利！ あなた: ${playerBestHand.description}, コンピュータ: ${computerBestHand.description}`);
-    addToHistory('ショーダウン', winner, winAmount - playerBet);
+    addToHistory('ショーダウン', winner, profit);
     
     setTimeout(() => {
       setGameState('betting');
+      // ゲーム終了時にベット額をリセット
+      setPlayerBet(0);
+      setComputerBet(0);
+      setPot(0);
     }, 3000);
   };
 
