@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react'
 
 const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }) => {
-  // 高級シンボル（期待値1.0調整版）
+  // 高級シンボル（プレイヤー有利版 RTP119.4%）
   const symbols = [
-    { symbol: '💸', name: 'キャッシュ', value: 50, weight: 5 },       // 高価値（100→50に減額）
-    { symbol: '💎', name: 'ダイヤモンド', value: 25, weight: 8 },     // 高価値（50→25に減額）
-    { symbol: '👑', name: 'クラウン', value: 15, weight: 12 },        // 高価値（30→15に減額）
-    { symbol: '🏆', name: 'トロフィー', value: 10, weight: 15 },      // 中高価値（20→10に減額）
-    { symbol: '⭐', name: 'ゴールドスター', value: 8, weight: 20 },   // 中価値（15→8に減額）
-    { symbol: '🎰', name: 'ラッキー7', value: 5, weight: 25 },        // 中価値（10→5に減額）
-    { symbol: '🔔', name: 'ゴールドベル', value: 4, weight: 30 },     // 中価値（8→4に減額）
-    { symbol: '🍀', name: 'ラッキークローバー', value: 2, weight: 35 }, // 低価値（5→2に減額）
+    { symbol: '', name: 'ダイヤモンド', value: 12, weight: 8 },     // 12倍（25→12）
+    { symbol: '�', name: 'ファイア', value: 10, weight: 10 },        // 10倍（新規）
+    { symbol: '⭐', name: 'ゴールドスター', value: 8, weight: 12 },   // 8倍（8→8）
+    { symbol: '�', name: 'チェリー', value: 6, weight: 15 },         // 6倍（新規）
+    { symbol: '🍋', name: 'レモン', value: 4, weight: 20 },           // 4倍（新規）
+    { symbol: '�', name: 'オレンジ', value: 3, weight: 25 },         // 3倍（新規）
   ]
 
   // ゲーム状態
@@ -57,7 +55,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     return { totalMultiplier, winningLines }
   }
 
-  // ライン勝利計算（厳格版）
+  // ライン勝利計算（プレイヤー有利版）
   const calculateLineWin = (lineSymbols) => {
     // デバッグ用ログ
     console.log('Line symbols:', lineSymbols.map(i => symbols[i].symbol), 'Indexes:', lineSymbols)
@@ -78,26 +76,19 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
 
     console.log(`First symbol: ${symbols[firstSymbol].symbol}, Consecutive: ${consecutiveCount}`)
 
-    // キャッシュシンボル（💸）の特別ルール：2つ以上連続で勝利（調整版）
-    if (firstSymbol === 0 && consecutiveCount >= 2) { // キャッシュは0番目
-      const winAmount = symbols[0].value * consecutiveCount * 1 // 倍率を2→1に減額
-      console.log(`Cash special rule win: ${winAmount}`)
-      return winAmount
-    }
-
-    // 一般シンボル：3つ以上連続している場合のみ勝利（調整版）
+    // 3つ以上連続している場合のみ勝利（プレイヤー有利版）
     if (consecutiveCount >= 3) {
       const symbol = symbols[firstSymbol]
       const baseMultiplier = symbol.value
       
-      // 連続数に応じて倍率アップ（大幅減額）
+      // 連続数に応じて倍率アップ（適度な倍率）
       let countMultiplier = 1
-      if (consecutiveCount === 5) countMultiplier = 3      // 10→3に減額
-      else if (consecutiveCount === 4) countMultiplier = 2 // 5→2に減額
-      else if (consecutiveCount === 3) countMultiplier = 1 // 2→1に減額
+      if (consecutiveCount === 5) countMultiplier = 5      // 5つ揃い：5倍
+      else if (consecutiveCount === 4) countMultiplier = 3 // 4つ揃い：3倍
+      else if (consecutiveCount === 3) countMultiplier = 1 // 3つ揃い：1倍
       
       const winAmount = baseMultiplier * countMultiplier
-      console.log(`Normal win: ${symbol.symbol} x${consecutiveCount} = ${winAmount}`)
+      console.log(`Win: ${symbol.symbol} x${consecutiveCount} = ${winAmount}`)
       return winAmount
     }
 

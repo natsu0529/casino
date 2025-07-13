@@ -47,48 +47,48 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     console.log('Symbols:', symbol1.symbol, symbol2.symbol, symbol3.symbol)
     console.log('Symbol names:', symbol1.name, symbol2.name, symbol3.name)
 
-    // 3つ同じシンボルのみ当たり（調整版）
+    // 3つ同じシンボルのみ当たり（プレイヤー有利版 RTP125%）
     if (reel1 === reel2 && reel2 === reel3) {
       console.log('3つ揃い判定: 成功')
       switch (symbol1.name) {
         case 'ラッキーセブン': 
-          console.log('ラッキーセブン3つ: 50倍')
-          return 50  // 7が3つ揃い（77→50に減額）
+          console.log('ラッキーセブン3つ: 100倍')
+          return 100  // 7が3つ揃い（50→100倍）
         case 'ダイヤ': 
-          console.log('ダイヤ3つ: 15倍')
-          return 15         // ダイヤ3つ（20→15に減額）
+          console.log('ダイヤ3つ: 50倍')
+          return 50         // ダイヤ3つ（15→50倍）
         case 'スター': 
-          console.log('スター3つ: 10倍')
-          return 10         // スター3つ（15→10に減額）
+          console.log('スター3つ: 25倍')
+          return 25         // スター3つ（10→25倍）
         case 'ベル': 
-          console.log('ベル3つ: 8倍')
-          return 8            // ベル3つ（10→8に減額）
+          console.log('ベル3つ: 20倍')
+          return 20            // ベル3つ（8→20倍）
         case 'ブドウ': 
-          console.log('ブドウ3つ: 6倍')
-          return 6          // ブドウ3つ（8→6に減額）
+          console.log('ブドウ3つ: 10倍')
+          return 10          // ブドウ3つ（6→10倍）
         case 'オレンジ': 
-          console.log('オレンジ3つ: 4倍')
-          return 4        // オレンジ3つ（6→4に減額）
+          console.log('オレンジ3つ: 6倍')
+          return 6        // オレンジ3つ（4→6倍）
         case 'レモン': 
-          console.log('レモン3つ: 3倍')
-          return 3          // レモン3つ（4→3に減額）
+          console.log('レモン3つ: 10倍')
+          return 10          // レモン3つ（3→10倍）
         case 'チェリー': 
-          console.log('チェリー3つ: 2倍')
-          return 2        // チェリー3つ（2→2のまま）
+          console.log('チェリー3つ: 20倍')
+          return 20        // チェリー3つ（2→20倍）
         default: 
           console.log('不明なシンボル: 0倍')
           return 0
       }
     }
 
-    // チェリーの特別ルール（大幅削減）
+    // チェリーの特別ルール（大幅強化）
     if (reel1 === 0) { // チェリーは0番目
       if (reel2 === 0) { // 左2つがチェリー
-        console.log('チェリー特別ルール: 左2つチェリー 2倍')
-        return 2 // 4→2に減額
+        console.log('チェリー特別ルール: 左2つチェリー 5倍')
+        return 5 // 2→5倍
       } else { // 左1つだけチェリー
-        console.log('チェリー特別ルール: 左1つチェリー 1倍')
-        return 1 // 2→1に減額
+        console.log('チェリー特別ルール: 左1つチェリー 2倍')
+        return 2 // 1→2倍
       }
     }
 
