@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
 export const useProfile = (userId) => {
@@ -205,7 +205,7 @@ export const useProfile = (userId) => {
   }
 
   // 掲示板メッセージ取得関数
-  const getMessages = async (limit = 10) => {
+  const getMessages = useCallback(async (limit = 10) => {
     try {
       const { data, error } = await supabase
         .from('message_board')
@@ -237,10 +237,10 @@ export const useProfile = (userId) => {
       console.error('Error in getMessages:', error)
       return []
     }
-  }
+  }, [])
 
   // 掲示板メッセージ投稿関数
-  const postMessage = async (content) => {
+  const postMessage = useCallback(async (content) => {
     try {
       if (!userId) {
         throw new Error('User not authenticated')
@@ -266,7 +266,7 @@ export const useProfile = (userId) => {
       console.error('Error in postMessage:', error)
       throw error
     }
-  }
+  }, [userId])
 
   return {
     profile,
