@@ -237,37 +237,37 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-900 via-amber-900 to-orange-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-900 via-amber-900 to-orange-900 p-2 xs:p-4">
       <div className="max-w-6xl mx-auto">
         {/* ヘッダー */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col xs:flex-row justify-between items-center mb-4 xs:mb-6 gap-2 xs:gap-0">
           <button
             onClick={() => onNavigateHome()}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-300"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 xs:px-4 rounded-lg transition-colors duration-300 text-sm xs:text-base"
           >
             ← ホームに戻る
           </button>
-          <h1 className="text-4xl font-bold text-yellow-300">💸 高オッズスロット 💸</h1>
-          <div className="text-white text-right">
-            <div className="text-lg font-bold">👤 {currentUser.username}</div>
-            <div className="text-yellow-300 font-bold">💰 {currentUser.balance.toLocaleString()}コイン</div>
+          <h1 className="text-2xl xs:text-3xl sm:text-4xl font-bold text-yellow-300 text-center">💸 高オッズスロット 💸</h1>
+          <div className="text-white text-center xs:text-right">
+            <div className="text-sm xs:text-lg font-bold">👤 {currentUser.username}</div>
+            <div className="text-yellow-300 font-bold text-sm xs:text-base">💰 {currentUser.balance.toLocaleString()}コイン</div>
           </div>
         </div>
 
         {/* ボーナス情報 */}
         {bonusRound && (
-          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-4 mb-6 text-center">
-            <h2 className="text-2xl font-bold text-white">🎰 ボーナスラウンド 🎰</h2>
-            <p className="text-white">フリースピン残り: {freeSpins}回</p>
+          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-3 xs:p-4 mb-4 xs:mb-6 text-center">
+            <h2 className="text-lg xs:text-2xl font-bold text-white">🎰 ボーナスラウンド 🎰</h2>
+            <p className="text-white text-sm xs:text-base">フリースピン残り: {freeSpins}回</p>
           </div>
         )}
 
         {/* スロットマシン */}
-        <div className="bg-gradient-to-b from-yellow-400 to-amber-600 rounded-lg p-8 mb-6 shadow-2xl">
-          <div className="bg-black rounded-lg p-6 mb-6">
-            <div className="flex justify-center space-x-2">
+        <div className="bg-gradient-to-b from-yellow-400 to-amber-600 rounded-lg p-4 xs:p-6 sm:p-8 mb-4 xs:mb-6 shadow-2xl">
+          <div className="bg-black rounded-lg p-3 xs:p-4 sm:p-6 mb-4 xs:mb-6">
+            <div className="flex justify-center space-x-1 xs:space-x-2 sm:space-x-3 overflow-x-auto">
               {reels.map((reelIndex, index) => (
-                <div key={index} className={`w-20 h-20 bg-gradient-to-b from-yellow-100 to-yellow-300 rounded-lg flex items-center justify-center text-3xl font-bold border-4 border-yellow-500 shadow-lg ${
+                <div key={index} className={`w-12 h-12 xs:w-16 xs:h-16 sm:w-20 sm:h-20 bg-gradient-to-b from-yellow-100 to-yellow-300 rounded-lg flex items-center justify-center text-lg xs:text-2xl sm:text-3xl font-bold border-2 xs:border-4 border-yellow-500 shadow-lg flex-shrink-0 ${
                   spinning ? 'animate-pulse' : ''
                 }`}>
                   {symbols[reelIndex].symbol}
@@ -277,19 +277,19 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
           </div>
 
           {/* コントロールパネル */}
-          <div className="bg-black/50 rounded-lg p-4">
-            <div className="flex justify-between items-center mb-4">
+          <div className="bg-black/50 rounded-lg p-3 xs:p-4">
+            <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center mb-3 xs:mb-4 gap-2 xs:gap-0">
               <div className="text-white">
-                <label htmlFor="bet-amount" className="text-lg font-bold">ベット額: {betAmount.toLocaleString()}コイン</label>
-                {freeSpins > 0 && <span className="text-yellow-300 ml-4">フリースピン中！</span>}
+                <label htmlFor="bet-amount" className="text-sm xs:text-lg font-bold">ベット額: {betAmount.toLocaleString()}コイン</label>
+                {freeSpins > 0 && <span className="text-yellow-300 ml-2 xs:ml-4 text-sm xs:text-base">フリースピン中！</span>}
               </div>
-              <div className="flex space-x-2" role="group" aria-label="ベット額選択">
+              <div className="flex flex-wrap gap-1 xs:gap-2" role="group" aria-label="ベット額選択">
                 {!freeSpins && (
                   <>
                     <button
                       id="bet-500"
                       onClick={() => setBetAmount(500)}
-                      className={`px-3 py-2 rounded text-white ${betAmount === 500 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
+                      className={`px-2 py-1 xs:px-3 xs:py-2 rounded text-white text-sm xs:text-base ${betAmount === 500 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
                       aria-label="ベット額500コイン"
                     >
                       500
@@ -297,7 +297,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                     <button
                       id="bet-1000"
                       onClick={() => setBetAmount(1000)}
-                      className={`px-3 py-2 rounded text-white ${betAmount === 1000 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
+                      className={`px-2 py-1 xs:px-3 xs:py-2 rounded text-white text-sm xs:text-base ${betAmount === 1000 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
                       aria-label="ベット額1000コイン"
                     >
                       1000
@@ -305,7 +305,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                     <button
                       id="bet-2000"
                       onClick={() => setBetAmount(2000)}
-                      className={`px-3 py-2 rounded text-white ${betAmount === 2000 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
+                      className={`px-2 py-1 xs:px-3 xs:py-2 rounded text-white text-sm xs:text-base ${betAmount === 2000 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
                       aria-label="ベット額2000コイン"
                     >
                       2000
@@ -313,7 +313,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                     <button
                       id="bet-5000"
                       onClick={() => setBetAmount(5000)}
-                      className={`px-3 py-2 rounded text-white ${betAmount === 5000 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
+                      className={`px-2 py-1 xs:px-3 xs:py-2 rounded text-white text-sm xs:text-base ${betAmount === 5000 ? 'bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`}
                       aria-label="ベット額5000コイン"
                     >
                       5000
@@ -328,7 +328,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                 id="main-spin-button"
                 onClick={spin}
                 disabled={spinning || (!freeSpins && betAmount > currentUser.balance)}
-                className="px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xl rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="px-6 py-3 xs:px-8 xs:py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-lg xs:text-xl rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
                 aria-label={spinning ? 'スピン中' : freeSpins > 0 ? 'フリースピン実行' : 'スピン実行'}
               >
                 {spinning ? 'スピン中...' : freeSpins > 0 ? 'フリースピン' : 'スピン'}
@@ -338,26 +338,26 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
 
           {/* 最後の勝利金 */}
           {lastWin > 0 && (
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-center py-3 rounded-lg mt-4">
-              <span className="text-2xl font-bold">🎉 {lastWin.toLocaleString()}コイン獲得！ 🎉</span>
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-center py-2 xs:py-3 rounded-lg mt-3 xs:mt-4">
+              <span className="text-lg xs:text-2xl font-bold">🎉 {lastWin.toLocaleString()}コイン獲得！ 🎉</span>
             </div>
           )}
         </div>
 
         {/* メッセージエリア */}
         {message && (
-          <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 mb-6">
-            <p className="text-white text-center text-lg font-bold">{message}</p>
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-3 xs:p-4 mb-4 xs:mb-6">
+            <p className="text-white text-center text-sm xs:text-lg font-bold">{message}</p>
           </div>
         )}
 
         {/* ペイアウトテーブルとゲーム履歴 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 xs:gap-6">
           {/* ペイアウトテーブル */}
-          <div className="bg-white/10 backdrop-blur-md rounded-lg p-4">
-            <h3 className="text-white font-bold mb-4 text-center">ペイアウトテーブル</h3>
-            <div className="space-y-2 text-sm">
-              <div className="text-yellow-300 font-bold border-b border-white/30 pb-2">5連続</div>
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-3 xs:p-4">
+            <h3 className="text-white font-bold mb-3 xs:mb-4 text-center text-sm xs:text-base">ペイアウトテーブル</h3>
+            <div className="space-y-1 xs:space-y-2 text-xs xs:text-sm">
+              <div className="text-yellow-300 font-bold border-b border-white/30 pb-1 xs:pb-2">5連続</div>
               {symbols.map((symbol, index) => (
                 <div key={index} className="flex justify-between text-white">
                   <span>{symbol.symbol} {symbol.name}</span>
@@ -365,8 +365,8 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                 </div>
               ))}
               
-              <div className="border-t border-white/30 pt-2 mt-2">
-                <div className="text-white font-bold">特別ルール</div>
+              <div className="border-t border-white/30 pt-1 xs:pt-2 mt-1 xs:mt-2">
+                <div className="text-white font-bold text-xs xs:text-sm">特別ルール</div>
                 <div className="flex justify-between text-white text-xs">
                   <span>💸 キャッシュ2個以上</span>
                   <span>特別配当</span>
@@ -380,9 +380,9 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
           </div>
 
           {/* ゲーム履歴 */}
-          <div className="bg-white/10 backdrop-blur-md rounded-lg p-4">
-            <h3 className="text-white font-bold mb-4 text-center">最近のゲーム</h3>
-            <div className="space-y-2 text-sm">
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-3 xs:p-4">
+            <h3 className="text-white font-bold mb-3 xs:mb-4 text-center text-sm xs:text-base">最近のゲーム</h3>
+            <div className="space-y-1 xs:space-y-2 text-xs xs:text-sm">
               {gameHistory.length === 0 ? (
                 <p className="text-gray-300 text-center">まだゲームをプレイしていません</p>
               ) : (
@@ -391,11 +391,11 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                     <div className="flex justify-between items-center">
                       <div className="flex space-x-1">
                         {game.reels.map((reelIndex, i) => (
-                          <span key={i} className="text-lg">{symbols[reelIndex].symbol}</span>
+                          <span key={i} className="text-sm xs:text-lg">{symbols[reelIndex].symbol}</span>
                         ))}
                       </div>
                       <div className="text-right">
-                        <div className={`font-bold ${game.win > 0 ? 'text-green-300' : 'text-red-300'}`}>
+                        <div className={`font-bold text-xs xs:text-sm ${game.win > 0 ? 'text-green-300' : 'text-red-300'}`}>
                           {game.win > 0 ? `+${game.win.toLocaleString()}` : `-${game.bet.toLocaleString()}`}
                         </div>
                         <div className="text-xs text-gray-300">{game.timestamp}</div>
