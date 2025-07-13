@@ -16,6 +16,13 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
   const [playerAction, setPlayerAction] = useState('');
   const [computerAction, setComputerAction] = useState('');
 
+  const rulesText = `
+  Texas Poker Rules:
+  - Both user and computer start with a fixed bet of 10 coins.
+  - The computer's actions are based on hand strength.
+  - The game proceeds with betting, raising, and folding.
+  `;
+
   const createDeck = () => {
     const suits = ['♠', '♥', '♦', '♣'];
     const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
