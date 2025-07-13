@@ -186,23 +186,29 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
       setLastWin(winAmount)
       onUpdateBalance(currentUser.balance + winAmount)
       
-      if (multiplier >= 77) {
-        setMessage(`🎉 ラッキーセブン！ ${winAmount.toLocaleString()}コイン獲得！ 🎉`)
-      } else if (multiplier >= 20) {
-        setMessage(`💎 大当たり！ ${winAmount.toLocaleString()}コイン獲得！ 💎`)
-      } else if (multiplier >= 10) {
-        setMessage(`⭐ 当たり！ ${winAmount.toLocaleString()}コイン獲得！ ⭐`)
-      } else {
-        setMessage(`🍒 小当たり！ ${winAmount.toLocaleString()}コイン獲得！`)
+      if (!autoSpin) {
+        // 連続スピン中でない場合のみメッセージを表示
+        if (multiplier >= 77) {
+          setMessage(`🎉 ラッキーセブン！ ${winAmount.toLocaleString()}コイン獲得！ 🎉`)
+        } else if (multiplier >= 20) {
+          setMessage(`💎 大当たり！ ${winAmount.toLocaleString()}コイン獲得！ 💎`)
+        } else if (multiplier >= 10) {
+          setMessage(`⭐ 当たり！ ${winAmount.toLocaleString()}コイン獲得！ ⭐`)
+        } else {
+          setMessage(`🍒 小当たり！ ${winAmount.toLocaleString()}コイン獲得！`)
+        }
       }
-    } else {
-      setMessage(autoSpin ? `連続スピン中... (${autoSpinCount + 1}/${maxAutoSpins})` : '残念！もう一度挑戦してください。')
+    } else if (!autoSpin) {
+      setMessage('残念！もう一度挑戦してください。')
     }
 
     // 連続スピンの処理
     if (autoSpin) {
       const newCount = autoSpinCount + 1
       setAutoSpinCount(newCount)
+      
+      // 連続スピン中のメッセージを更新
+      setMessage(`連続スピン中... (${newCount}/${maxAutoSpins})`)
       
       if (newCount >= maxAutoSpins) {
         // 連続スピン終了
@@ -212,7 +218,8 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
       } else {
         // 次のスピンを実行
         setTimeout(() => {
-          if (currentUser.balance >= betAmount) {
+          // 最新の残高を確認
+          if (betAmount <= currentUser.balance) {
             spin()
           } else {
             setAutoSpin(false)

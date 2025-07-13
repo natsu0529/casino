@@ -195,27 +195,32 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       setLastWin(winAmount)
       onUpdateBalance(currentUser.balance + winAmount)
       
-      if (totalMultiplier >= 500) {
-        setMessage(`🎉 メガウィン！ ${winAmount.toLocaleString()}コイン獲得！ 🎉`)
-      } else if (totalMultiplier >= 100) {
-        setMessage(`💎 ビッグウィン！ ${winAmount.toLocaleString()}コイン獲得！ 💎`)
-      } else if (totalMultiplier >= 50) {
-        setMessage(`👑 グレートウィン！ ${winAmount.toLocaleString()}コイン獲得！ 👑`)
-      } else {
-        setMessage(`⭐ ウィン！ ${winAmount.toLocaleString()}コイン獲得！ ⭐`)
+      if (!autoSpin || freeSpins > 0) {
+        // 連続スピン中でない場合、またはフリースピン中の場合のみメッセージを表示
+        if (totalMultiplier >= 500) {
+          setMessage(`🎉 メガウィン！ ${winAmount.toLocaleString()}コイン獲得！ 🎉`)
+        } else if (totalMultiplier >= 100) {
+          setMessage(`💎 ビッグウィン！ ${winAmount.toLocaleString()}コイン獲得！ 💎`)
+        } else if (totalMultiplier >= 50) {
+          setMessage(`👑 グレートウィン！ ${winAmount.toLocaleString()}コイン獲得！ 👑`)
+        } else {
+          setMessage(`⭐ ウィン！ ${winAmount.toLocaleString()}コイン獲得！ ⭐`)
+        }
       }
     } else if (bonusTriggered) {
       setMessage('🎰 ボーナスラウンド開始！フリースピン10回！ 🎰')
-    } else {
+    } else if (!autoSpin || freeSpins > 0) {
       const defaultMessage = freeSpins > 0 ? `フリースピン残り: ${freeSpins}回` : '残念！もう一度挑戦してください。'
-      const autoSpinMessage = autoSpin && freeSpins === 0 ? `連続スピン中... (${autoSpinCount + 1}/${maxAutoSpins})` : defaultMessage
-      setMessage(autoSpinMessage)
+      setMessage(defaultMessage)
     }
 
     // 連続スピンの処理（フリースピン中は除く）
     if (autoSpin && freeSpins === 0) {
       const newCount = autoSpinCount + 1
       setAutoSpinCount(newCount)
+      
+      // 連続スピン中のメッセージを更新
+      setMessage(`連続スピン中... (${newCount}/${maxAutoSpins})`)
       
       if (newCount >= maxAutoSpins) {
         // 連続スピン終了
@@ -225,7 +230,8 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       } else {
         // 次のスピンを実行
         setTimeout(() => {
-          if (currentUser.balance >= betAmount) {
+          // 最新の残高を確認
+          if (betAmount <= currentUser.balance) {
             spin()
           } else {
             setAutoSpin(false)
