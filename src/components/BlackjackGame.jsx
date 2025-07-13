@@ -230,37 +230,37 @@ const BlackjackGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900 p-1 xs:p-2 sm:p-4">
       <div className="max-w-4xl mx-auto">
         {/* ヘッダー */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col xs:flex-row justify-between items-center mb-2 xs:mb-3 sm:mb-4 md:mb-6 gap-1 xs:gap-2">
           <button
             onClick={() => onNavigateHome()}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-300"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 xs:px-3 xs:py-2 sm:px-4 sm:py-2 rounded-lg transition-colors duration-300 text-xs xs:text-sm sm:text-base order-1 xs:order-none"
           >
-            ← ホームに戻る
+            ← ホーム
           </button>
-          <h1 className="text-4xl font-bold text-white">♠ ブラックジャック ♠</h1>
-          <div className="text-white text-right">
-            <div className="text-lg font-bold">👤 {currentUser.username}</div>
-            <div className="text-yellow-300 font-bold">💰 {currentUser.balance.toLocaleString()}コイン</div>
+          <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white order-2 xs:order-none text-center">♠ ブラックジャック ♠</h1>
+          <div className="text-white text-center xs:text-right order-3 xs:order-none">
+            <div className="text-xs xs:text-sm sm:text-lg font-bold">👤 {currentUser.username}</div>
+            <div className="text-yellow-300 font-bold text-xs xs:text-sm sm:text-base">💰 {currentUser.balance.toLocaleString()}コイン</div>
           </div>
         </div>
 
         {/* ゲームエリア */}
-        <div className="bg-green-800 rounded-lg p-6 mb-6">
+        <div className="bg-green-800 rounded-lg p-2 xs:p-3 sm:p-6 mb-2 xs:mb-3 sm:mb-4 md:mb-6">
           {/* ディーラーエリア */}
-          <div className="mb-8">
-            <h3 className="text-xl font-bold text-white mb-4">ディーラー (スコア: {gameStatus === 'playing' ? '?' : dealerScore})</h3>
-            <div className="flex space-x-2">
+          <div className="mb-3 xs:mb-4 sm:mb-8">
+            <h3 className="text-sm xs:text-base sm:text-xl font-bold text-white mb-2 xs:mb-3 sm:mb-4">ディーラー (スコア: {gameStatus === 'playing' ? '?' : dealerScore})</h3>
+            <div className="flex flex-wrap justify-center gap-0.5 xs:gap-1 sm:gap-2">
               {dealerHand.map((card, index) => (
-                <div key={index} className={`w-16 h-24 rounded-lg flex flex-col items-center justify-center text-lg font-bold ${
+                <div key={index} className={`w-8 h-12 xs:w-10 xs:h-14 sm:w-12 sm:h-16 md:w-16 md:h-24 rounded-md flex flex-col items-center justify-center text-xs xs:text-sm sm:text-lg font-bold ${
                   index === 1 && gameStatus === 'playing' ? 'bg-blue-900 text-blue-300' : 'bg-white text-black'
                 }`}>
                   {index === 1 && gameStatus === 'playing' ? '?' : (
                     <>
-                      <div>{card.rank}</div>
-                      <div>{card.suit}</div>
+                      <div className={['♥', '♦'].includes(card.suit) ? 'text-red-500' : 'text-black'}>{card.rank}</div>
+                      <div className={['♥', '♦'].includes(card.suit) ? 'text-red-500' : 'text-black'}>{card.suit}</div>
                     </>
                   )}
                 </div>
@@ -270,12 +270,12 @@ const BlackjackGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
 
           {/* プレイヤーエリア */}
           <div>
-            <h3 className="text-xl font-bold text-white mb-4">あなた (スコア: {playerScore})</h3>
-            <div className="flex space-x-2">
+            <h3 className="text-sm xs:text-base sm:text-xl font-bold text-white mb-2 xs:mb-3 sm:mb-4">あなた (スコア: {playerScore})</h3>
+            <div className="flex flex-wrap justify-center gap-0.5 xs:gap-1 sm:gap-2">
               {playerHand.map((card, index) => (
-                <div key={index} className="w-16 h-24 bg-white rounded-lg flex flex-col items-center justify-center text-lg font-bold text-black">
-                  <div>{card.rank}</div>
-                  <div>{card.suit}</div>
+                <div key={index} className="w-8 h-12 xs:w-10 xs:h-14 sm:w-12 sm:h-16 md:w-16 md:h-24 bg-white rounded-md flex flex-col items-center justify-center text-xs xs:text-sm sm:text-lg font-bold">
+                  <div className={['♥', '♦'].includes(card.suit) ? 'text-red-500' : 'text-black'}>{card.rank}</div>
+                  <div className={['♥', '♦'].includes(card.suit) ? 'text-red-500' : 'text-black'}>{card.suit}</div>
                 </div>
               ))}
             </div>
@@ -284,15 +284,15 @@ const BlackjackGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
 
         {/* ベットエリア */}
         {gameStatus === 'betting' && (
-          <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6">
-            <h3 className="text-xl font-bold text-white mb-4">賭け金を選択してください</h3>
-            <div className="grid grid-cols-5 gap-4 mb-6">
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-2 xs:p-3 sm:p-6 mb-2 xs:mb-3 sm:mb-4 md:mb-6">
+            <h3 className="text-sm xs:text-base sm:text-xl font-bold text-white mb-2 xs:mb-3 sm:mb-4 text-center">賭け金を選択してください</h3>
+            <div className="grid grid-cols-3 xs:grid-cols-5 gap-1 xs:gap-2 sm:gap-4 mb-2 xs:mb-3 sm:mb-6">
               {[10, 25, 50, 100, 250].map(amount => (
                 <button
                   key={amount}
                   onClick={() => setBetAmount(amount)}
                   disabled={amount > currentUser.balance}
-                  className={`py-3 px-4 rounded-lg font-bold transition-colors ${
+                  className={`py-2 px-2 xs:py-3 xs:px-4 rounded-lg font-bold transition-colors text-xs xs:text-sm sm:text-base ${
                     betAmount === amount 
                       ? 'bg-yellow-500 text-black border-2 border-yellow-300' 
                       : amount > currentUser.balance
@@ -304,15 +304,15 @@ const BlackjackGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
                 </button>
               ))}
             </div>
-            <div className="text-center mb-4">
-              <span className="text-white text-lg">選択した賭け金: </span>
-              <span className="text-yellow-300 font-bold text-xl">{betAmount}コイン</span>
+            <div className="text-center mb-2 xs:mb-3 sm:mb-4">
+              <span className="text-white text-xs xs:text-sm sm:text-lg">選択した賭け金: </span>
+              <span className="text-yellow-300 font-bold text-sm xs:text-base sm:text-xl">{betAmount}コイン</span>
             </div>
             <div className="text-center">
               <button
                 onClick={startGame}
                 disabled={betAmount > currentUser.balance}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-300"
+                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white font-bold py-2 px-4 xs:py-3 xs:px-6 sm:py-3 sm:px-8 rounded-lg transition-colors duration-300 text-xs xs:text-sm sm:text-base"
               >
                 ゲーム開始
               </button>
@@ -322,24 +322,24 @@ const BlackjackGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
 
         {/* アクションボタン */}
         {gameStatus === 'playing' && (
-          <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6">
-            <div className="flex space-x-4">
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-2 xs:p-3 sm:p-6 mb-2 xs:mb-3 sm:mb-4 md:mb-6">
+            <div className="grid grid-cols-2 xs:flex xs:flex-wrap gap-1 xs:gap-2 sm:gap-4">
               <button
                 onClick={hit}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 xs:py-3 xs:px-4 sm:py-3 sm:px-6 rounded-lg transition-colors duration-300 text-xs xs:text-sm sm:text-base"
               >
                 ヒット
               </button>
               <button
                 onClick={stand}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300"
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 xs:py-3 xs:px-4 sm:py-3 sm:px-6 rounded-lg transition-colors duration-300 text-xs xs:text-sm sm:text-base"
               >
                 スタンド
               </button>
               {canDoubleDown && (
                 <button
                   onClick={doubleDown}
-                  className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300"
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-3 xs:py-3 xs:px-4 sm:py-3 sm:px-6 rounded-lg transition-colors duration-300 text-xs xs:text-sm sm:text-base"
                 >
                   ダブルダウン
                 </button>
@@ -347,7 +347,7 @@ const BlackjackGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
               {canSplit && (
                 <button
                   onClick={() => setMessage('スプリット機能は今後実装予定です。')}
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300"
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 xs:py-3 xs:px-4 sm:py-3 sm:px-6 rounded-lg transition-colors duration-300 text-xs xs:text-sm sm:text-base"
                 >
                   スプリット
                 </button>
@@ -355,7 +355,7 @@ const BlackjackGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
               {insurance && (
                 <button
                   onClick={() => setMessage('インシュランス機能は今後実装予定です。')}
-                  className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300"
+                  className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-3 xs:py-3 xs:px-4 sm:py-3 sm:px-6 rounded-lg transition-colors duration-300 text-xs xs:text-sm sm:text-base"
                 >
                   インシュランス
                 </button>
@@ -366,8 +366,8 @@ const BlackjackGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
 
         {/* メッセージエリア */}
         {message && (
-          <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 mb-6">
-            <p className="text-white text-center text-lg font-bold">{message}</p>
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-2 xs:p-3 sm:p-4 mb-2 xs:mb-3 sm:mb-4 md:mb-6">
+            <p className="text-white text-center text-xs xs:text-sm sm:text-lg font-bold">{message}</p>
           </div>
         )}
 
@@ -376,7 +376,7 @@ const BlackjackGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
           <div className="text-center">
             <button
               onClick={newGame}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 xs:py-3 xs:px-6 sm:py-3 sm:px-6 rounded-lg transition-colors duration-300 text-xs xs:text-sm sm:text-base"
             >
               新しいゲーム
             </button>

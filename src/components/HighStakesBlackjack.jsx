@@ -203,7 +203,7 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
   const renderCard = (card, hidden = false) => {
     if (hidden) {
       return (
-        <div className="inline-block w-16 h-24 bg-blue-600 border-2 border-white rounded-lg flex items-center justify-center text-white font-bold mx-1">
+        <div className="inline-block w-8 h-12 xs:w-10 xs:h-14 sm:w-12 sm:h-16 md:w-16 md:h-24 bg-blue-600 border border-white rounded-md flex items-center justify-center text-white font-bold text-xs sm:text-base">
           🂠
         </div>
       )
@@ -211,55 +211,55 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
 
     const color = ['♥', '♦'].includes(card.suit) ? 'text-red-500' : 'text-black'
     return (
-      <div className="inline-block w-16 h-24 bg-white border-2 border-gray-300 rounded-lg flex flex-col items-center justify-center mx-1">
-        <div className={`text-lg font-bold ${color}`}>{card.rank}</div>
-        <div className={`text-xl ${color}`}>{card.suit}</div>
+      <div className="inline-block w-8 h-12 xs:w-10 xs:h-14 sm:w-12 sm:h-16 md:w-16 md:h-24 bg-white border border-gray-300 rounded-md flex flex-col items-center justify-center">
+        <div className={`text-xs xs:text-sm sm:text-base md:text-lg font-bold ${color}`}>{card.rank}</div>
+        <div className={`text-sm xs:text-base sm:text-lg md:text-xl ${color}`}>{card.suit}</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-900 via-purple-900 to-black p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-red-900 via-purple-900 to-black p-1 xs:p-2 sm:p-4">
+      <div className="max-w-6xl mx-auto">
         {/* ヘッダー */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col xs:flex-row justify-between items-center mb-2 xs:mb-3 sm:mb-4 md:mb-6 gap-1 xs:gap-2">
           <button
             onClick={() => onNavigateHome()}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-300"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 xs:px-3 xs:py-2 sm:px-4 sm:py-2 rounded-lg transition-colors duration-300 text-xs xs:text-sm sm:text-base order-1 xs:order-none"
           >
-            ← ホームに戻る
+            ← ホーム
           </button>
-          <h1 className="text-4xl font-bold text-white flex items-center gap-2">
-            ♠ ハイステークスブラックジャック ♠
+          <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white flex items-center gap-1 sm:gap-2 order-2 xs:order-none text-center">
+            <span className="hidden md:inline">♠</span> ハイステークスBJ <span className="hidden md:inline">♠</span>
           </h1>
-          <div className="text-white text-right">
-            <div className="text-lg font-bold">👤 {currentUser?.username}</div>
-            <div className="text-yellow-300 font-bold">💰 {currentUser?.balance?.toLocaleString()}コイン</div>
+          <div className="text-white text-center xs:text-right order-3 xs:order-none">
+            <div className="text-xs xs:text-sm sm:text-lg font-bold">👤 {currentUser?.username}</div>
+            <div className="text-yellow-300 font-bold text-xs xs:text-sm sm:text-base">💰 {currentUser?.balance?.toLocaleString()}コイン</div>
           </div>
         </div>
 
         {/* ゲーム説明 */}
-        <div className="bg-red-800/30 p-4 rounded-lg mb-6 text-white text-center">
-          <h2 className="text-2xl font-bold mb-2">💎 ハイステークスブラックジャック 💎</h2>
-          <p className="text-lg">最低ベット額: 100コイン | 通常の2倍の配当！</p>
-          <p>21に近づけてディーラーに勝利しよう！</p>
+        <div className="bg-red-800/30 p-2 xs:p-3 sm:p-4 rounded-lg mb-2 xs:mb-3 sm:mb-4 md:mb-6 text-white text-center">
+          <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-bold mb-1 xs:mb-2">💎 ハイステークスBJ 💎</h2>
+          <p className="text-xs xs:text-sm sm:text-base md:text-lg">最低ベット額: 5000コイン | 通常の2倍の配当！</p>
+          <p className="text-xs sm:text-sm md:text-base">21に近づけてディーラーに勝利しよう！</p>
         </div>
 
         {/* メッセージ */}
         {message && (
-          <div className="bg-yellow-600 text-white p-4 rounded-lg mb-6 text-center font-bold text-lg">
+          <div className="bg-yellow-600 text-white p-2 xs:p-3 sm:p-4 rounded-lg mb-2 xs:mb-3 sm:mb-4 md:mb-6 text-center font-bold text-xs xs:text-sm sm:text-lg">
             {message}
           </div>
         )}
 
         {/* ゲームエリア */}
-        <div className="bg-green-800 rounded-lg p-6 mb-6">
+        <div className="bg-green-800 rounded-lg p-2 xs:p-3 sm:p-6 mb-2 xs:mb-3 sm:mb-4 md:mb-6">
           {/* ディーラーのカード */}
-          <div className="mb-8">
-            <h3 className="text-xl font-bold text-white mb-2">
+          <div className="mb-2 xs:mb-3 sm:mb-4 md:mb-8">
+            <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-bold text-white mb-1 xs:mb-2 text-center">
               ディーラー {gameStatus === 'dealer' || gameStatus === 'finished' ? `(${dealerScore})` : ''}
             </h3>
-            <div className="flex justify-center">
+            <div className="flex justify-center flex-wrap gap-0.5 xs:gap-1">
               {dealerHand.map((card, index) => 
                 renderCard(card, index === 1 && gameStatus === 'playing')
               )}
@@ -268,10 +268,10 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
 
           {/* プレイヤーのカード */}
           <div>
-            <h3 className="text-xl font-bold text-white mb-2">
+            <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-bold text-white mb-1 xs:mb-2 text-center">
               あなた ({playerScore})
             </h3>
-            <div className="flex justify-center">
+            <div className="flex justify-center flex-wrap gap-0.5 xs:gap-1">
               {playerHand.map((card, index) => 
                 renderCard(card)
               )}
@@ -281,15 +281,15 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
 
         {/* ベットエリア */}
         {gameStatus === 'betting' && (
-          <div className="bg-purple-800/50 p-6 rounded-lg mb-6">
-            <h3 className="text-xl font-bold text-white mb-4 text-center">ベット額を選択</h3>
-            <div className="flex justify-center gap-4 mb-4">
+          <div className="bg-purple-800/50 p-2 xs:p-3 sm:p-6 rounded-lg mb-2 xs:mb-3 sm:mb-4 md:mb-6">
+            <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-bold text-white mb-2 xs:mb-3 sm:mb-4 text-center">ベット額を選択</h3>
+            <div className="grid grid-cols-3 xs:grid-cols-5 sm:flex sm:justify-center gap-1 xs:gap-2 sm:gap-4 mb-2 xs:mb-3 sm:mb-4">
               {[5000, 10000, 20000, 40000, 80000].map(amount => (
                 <button
                   key={amount}
                   onClick={() => setBetAmount(amount)}
                   disabled={amount > currentUser.balance}
-                  className={`px-4 py-2 rounded-lg font-bold transition-colors ${
+                  className={`px-1 py-1 xs:px-2 xs:py-2 sm:px-4 sm:py-2 rounded-lg font-bold transition-colors text-xs sm:text-base ${
                     betAmount === amount 
                       ? 'bg-yellow-500 text-black' 
                       : amount > currentUser.balance
@@ -305,7 +305,7 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
               <button
                 onClick={startGame}
                 disabled={betAmount > currentUser.balance}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white px-8 py-3 rounded-lg font-bold text-lg"
+                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white px-3 py-2 xs:px-4 xs:py-2 sm:px-8 sm:py-3 rounded-lg font-bold text-xs xs:text-sm sm:text-lg"
               >
                 ゲーム開始 ({betAmount.toLocaleString()}コイン)
               </button>
@@ -315,16 +315,16 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
 
         {/* ゲームアクション */}
         {gameStatus === 'playing' && (
-          <div className="text-center mb-6">
+          <div className="text-center mb-2 xs:mb-3 sm:mb-4 md:mb-6">
             <button
               onClick={hit}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold text-lg mr-4"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 xs:px-4 xs:py-2 sm:px-6 sm:py-3 rounded-lg font-bold text-xs xs:text-sm sm:text-lg mr-2 sm:mr-4"
             >
               ヒット
             </button>
             <button
               onClick={stand}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-bold text-lg"
+              className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 xs:px-4 xs:py-2 sm:px-6 sm:py-3 rounded-lg font-bold text-xs xs:text-sm sm:text-lg"
             >
               スタンド
             </button>
@@ -333,10 +333,10 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
 
         {/* 新しいゲーム */}
         {gameStatus === 'finished' && (
-          <div className="text-center mb-6">
+          <div className="text-center mb-2 xs:mb-3 sm:mb-4 md:mb-6">
             <button
               onClick={newGame}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-bold text-lg"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 xs:px-4 xs:py-2 sm:px-8 sm:py-3 rounded-lg font-bold text-xs xs:text-sm sm:text-lg"
             >
               新しいゲーム
             </button>
@@ -345,25 +345,25 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
 
         {/* ゲーム履歴 */}
         {gameHistory.length > 0 && (
-          <div className="bg-black/30 p-4 rounded-lg">
-            <h3 className="text-xl font-bold text-white mb-4">ゲーム履歴</h3>
+          <div className="bg-black/30 p-2 xs:p-3 sm:p-4 rounded-lg">
+            <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-bold text-white mb-2 xs:mb-3 sm:mb-4">ゲーム履歴</h3>
             <div className="overflow-x-auto">
-              <table className="w-full text-white text-sm">
+              <table className="w-full text-white text-xs sm:text-sm">
                 <thead>
                   <tr className="border-b border-gray-600">
-                    <th className="text-left p-2">時刻</th>
-                    <th className="text-left p-2">ベット</th>
-                    <th className="text-left p-2">結果</th>
-                    <th className="text-left p-2">獲得</th>
-                    <th className="text-left p-2">スコア</th>
+                    <th className="text-left p-1 sm:p-2">時刻</th>
+                    <th className="text-left p-1 sm:p-2">ベット</th>
+                    <th className="text-left p-1 sm:p-2">結果</th>
+                    <th className="text-left p-1 sm:p-2">獲得</th>
+                    <th className="text-left p-1 sm:p-2">スコア</th>
                   </tr>
                 </thead>
                 <tbody>
                   {gameHistory.map(game => (
                     <tr key={game.id} className="border-b border-gray-700">
-                      <td className="p-2">{game.timestamp}</td>
-                      <td className="p-2">{game.betAmount.toLocaleString()}</td>
-                      <td className="p-2">
+                      <td className="p-1 sm:p-2">{game.timestamp}</td>
+                      <td className="p-1 sm:p-2">{game.betAmount.toLocaleString()}</td>
+                      <td className="p-1 sm:p-2">
                         <span className={`font-bold ${
                           game.result === 'win' ? 'text-green-400' : 
                           game.result === 'lose' ? 'text-red-400' : 'text-yellow-400'
@@ -371,8 +371,8 @@ const HighStakesBlackjack = ({ currentUser, onNavigateHome, onBalanceUpdate }) =
                           {game.result === 'win' ? '勝利' : game.result === 'lose' ? '敗北' : '引分'}
                         </span>
                       </td>
-                      <td className="p-2">{game.winAmount.toLocaleString()}</td>
-                      <td className="p-2">{game.playerScore} vs {game.dealerScore}</td>
+                      <td className="p-1 sm:p-2">{game.winAmount.toLocaleString()}</td>
+                      <td className="p-1 sm:p-2">{game.playerScore} vs {game.dealerScore}</td>
                     </tr>
                   ))}
                 </tbody>
