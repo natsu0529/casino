@@ -131,8 +131,7 @@ const MessageBoard = ({ currentUser, user }) => {
                   <span className="text-white font-bold flex items-center">
                     👤 <UserNameWithTitle 
                       username={message.username} 
-                      title={message.title}
-                      className="ml-1"
+                      title={message.title} 
                     />
                   </span>
                   {message.balance && (

@@ -36,3 +36,36 @@ DROP POLICY IF EXISTS "Users can insert their own purchases" ON title_purchases;
 CREATE POLICY "Users can insert their own purchases" ON title_purchases
   FOR INSERT
   WITH CHECK (auth.uid() = user_id);
+
+-- 爵位購入の段階的制約を強制するトリガー関数
+CREATE OR REPLACE FUNCTION enforce_stepwise_title_purchase()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- 現在の爵位を取得
+  DECLARE current_title VARCHAR(20);
+  SELECT title INTO current_title FROM profiles WHERE id = NEW.user_id;
+
+  -- 購入可能な爵位の順序を定義
+  DECLARE title_order TEXT[] := ARRAY['男爵', '子爵', '伯爵', '侯爵', '公爵'];
+
+  -- 現在の爵位のインデックスを取得
+  DECLARE current_index INT := COALESCE(array_position(title_order, current_title), 0);
+
+  -- 購入しようとしている爵位のインデックスを取得
+  DECLARE new_index INT := array_position(title_order, NEW.title);
+
+  -- 購入が段階的でない場合はエラーをスロー
+  IF new_index IS NULL OR new_index != current_index + 1 THEN
+    RAISE EXCEPTION 'Invalid title purchase: You can only purchase the next title in order.';
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- トリガーをタイトル購入履歴テーブルに追加
+DROP TRIGGER IF EXISTS enforce_stepwise_title_purchase_trigger ON title_purchases;
+CREATE TRIGGER enforce_stepwise_title_purchase_trigger
+BEFORE INSERT ON title_purchases
+FOR EACH ROW
+EXECUTE FUNCTION enforce_stepwise_title_purchase();
