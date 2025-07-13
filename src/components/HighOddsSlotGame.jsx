@@ -96,12 +96,13 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     return 0
   }
 
-  // ボーナス判定
+  // ボーナス判定（上位3シンボルでボーナス発生）
   const checkBonus = (reels) => {
-    const bonusSymbols = reels.filter(s => s <= 2).length // 上位3シンボル
+    const bonusSymbols = reels.filter(s => s <= 2).length // 💎、🔥、⭐（上位3シンボル）
     if (bonusSymbols >= 3) {
       setFreeSpins(10)
       setBonusRound(true)
+      setMessage('ボーナス発生！フリースピン10回獲得！')
       return true
     }
     return false
@@ -348,23 +349,33 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
           <div className="bg-white/10 backdrop-blur-md rounded-lg p-3 xs:p-4">
             <h3 className="text-white font-bold mb-3 xs:mb-4 text-center text-sm xs:text-base">ペイアウトテーブル</h3>
             <div className="space-y-1 xs:space-y-2 text-xs xs:text-sm">
-              <div className="text-yellow-300 font-bold border-b border-white/30 pb-1 xs:pb-2">5連続</div>
+              <div className="text-yellow-300 font-bold border-b border-white/30 pb-1 xs:pb-2">3連続以上で勝利</div>
               {symbols.map((symbol, index) => (
                 <div key={index} className="flex justify-between text-white">
                   <span>{symbol.symbol} {symbol.name}</span>
-                  <span className="text-yellow-300 font-bold">{symbol.value * 10}倍</span>
+                  <span className="text-yellow-300 font-bold">{symbol.value}倍</span>
                 </div>
               ))}
               
               <div className="border-t border-white/30 pt-1 xs:pt-2 mt-1 xs:mt-2">
-                <div className="text-white font-bold text-xs xs:text-sm">特別ルール</div>
+                <div className="text-white font-bold text-xs xs:text-sm">連続ボーナス</div>
                 <div className="flex justify-between text-white text-xs">
-                  <span>💸 キャッシュ2個以上</span>
-                  <span>特別配当</span>
+                  <span>5つ連続</span>
+                  <span className="text-yellow-300">基本倍率×5</span>
                 </div>
                 <div className="flex justify-between text-white text-xs">
-                  <span>ボーナスシンボル3個以上</span>
-                  <span>フリースピン10回</span>
+                  <span>4つ連続</span>
+                  <span className="text-yellow-300">基本倍率×3</span>
+                </div>
+                <div className="flex justify-between text-white text-xs">
+                  <span>3つ連続</span>
+                  <span className="text-yellow-300">基本倍率×1</span>
+                </div>
+                <div className="border-t border-white/30 pt-1 mt-1">
+                  <div className="flex justify-between text-white text-xs">
+                    <span>💎🔥⭐ 3個以上</span>
+                    <span className="text-purple-300">フリースピン10回</span>
+                  </div>
                 </div>
               </div>
             </div>
