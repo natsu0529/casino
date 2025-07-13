@@ -74,6 +74,11 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     onBalanceUpdate(newBalance);
     
     console.log(`New game started - Initial bet: ${betAmount}, Pot: ${betAmount * 2}, Player balance: ${newBalance}`);
+    
+    // プリフロップでコンピュータのアクションをチェック（少し遅延させる）
+    setTimeout(() => {
+      checkComputerPreflop();
+    }, 1000);
   };
 
   const dealCommunityCards = (count) => {
@@ -345,8 +350,9 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     setPlayerAction(action);
     
     if (action === 'fold') {
+      // プレイヤーがフォールドした場合、賭けた金額は戻ってこない
       const loss = -playerBet;
-      setMessage('あなたがフォールドしました。コンピュータの勝利です。');
+      setMessage('あなたがフォールドしました。コンピュータの勝利です。賭けた金額は没収されます。');
       addToHistory('フォールド', 'コンピュータ', loss);
       setGameState('betting');
       // ベット額をリセット
@@ -362,13 +368,25 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       setComputerAction(computerActionType);
       
       if (computerActionType === 'fold') {
-        const winAmount = pot;
-        const newBalance = currentUser.balance + winAmount;
-        onBalanceUpdate(newBalance);
-        const profit = winAmount - playerBet;
-        console.log(`Computer folded after call - Win amount: ${winAmount}, Player bet: ${playerBet}, Profit: ${profit}, New balance: ${newBalance}`);
-        setMessage(`コンピュータがフォールドしました。あなたの勝利です！ ${winAmount}コイン獲得（利益: ${profit}コイン）`);
-        addToHistory('コール', 'あなた', profit);
+        // プリフロップで初期ベットのみの場合とそれ以外で処理を分ける
+        if (gameState === 'preflop' && playerBet === betAmount && computerBet === betAmount) {
+          // プリフロップで追加ベットなし：プレイヤーのベット分のみ返還
+          const returnAmount = betAmount;
+          const newBalance = currentUser.balance + returnAmount;
+          onBalanceUpdate(newBalance);
+          console.log(`Computer folded in preflop (no additional bets) - Return amount: ${returnAmount}, New balance: ${newBalance}`);
+          setMessage(`コンピュータがフォールドしました。次のゲームへ進みます。ベット分（${returnAmount}コイン）が返還されました。`);
+          addToHistory('コール', 'あなた', 0); // 損益なし
+        } else {
+          // 追加ベットがある場合またはフロップ以降：ポット全体を獲得
+          const winAmount = pot;
+          const newBalance = currentUser.balance + winAmount;
+          onBalanceUpdate(newBalance);
+          const profit = winAmount - playerBet;
+          console.log(`Computer folded after call - Win amount: ${winAmount}, Player bet: ${playerBet}, Profit: ${profit}, New balance: ${newBalance}`);
+          setMessage(`コンピュータがフォールドしました。あなたの勝利です！ ${winAmount}コイン獲得（利益: ${profit}コイン）`);
+          addToHistory('コール', 'あなた', profit);
+        }
         setGameState('betting');
         // ベット額をリセット
         setPlayerBet(0);
@@ -398,6 +416,7 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       setComputerAction(computerActionType);
       
       if (computerActionType === 'fold') {
+        // レイズ後は常にポット全体を獲得（追加ベットが発生している）
         const winAmount = pot;
         const finalBalance = newBalance + winAmount;
         onBalanceUpdate(finalBalance);
@@ -443,6 +462,30 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     } else if (gameState === 'river') {
       showdown();
     }
+  };
+
+  // プリフロップでコンピュータが最初にフォールドする可能性をチェック
+  const checkComputerPreflop = () => {
+    if (gameState === 'preflop' && playerBet === betAmount && computerBet === betAmount) {
+      const computerActionType = getComputerAction(false);
+      setComputerAction(computerActionType);
+      
+      if (computerActionType === 'fold') {
+        // プリフロップで初期ベットのみ：プレイヤーのベット分を返還
+        const returnAmount = betAmount;
+        const newBalance = currentUser.balance + returnAmount;
+        onBalanceUpdate(newBalance);
+        console.log(`Computer folded in preflop (initial bet only) - Return amount: ${returnAmount}, New balance: ${newBalance}`);
+        setMessage(`コンピュータがプリフロップでフォールドしました。次のゲームへ進みます。ベット分（${returnAmount}コイン）が返還されました。`);
+        addToHistory('プリフロップ', 'あなた', 0); // 損益なし
+        setGameState('betting');
+        setPlayerBet(0);
+        setComputerBet(0);
+        setPot(0);
+        return true; // フォールドした
+      }
+    }
+    return false; // フォールドしなかった
   };
 
   const showdown = () => {
@@ -585,6 +628,13 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
                 <li>ターン: 4枚目のコミュニティカードが公開された後のベッティング</li>
                 <li>リバー: 5枚目のコミュニティカードが公開された後のベッティング</li>
                 <li>ショーダウン: 手札を比較して勝敗を決定</li>
+              </ul>
+              <p><strong>フォールドのルール:</strong></p>
+              <ul className="list-disc list-inside space-y-1 ml-4 text-red-600">
+                <li><strong>プリフロップで追加ベットなし:</strong> フォールドした場合、次のゲームに進み、ベット分が返還されます</li>
+                <li><strong>追加ベット後またはフロップ以降:</strong> フォールドした側は賭け金を失い、勝った側がポット全体を獲得します</li>
+                <li><strong>プレイヤーがフォールド:</strong> 賭けた金額は一切戻ってきません</li>
+                <li><strong>コンピュータがフォールド:</strong> プレイヤーがポット全体を獲得します</li>
               </ul>
               <p><strong>アクション:</strong></p>
               <ul className="list-disc list-inside space-y-1 ml-4">
