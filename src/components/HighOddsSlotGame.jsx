@@ -244,8 +244,10 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       console.log(`現在のカウント: ${autoSpinCount}, 新しいカウント: ${newCount}, 最大回数: ${maxAutoSpins}`)
       console.log(`autoSpin状態: ${autoSpin}, autoSpinRef.current: ${autoSpinRef.current}`)
       
+      // 先にカウントを更新
       setAutoSpinCount(newCount)
       
+      // 終了条件を厳密にチェック
       if (newCount >= maxAutoSpins) {
         // 連続スピン終了
         console.log(`連続スピン終了: ${newCount} >= ${maxAutoSpins}`)
@@ -258,24 +260,42 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         setMessage(`連続スピン中... (${newCount}/${maxAutoSpins})`)
         console.log(`次のスピンをスケジュール: ${newCount}/${maxAutoSpins}`)
         
-        // 次のスピンを実行
-        setTimeout(() => {
-          console.log(`=== 高オッズタイマー実行 ===`)
-          console.log(`現在の残高: ${currentBalanceRef.current}, ベット額: ${betAmount}`)
-          console.log(`autoSpin状態（タイマー内）: ${autoSpinRef.current}`)
-          
-          // refから最新の残高とautoSpin状態を確認
-          if (betAmount <= currentBalanceRef.current && autoSpinRef.current) {
-            console.log(`残高OK、autoSpinアクティブ、次のスピンを実行`)
-            spin()
-          } else {
-            console.log(`残高不足またはautoSpin停止で連続スピン停止`)
-            setAutoSpin(false)
-            autoSpinRef.current = false
-            setAutoSpinCount(0)
-            setMessage('残高不足により連続スピンを停止しました。')
-          }
-        }, 1500) // 1.5秒後に次のスピン
+        // タイマー前に再度終了条件チェック
+        const shouldContinue = newCount < maxAutoSpins && autoSpinRef.current && freeSpins === 0
+        if (shouldContinue) {
+          // 次のスピンを実行
+          setTimeout(() => {
+            console.log(`=== 高オッズタイマー実行 ===`)
+            console.log(`現在の残高: ${currentBalanceRef.current}, ベット額: ${betAmount}`)
+            console.log(`autoSpin状態（タイマー内）: ${autoSpinRef.current}`)
+            console.log(`現在のカウント（タイマー内）: ${autoSpinCount}, 最大回数: ${maxAutoSpins}`)
+            console.log(`フリースピン状態: ${freeSpins}`)
+            
+            // 四重チェック: 残高・autoSpin状態・回数制限・フリースピン
+            if (betAmount <= currentBalanceRef.current && autoSpinRef.current && autoSpinCount < maxAutoSpins && freeSpins === 0) {
+              console.log(`全条件OK、次のスピンを実行`)
+              spin()
+            } else {
+              console.log(`条件不満足で連続スピン停止`)
+              setAutoSpin(false)
+              autoSpinRef.current = false
+              setAutoSpinCount(0)
+              if (betAmount > currentBalanceRef.current) {
+                setMessage('残高不足により連続スピンを停止しました。')
+              } else if (freeSpins > 0) {
+                setMessage('フリースピン開始により連続スピンを停止しました。')
+              } else {
+                setMessage(`連続スピン完了！`)
+              }
+            }
+          }, 1500) // 1.5秒後に次のスピン
+        } else {
+          console.log(`継続条件不満足で連続スピン即時停止`)
+          setAutoSpin(false)
+          autoSpinRef.current = false
+          setAutoSpinCount(0)
+          setMessage(`連続スピン完了！`)
+        }
       }
     } else {
       console.log(`高オッズ連続スピン処理をスキップ（autoSpin: ${autoSpin}, autoSpinRef.current: ${autoSpinRef.current}, freeSpins: ${freeSpins}）`)
