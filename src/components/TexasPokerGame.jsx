@@ -18,9 +18,10 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
 
   const rulesText = `
   Texas Poker Rules:
-  - Both user and computer start with a fixed bet of 10 coins.
-  - The computer's actions are based on hand strength.
-  - The game proceeds with betting, raising, and folding.
+  - ゲーム開始時に両プレイヤーが10コインの固定ベットを行います
+  - コンピュータの行動はハンドの強さに基づいて決定されます
+  - フォールド時は引き分けとなり参加料が返還されます
+  - 勝者はプール金全額を獲得します
   `;
 
   const createDeck = () => {
@@ -55,7 +56,8 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
   };
 
   const startNewGame = () => {
-    if (!currentUser || currentUser.balance < betAmount) {
+    const fixedBet = 10; // 固定ベット額
+    if (!currentUser || currentUser.balance < fixedBet) {
       setMessage('残高が不足しています');
       return;
     }
@@ -68,21 +70,21 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     setPlayerCards(playerHand);
     setComputerCards(computerHand);
     setCommunityCards([]);
-    setPot(betAmount * 2);
-    setPlayerBet(betAmount);
-    setComputerBet(betAmount);
+    setPot(fixedBet * 2); // 固定ベット×2
+    setPlayerBet(fixedBet);
+    setComputerBet(fixedBet);
     setGameState('preflop');
-    setMessage('プリフロップ: アクションを選択してください');
+    setMessage('プリフロップ: 両プレイヤーが10コインずつベットしました。アクションを選択してください');
     setPlayerAction('');
     setComputerAction('');
 
-    // 残高から初期ベット額を引く
-    const newBalance = currentUser.balance - betAmount;
-    console.log(`=== GAME START ===`);
-    console.log(`Before: ${currentUser.balance}, Bet: ${betAmount}, After: ${newBalance}`);
+    // 残高から固定ベット額を引く
+    const newBalance = currentUser.balance - fixedBet;
+    console.log(`=== GAME START (FIXED BET) ===`);
+    console.log(`Before: ${currentUser.balance}, Fixed Bet: ${fixedBet}, After: ${newBalance}`);
     onBalanceUpdate(newBalance);
     
-    console.log(`New game started - Initial bet: ${betAmount}, Pot: ${betAmount * 2}, Player balance: ${newBalance}`);
+    console.log(`New game started - Fixed bet: ${fixedBet}, Pot: ${fixedBet * 2}, Player balance: ${newBalance}`);
     
     // プリフロップでコンピュータのアクションをチェック（少し遅延させる）
     setTimeout(() => {
@@ -277,39 +279,19 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     }
     
     const handInfo = evaluateComputerHandStrength();
-    const currentBetSize = Math.max(playerBet, computerBet);
-    const initialBet = betAmount; // 初期掛金
-    const raiseFactor = currentBetSize / initialBet; // 現在のベット倍率
     
-    // ハンドの強さに応じた判断
-    if (handInfo.rank >= 3) { // スリーカード以上
-      return Math.random() < 0.8 ? 'raise' : 'call'; // 絶対降りない
-    } else if (handInfo.rank === 2) { // ツーペア
-      if (raiseFactor <= 10) { // 10倍以内なら降りない
-        return Math.random() < 0.6 ? 'call' : 'raise';
-      } else {
-        return Math.random() < 0.3 ? 'call' : 'fold'; // 10倍超えたら慎重に
-      }
-    } else if (handInfo.rank === 1) { // ワンペア
-      if (raiseFactor <= 5) { // 5倍以内なら降りない
-        return Math.random() < 0.7 ? 'call' : 'raise';
-      } else {
-        return Math.random() < 0.2 ? 'call' : 'fold'; // 5倍超えたらほぼ降りる
-      }
+    // 新しいシンプルなアルゴリズム
+    if (handInfo.rank >= 7) { // フォーカード以上
+      return 'raise';
+    } else if (handInfo.rank >= 4) { // ストレート以上
+      return Math.random() < 0.7 ? 'call' : 'raise';
+    } else if (handInfo.rank >= 1) { // ワンペア以上
+      return Math.random() < 0.6 ? 'call' : 'fold';
     } else { // ハイカードのみ
-      if (handInfo.highCard >= 12) { // Q以上のハイカード
-        if (raiseFactor <= 2) {
-          return Math.random() < 0.5 ? 'call' : 'fold';
-        } else {
-          return Math.random() < 0.2 ? 'call' : 'fold';
-        }
+      if (handInfo.highCard >= 12) { // Q以上
+        return Math.random() < 0.4 ? 'call' : 'fold';
       } else {
-        // 弱いハンド
-        if (raiseFactor <= 1.5) {
-          return Math.random() < 0.3 ? 'call' : 'fold';
-        } else {
-          return 'fold';
-        }
+        return Math.random() < 0.2 ? 'call' : 'fold';
       }
     }
   };
@@ -743,26 +725,16 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
           {gameState === 'betting' && (
             <div className="text-center">
               <h3 className="text-base xs:text-lg sm:text-xl font-bold mb-2 xs:mb-3 sm:mb-4">新しいゲームを開始</h3>
-              <div className="mb-2 xs:mb-3 sm:mb-4">
-                <label className="block text-xs xs:text-sm font-medium mb-1 xs:mb-2">ベット額を選択:</label>
-                <div className="flex justify-center gap-1 xs:gap-2 flex-wrap">
-                  {[10, 25, 50, 100, 250].map(amount => (
-                    <button
-                      key={amount}
-                      onClick={() => setBetAmount(amount)}
-                      className={`px-2 py-1 xs:px-3 xs:py-2 sm:px-4 sm:py-2 rounded-lg text-xs xs:text-sm sm:text-base ${betAmount === amount ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-                    >
-                      {amount}
-                    </button>
-                  ))}
-                </div>
+              <div className="mb-2 xs:mb-3 sm:mb-4 text-sm xs:text-base">
+                <p className="text-gray-600 mb-2">固定ベット: 10コイン（両プレイヤー）</p>
+                <p className="text-gray-500 text-xs xs:text-sm">※ベット額の変更はできません</p>
               </div>
               <button 
                 onClick={startNewGame}
-                disabled={currentUser.balance < betAmount}
+                disabled={currentUser.balance < 10}
                 className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 xs:px-6 xs:py-2 sm:px-8 sm:py-3 rounded-lg text-sm xs:text-base sm:text-lg font-bold"
               >
-                ゲーム開始 ({betAmount}コイン)
+                ゲーム開始 (10コイン)
               </button>
             </div>
           )}
