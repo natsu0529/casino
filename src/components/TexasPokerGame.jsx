@@ -71,6 +71,8 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
 
     // 残高から初期ベット額を引く
     const newBalance = currentUser.balance - betAmount;
+    console.log(`=== GAME START ===`);
+    console.log(`Before: ${currentUser.balance}, Bet: ${betAmount}, After: ${newBalance}`);
     onBalanceUpdate(newBalance);
     
     console.log(`New game started - Initial bet: ${betAmount}, Pot: ${betAmount * 2}, Player balance: ${newBalance}`);
@@ -408,8 +410,6 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       
       setPot(prev => prev + raiseAmount);
       setPlayerBet(prev => prev + raiseAmount);
-      const newBalance = currentUser.balance - raiseAmount;
-      onBalanceUpdate(newBalance);
       
       console.log(`Player raises - Raise amount: ${raiseAmount}, New pot will be: ${pot + raiseAmount}, Player bet will be: ${playerBet + raiseAmount}`);
       
@@ -420,7 +420,10 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       if (computerActionType === 'fold') {
         // レイズ後は常にポット全体を獲得（追加ベットが発生している）
         const winAmount = pot + raiseAmount; // 更新後のポット値を正しく計算
-        const finalBalance = newBalance + winAmount;
+        // 残高更新を1回にまとめる：レイズ分を引いて勝利金を加算
+        const finalBalance = currentUser.balance - raiseAmount + winAmount;
+        console.log(`=== COMPUTER FOLDED AFTER RAISE ===`);
+        console.log(`Before: ${currentUser.balance}, Raise: ${raiseAmount}, Win: ${winAmount}, After: ${finalBalance}`);
         onBalanceUpdate(finalBalance);
         // playerBetは既にraiseAmountが加算済みなので、二重計算を避ける
         const totalPlayerBet = playerBet + raiseAmount; // レイズ後のプレイヤー総ベット額
@@ -499,6 +502,7 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     setGameState('showdown');
     
     console.log(`=== SHOWDOWN DEBUG ===`);
+    console.log(`Current user balance before showdown: ${currentUser.balance}`);
     console.log(`Pot: ${pot}, Player bet: ${playerBet}, Computer bet: ${computerBet}`);
     
     const playerBestHand = getBestHand(playerCards, communityCards);
@@ -516,6 +520,8 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       // 利益 = 獲得金額 - プレイヤーがゲーム中に支払った総額
       profit = winAmount - playerBet;
       const newBalance = currentUser.balance + winAmount;
+      console.log(`=== PLAYER WINS (SHOWDOWN) ===`);
+      console.log(`Before: ${currentUser.balance}, Win amount: ${winAmount}, After: ${newBalance}, Profit: ${profit}`);
       onBalanceUpdate(newBalance);
       console.log(`Player wins! Pot: ${pot}, Player bet: ${playerBet}, Win amount: ${winAmount}, Profit: ${profit}, New balance: ${newBalance}`);
     } else if (computerBestHand.rank > playerBestHand.rank || 
