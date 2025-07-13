@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
 const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
-  const [user, setUser] = useState(currentUser);
   const [gameState, setGameState] = useState('betting'); // betting, preflop, flop, turn, river, showdown
   const [playerCards, setPlayerCards] = useState([]);
   const [computerCards, setComputerCards] = useState([]);
@@ -16,10 +15,6 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
   const [showRules, setShowRules] = useState(false);
   const [playerAction, setPlayerAction] = useState('');
   const [computerAction, setComputerAction] = useState('');
-
-  useEffect(() => {
-    setUser(currentUser);
-  }, [currentUser]);
 
   const createDeck = () => {
     const suits = ['♠', '♥', '♦', '♣'];
@@ -53,7 +48,7 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
   };
 
   const startNewGame = () => {
-    if (!user || user.balance < betAmount) {
+    if (!currentUser || currentUser.balance < betAmount) {
       setMessage('残高が不足しています');
       return;
     }
@@ -75,11 +70,10 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     setComputerAction('');
 
     // 残高から初期ベット額を引く
-    const updatedUser = { ...user, balance: user.balance - betAmount };
-    setUser(updatedUser);
-    onBalanceUpdate(updatedUser.balance);
+    const newBalance = currentUser.balance - betAmount;
+    onBalanceUpdate(newBalance);
     
-    console.log(`New game started - Initial bet: ${betAmount}, Pot: ${betAmount * 2}, Player balance: ${updatedUser.balance}`);
+    console.log(`New game started - Initial bet: ${betAmount}, Pot: ${betAmount * 2}, Player balance: ${newBalance}`);
   };
 
   const dealCommunityCards = (count) => {
@@ -369,10 +363,10 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       
       if (computerActionType === 'fold') {
         const winAmount = pot;
-        const updatedUser = { ...user, balance: user.balance + winAmount };
-        setUser(updatedUser);
-        onBalanceUpdate(updatedUser.balance);
+        const newBalance = currentUser.balance + winAmount;
+        onBalanceUpdate(newBalance);
         const profit = winAmount - playerBet;
+        console.log(`Computer folded after call - Win amount: ${winAmount}, Player bet: ${playerBet}, Profit: ${profit}, New balance: ${newBalance}`);
         setMessage(`コンピュータがフォールドしました。あなたの勝利です！ ${winAmount}コイン獲得（利益: ${profit}コイン）`);
         addToHistory('コール', 'あなた', profit);
         setGameState('betting');
@@ -389,28 +383,27 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     
     if (action === 'raise') {
       const raiseAmount = betAmount;
-      if (user.balance < raiseAmount) {
+      if (currentUser.balance < raiseAmount) {
         setMessage('残高が不足しています');
         return;
       }
       
       setPot(prev => prev + raiseAmount);
       setPlayerBet(prev => prev + raiseAmount);
-      const updatedUser = { ...user, balance: user.balance - raiseAmount };
-      setUser(updatedUser);
-      onBalanceUpdate(updatedUser.balance);
+      const newBalance = currentUser.balance - raiseAmount;
+      onBalanceUpdate(newBalance);
       
       // レイズに対するコンピュータのアクションを決定（レイズ専用ロジック使用）
       const computerActionType = getComputerAction(true); // レイズに対する判断
       setComputerAction(computerActionType);
       
       if (computerActionType === 'fold') {
-        const winAmount = pot + raiseAmount;
-        const finalUser = { ...updatedUser, balance: updatedUser.balance + winAmount };
-        setUser(finalUser);
-        onBalanceUpdate(finalUser.balance);
+        const winAmount = pot;
+        const finalBalance = newBalance + winAmount;
+        onBalanceUpdate(finalBalance);
         const totalPlayerBet = playerBet + raiseAmount;
         const profit = winAmount - totalPlayerBet;
+        console.log(`Computer folded after raise - Win amount: ${winAmount}, Total player bet: ${totalPlayerBet}, Profit: ${profit}, New balance: ${finalBalance}`);
         setMessage(`コンピュータがフォールドしました。あなたの勝利です！ ${winAmount}コイン獲得（利益: ${profit}コイン）`);
         addToHistory('レイズ', 'あなた', profit);
         setGameState('betting');
@@ -468,9 +461,8 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       winner = 'あなた';
       winAmount = pot; // ポット全体を獲得
       profit = winAmount - playerBet; // 実際の利益
-      const updatedUser = { ...user, balance: user.balance + winAmount };
-      setUser(updatedUser);
-      onBalanceUpdate(updatedUser.balance);
+      const newBalance = currentUser.balance + winAmount;
+      onBalanceUpdate(newBalance);
       console.log(`Player wins! Pot: ${pot}, Player bet: ${playerBet}, Win amount: ${winAmount}, Profit: ${profit}`);
     } else if (computerBestHand.rank > playerBestHand.rank || 
                (computerBestHand.rank === playerBestHand.rank && computerBestHand.highCard > playerBestHand.highCard)) {
@@ -484,9 +476,8 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
       winner = '引き分け';
       winAmount = playerBet; // プレイヤーのベット分だけ戻る
       profit = 0; // 損益なし
-      const updatedUser = { ...user, balance: user.balance + winAmount };
-      setUser(updatedUser);
-      onBalanceUpdate(updatedUser.balance);
+      const newBalance = currentUser.balance + winAmount;
+      onBalanceUpdate(newBalance);
       console.log(`Draw! Player gets back: ${winAmount}`);
     }
     
@@ -562,7 +553,7 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
           </h1>
           <div className="text-white text-right">
             <div>ユーザー: {user.username}</div>
-            <div>残高: {user.balance}コイン</div>
+            <div>残高: {currentUser.balance}コイン</div>
           </div>
         </div>
 
@@ -685,7 +676,7 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
               </div>
               <button 
                 onClick={startNewGame}
-                disabled={user.balance < betAmount}
+                disabled={currentUser.balance < betAmount}
                 className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-8 py-3 rounded-lg text-lg font-bold"
               >
                 ゲーム開始 ({betAmount}コイン)
@@ -711,7 +702,7 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
                 </button>
                 <button 
                   onClick={() => handlePlayerAction('raise')}
-                  disabled={user.balance < betAmount}
+                  disabled={currentUser.balance < betAmount}
                   className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-bold"
                 >
                   レイズ (+{betAmount})
