@@ -173,10 +173,8 @@ function App() {
         return (
           <TexasPokerGame 
             currentUser={profile}
-            user={user}
             onBalanceUpdate={handleUpdateBalance} 
             onNavigateHome={() => setCurrentPage('home')}
-            onRecordGame={recordGameHistory}
           />
         )
       case 'home':

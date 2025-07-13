@@ -521,7 +521,7 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
     );
   };
 
-  if (!user) {
+  if (!currentUser) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-800 to-green-900 flex items-center justify-center">
         <div className="text-white text-center">
@@ -552,7 +552,7 @@ const TexasPokerGame = ({ currentUser, onBalanceUpdate, onNavigateHome }) => {
             🃏 テキサスホールデムポーカー
           </h1>
           <div className="text-white text-right">
-            <div>ユーザー: {user.username}</div>
+            <div>ユーザー: {currentUser.username}</div>
             <div>残高: {currentUser.balance}コイン</div>
           </div>
         </div>
