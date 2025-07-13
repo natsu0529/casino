@@ -35,13 +35,55 @@
    - "Users can update their own messages"
    - "Users can delete their own messages"
 
-#### 5. 修正をテスト
-スキーマ適用後、React アプリを再起動:
+#### 5. 修正内容の説明
+
+**トリガー関数の改善**:
+- より詳細なデバッグログを追加
+- エラーメッセージを日本語化
+- 段階的購入制約の強化
+
+**フロントエンドの修正**:
+- 爵位の更新をトリガーに委任
+- より適切なエラーハンドリング
+- ロールバック機能の実装
+
+**RLSポリシーの強化**:
+- ポリシーの再作成で権限問題を解決
+- デバッグ用関数の追加
+
+#### 6. テスト手順
+
+1. **基本的な段階的購入テスト**:
+   ```sql
+   -- ユーザーの現在の状態を確認
+   SELECT id, username, title, balance FROM profiles WHERE id = 'ユーザーID';
+   
+   -- 購入可能な爵位を確認
+   SELECT * FROM get_user_title_info('ユーザーID');
+   ```
+
+2. **無効な購入のテスト**:
+   ```sql
+   -- 段階をスキップした購入をテスト（エラーが出るべき）
+   SELECT * FROM test_title_purchase_insert('ユーザーID', '公爵', 1000);
+   ```
+
+3. **正常な購入のテスト**:
+   ```sql
+   -- 正しい段階の購入をテスト
+   SELECT * FROM test_title_purchase_insert('ユーザーID', '男爵', 1000);
+   ```
+
+#### 7. アプリケーション再起動
 ```bash
+cd /Users/natsus/Desktop/casino-app
 pnpm dev
 ```
 
-メッセージボードが正常に動作するはずです！
+#### 8. Postgresログの確認方法
+1. Supabase Dashboard → **Logs** → **Postgres Logs**
+2. `NOTICE:` で始まるメッセージでトリガーの動作を確認
+3. エラーがある場合は詳細な原因が表示される
 
 ---
 
@@ -224,3 +266,41 @@ SELECT * FROM profiles LIMIT 1;
 2. メッセージ投稿のテスト
 3. メッセージ取得のテスト
 4. リアルタイム更新の動作確認
+
+## 🚨 緊急: 爵位購入システム エラーの修正
+
+**エラー**: `Failed to record purchase history` と `status 400` エラー
+**原因**: トリガー関数とRLSポリシーの問題
+
+### 即座に修正する手順:
+
+#### 1. 修正されたスキーマの適用
+1. Supabase ダッシュボードの **SQL Editor** にアクセス
+2. `shop-schema.sql` ファイルの全内容をコピー
+3. SQL エディターに貼り付けて **"Run"** をクリック
+
+#### 2. 爵位購入システムのテスト
+以下のクエリでシステムをテスト:
+
+```sql
+-- 現在のユーザーの爵位情報を確認
+SELECT * FROM get_user_title_info('ユーザーID');
+
+-- 購入履歴テーブルへのアクセステスト
+SELECT * FROM check_title_purchase_access('ユーザーID');
+
+-- テスト購入実行
+SELECT * FROM test_title_purchase_insert('ユーザーID', '伯爵', 1000);
+```
+
+#### 3. デバッグログの確認
+1. **SQL Editor** で購入をテスト実行
+2. **Logs** → **Postgres Logs** でデバッグメッセージを確認
+3. `NOTICE:` で始まるメッセージで詳細を確認
+
+#### 4. 問題の特定と解決
+- **段階的購入エラー**: 現在の爵位から次の段階のみ購入可能
+- **RLSポリシーエラー**: `auth.uid()` と `user_id` の一致を確認
+- **トリガーエラー**: デバッグログで詳細な原因を確認
+
+---

@@ -286,36 +286,73 @@ export const useProfile = (userId) => {
       if (fetchError) throw fetchError
 
       if (currentProfile.balance < price) {
-        throw new Error('Insufficient balance')
+        throw new Error('残高が不足しています')
       }
 
-      // 残高を減らして爵位を設定
+      // 残高のみを減らす（爵位の更新はトリガーで行う）
       const newBalance = currentProfile.balance - price
       const { data: updatedProfile, error: updateError } = await supabase
         .from('profiles')
-        .update({ 
-          balance: newBalance,
-          title: titleName
-        })
+        .update({ balance: newBalance })
         .eq('id', userId)
         .select()
         .single()
 
       if (updateError) throw updateError
 
-      // 購入履歴を記録
-      const { error: historyError } = await supabase
+      // 購入履歴を記録（トリガーが段階的制約をチェックし、profiles.titleを更新）
+      const { data: purchaseData, error: historyError } = await supabase
         .from('title_purchases')
         .insert({
           user_id: userId,
           title: titleName,
           price: price
         })
+        .select()
 
       if (historyError) {
-        console.warn('Failed to record purchase history:', historyError)
-        // 履歴記録の失敗は致命的ではないので続行
+        console.error('Failed to record purchase history:', historyError)
+        // 購入履歴の記録が失敗した場合、残高をロールバック
+        const { error: rollbackError } = await supabase
+          .from('profiles')
+          .update({ balance: currentProfile.balance }) // 元の残高に戻す
+          .eq('id', userId)
+        
+        if (rollbackError) {
+          console.error('Failed to rollback balance update:', rollbackError)
+        }
+        
+        // より詳細なエラーメッセージを提供
+        const errorMessage = historyError.message || '不明なエラー'
+        if (errorMessage.includes('段階的に購入')) {
+          throw new Error('爵位は段階的に購入する必要があります。現在の爵位の次の段階のみ購入可能です。')
+        } else if (errorMessage.includes('男爵から購入')) {
+          throw new Error('最初の爵位は男爵から購入してください。')
+        } else {
+          throw new Error(`爵位の購入に失敗しました: ${errorMessage}`)
+        }
       }
+
+      // 購入成功後、最新のプロフィール（爵位含む）を取得
+      const { data: finalProfile, error: finalFetchError } = await supabase
+        .from('profiles')
+        .select()
+        .eq('id', userId)
+        .single()
+
+      if (finalFetchError) {
+        console.error('Failed to fetch updated profile:', finalFetchError)
+        // とりあえず手動で更新
+        const manualProfile = { ...updatedProfile, title: titleName }
+        setProfile(manualProfile)
+        console.log('Title purchased successfully (manual update):', manualProfile)
+        return { data: manualProfile, error: null }
+      }
+
+      console.log('Purchase history recorded successfully:', purchaseData)
+      setProfile(finalProfile)
+      console.log('Title purchased successfully:', finalProfile)
+      return { data: finalProfile, error: null }
 
       setProfile(updatedProfile)
       console.log('Title purchased successfully:', updatedProfile)
