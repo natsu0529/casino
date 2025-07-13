@@ -34,6 +34,29 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
   const [message, setMessage] = useState('')
   const [lastWin, setLastWin] = useState(0)
   const [gameHistory, setGameHistory] = useState([])
+  const [autoSpin, setAutoSpin] = useState(false)
+  const [autoSpinCount, setAutoSpinCount] = useState(0)
+  const [maxAutoSpins, setMaxAutoSpins] = useState(10)
+
+  // 連続スピン制御関数
+  const startAutoSpin = (count) => {
+    if (spinning || autoSpin) return
+    if (currentUser.balance < betAmount) {
+      setMessage('残高が不足しています。')
+      return
+    }
+    
+    setAutoSpin(true)
+    setAutoSpinCount(0)
+    setMaxAutoSpins(count)
+    spin()
+  }
+
+  const stopAutoSpin = () => {
+    setAutoSpin(false)
+    setAutoSpinCount(0)
+    setMessage('連続スピンを停止しました。')
+  }
 
   // ペイアウトテーブル（期待値1.1調整版）
   const getPayoutMultiplier = (reel1, reel2, reel3) => {
@@ -107,18 +130,20 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     
     if (betAmount > currentUser.balance) {
       setMessage('残高が不足しています。')
+      setAutoSpin(false)
+      setAutoSpinCount(0)
       return
     }
 
     setSpinning(true)
-    setMessage('スピン中...')
+    setMessage(autoSpin ? `連続スピン中... (${autoSpinCount + 1}/${maxAutoSpins})` : 'スピン中...')
     setLastWin(0)
 
     // 残高から賭け金を引く
     onUpdateBalance(currentUser.balance - betAmount)
 
     // アニメーション効果のためのランダム回転
-    const spinDuration = 2000 + Math.random() * 1000
+    const spinDuration = autoSpin ? 1000 : 2000 + Math.random() * 1000 // 連続スピン時は短縮
     const spinInterval = 100 // 100msごとに更新
 
     let elapsed = 0
@@ -145,7 +170,7 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
         // 結果判定
         setTimeout(() => {
           checkResult(finalReels)
-        }, 500)
+        }, autoSpin ? 200 : 500) // 連続スピン時は短縮
       }
     }, spinInterval)
   }
@@ -168,10 +193,34 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
       } else if (multiplier >= 10) {
         setMessage(`⭐ 当たり！ ${winAmount.toLocaleString()}コイン獲得！ ⭐`)
       } else {
-        setMessage(`� 小当たり！ ${winAmount.toLocaleString()}コイン獲得！`)
+        setMessage(`🍒 小当たり！ ${winAmount.toLocaleString()}コイン獲得！`)
       }
     } else {
-      setMessage('残念！もう一度挑戦してください。')
+      setMessage(autoSpin ? `連続スピン中... (${autoSpinCount + 1}/${maxAutoSpins})` : '残念！もう一度挑戦してください。')
+    }
+
+    // 連続スピンの処理
+    if (autoSpin) {
+      const newCount = autoSpinCount + 1
+      setAutoSpinCount(newCount)
+      
+      if (newCount >= maxAutoSpins) {
+        // 連続スピン終了
+        setAutoSpin(false)
+        setAutoSpinCount(0)
+        setMessage(`連続スピン完了！ ${maxAutoSpins}回実行しました。`)
+      } else {
+        // 次のスピンを実行
+        setTimeout(() => {
+          if (currentUser.balance >= betAmount) {
+            spin()
+          } else {
+            setAutoSpin(false)
+            setAutoSpinCount(0)
+            setMessage('残高不足により連続スピンを停止しました。')
+          }
+        }, 1000) // 1秒後に次のスピン
+      }
     }
 
     // ゲーム履歴に追加
@@ -238,20 +287,72 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
               </select>
             </div>
 
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center gap-2 xs:gap-3">
+              {/* 通常スピンボタン */}
               <button
                 id="slot-spin-button"
                 onClick={spin}
-                disabled={spinning || betAmount > currentUser.balance}
+                disabled={spinning || betAmount > currentUser.balance || autoSpin}
                 className={`px-4 py-2 xs:px-6 xs:py-2 sm:px-8 sm:py-3 rounded-lg font-bold text-white transition-all duration-300 text-xs xs:text-sm sm:text-base ${
-                  spinning || betAmount > currentUser.balance
+                  spinning || betAmount > currentUser.balance || autoSpin
                     ? 'bg-gray-500 cursor-not-allowed'
                     : 'bg-red-600 hover:bg-red-700 hover:scale-105'
                 }`}
                 aria-label={spinning ? 'スピン中' : 'スピン実行'}
               >
-                {spinning ? 'スピン中...' : 'スピン'}
+                {spinning ? 'スピン中...' : autoSpin ? '連続スピン中' : 'スピン'}
               </button>
+              
+              {/* 連続スピンボタン */}
+              {!autoSpin ? (
+                <div className="flex gap-1 xs:gap-2">
+                  <button
+                    onClick={() => startAutoSpin(10)}
+                    disabled={spinning || betAmount > currentUser.balance}
+                    className={`px-2 py-1 xs:px-3 xs:py-2 rounded text-xs xs:text-sm font-medium ${
+                      spinning || betAmount > currentUser.balance
+                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    }`}
+                  >
+                    10回
+                  </button>
+                  <button
+                    onClick={() => startAutoSpin(25)}
+                    disabled={spinning || betAmount > currentUser.balance}
+                    className={`px-2 py-1 xs:px-3 xs:py-2 rounded text-xs xs:text-sm font-medium ${
+                      spinning || betAmount > currentUser.balance
+                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    }`}
+                  >
+                    25回
+                  </button>
+                  <button
+                    onClick={() => startAutoSpin(50)}
+                    disabled={spinning || betAmount > currentUser.balance}
+                    className={`px-2 py-1 xs:px-3 xs:py-2 rounded text-xs xs:text-sm font-medium ${
+                      spinning || betAmount > currentUser.balance
+                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    }`}
+                  >
+                    50回
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-1">
+                  <div className="text-white text-xs xs:text-sm">
+                    連続スピン: {autoSpinCount}/{maxAutoSpins}
+                  </div>
+                  <button
+                    onClick={stopAutoSpin}
+                    className="px-3 py-1 xs:px-4 xs:py-2 bg-red-600 hover:bg-red-700 text-white rounded text-xs xs:text-sm font-medium"
+                  >
+                    停止
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

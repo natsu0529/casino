@@ -21,6 +21,9 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
   const [multiplier, setMultiplier] = useState(1)
   const [bonusRound, setBonusRound] = useState(false)
   const [freeSpins, setFreeSpins] = useState(0)
+  const [autoSpin, setAutoSpin] = useState(false)
+  const [autoSpinCount, setAutoSpinCount] = useState(0)
+  const [maxAutoSpins, setMaxAutoSpins] = useState(10)
 
   // 重み付きランダム選択
   const getWeightedRandomSymbol = () => {
@@ -119,11 +122,18 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     
     if (currentBet > currentUser.balance) {
       setMessage('残高が不足しています。')
+      setAutoSpin(false)
+      setAutoSpinCount(0)
       return
     }
 
     setSpinning(true)
-    setMessage('スピン中...')
+    const spinMessage = freeSpins > 0 
+      ? `フリースピン中... (残り${freeSpins}回)`
+      : autoSpin 
+        ? `連続スピン中... (${autoSpinCount + 1}/${maxAutoSpins})`
+        : 'スピン中...'
+    setMessage(spinMessage)
     setLastWin(0)
 
     // フリースピンでない場合のみ残高を減らす
@@ -133,8 +143,8 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       setFreeSpins(prev => prev - 1)
     }
 
-    // スピンアニメーション
-    const spinDuration = 3000 + Math.random() * 1000
+    // スピンアニメーション（連続スピン時は短縮）
+    const spinDuration = (autoSpin && freeSpins === 0) ? 1500 : 3000 + Math.random() * 1000
     const spinInterval = 100
 
     let elapsed = 0
@@ -197,7 +207,33 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     } else if (bonusTriggered) {
       setMessage('🎰 ボーナスラウンド開始！フリースピン10回！ 🎰')
     } else {
-      setMessage(freeSpins > 0 ? `フリースピン残り: ${freeSpins}回` : '残念！もう一度挑戦してください。')
+      const defaultMessage = freeSpins > 0 ? `フリースピン残り: ${freeSpins}回` : '残念！もう一度挑戦してください。'
+      const autoSpinMessage = autoSpin && freeSpins === 0 ? `連続スピン中... (${autoSpinCount + 1}/${maxAutoSpins})` : defaultMessage
+      setMessage(autoSpinMessage)
+    }
+
+    // 連続スピンの処理（フリースピン中は除く）
+    if (autoSpin && freeSpins === 0) {
+      const newCount = autoSpinCount + 1
+      setAutoSpinCount(newCount)
+      
+      if (newCount >= maxAutoSpins) {
+        // 連続スピン終了
+        setAutoSpin(false)
+        setAutoSpinCount(0)
+        setMessage(`連続スピン完了！ ${maxAutoSpins}回実行しました。`)
+      } else {
+        // 次のスピンを実行
+        setTimeout(() => {
+          if (currentUser.balance >= betAmount) {
+            spin()
+          } else {
+            setAutoSpin(false)
+            setAutoSpinCount(0)
+            setMessage('残高不足により連続スピンを停止しました。')
+          }
+        }, 1500) // 1.5秒後に次のスピン
+      }
     }
 
     // フリースピン終了チェック
@@ -226,6 +262,26 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         winAmount > originalBetAmount ? 'win' : 'lose'
       )
     }
+  }
+
+  // 連続スピン制御関数
+  const startAutoSpin = (count) => {
+    if (spinning || autoSpin || freeSpins > 0) return
+    if (currentUser.balance < betAmount) {
+      setMessage('残高が不足しています。')
+      return
+    }
+    
+    setAutoSpin(true)
+    setAutoSpinCount(0)
+    setMaxAutoSpins(count)
+    spin()
+  }
+
+  const stopAutoSpin = () => {
+    setAutoSpin(false)
+    setAutoSpinCount(0)
+    setMessage('連続スピンを停止しました。')
   }
 
   return (
@@ -315,16 +371,72 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
               </div>
             </div>
 
-            <div className="flex justify-center space-x-4">
+            <div className="flex flex-col items-center gap-3 xs:gap-4">
+              {/* メインスピンボタン */}
               <button
                 id="main-spin-button"
                 onClick={spin}
-                disabled={spinning || (!freeSpins && betAmount > currentUser.balance)}
+                disabled={spinning || (!freeSpins && betAmount > currentUser.balance) || autoSpin}
                 className="px-6 py-3 xs:px-8 xs:py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-lg xs:text-xl rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
                 aria-label={spinning ? 'スピン中' : freeSpins > 0 ? 'フリースピン実行' : 'スピン実行'}
               >
-                {spinning ? 'スピン中...' : freeSpins > 0 ? 'フリースピン' : 'スピン'}
+                {spinning ? 'スピン中...' : freeSpins > 0 ? 'フリースピン' : autoSpin ? '連続スピン中' : 'スピン'}
               </button>
+              
+              {/* 連続スピンコントロール */}
+              {freeSpins === 0 && (
+                <div className="flex flex-col items-center gap-2">
+                  {!autoSpin ? (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => startAutoSpin(10)}
+                        disabled={spinning || betAmount > currentUser.balance}
+                        className={`px-3 py-2 rounded font-medium text-sm ${
+                          spinning || betAmount > currentUser.balance
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        }`}
+                      >
+                        連続10回
+                      </button>
+                      <button
+                        onClick={() => startAutoSpin(25)}
+                        disabled={spinning || betAmount > currentUser.balance}
+                        className={`px-3 py-2 rounded font-medium text-sm ${
+                          spinning || betAmount > currentUser.balance
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        }`}
+                      >
+                        連続25回
+                      </button>
+                      <button
+                        onClick={() => startAutoSpin(50)}
+                        disabled={spinning || betAmount > currentUser.balance}
+                        className={`px-3 py-2 rounded font-medium text-sm ${
+                          spinning || betAmount > currentUser.balance
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        }`}
+                      >
+                        連続50回
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="text-white text-sm bg-blue-600/30 px-3 py-1 rounded">
+                        連続スピン: {autoSpinCount}/{maxAutoSpins}
+                      </div>
+                      <button
+                        onClick={stopAutoSpin}
+                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-medium text-sm"
+                      >
+                        停止
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
