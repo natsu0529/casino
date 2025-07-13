@@ -23,6 +23,8 @@ The message board feature is fully coded but needs the database table created in
 ### What Needs to Be Done ⏳
 - ⏳ Apply `message-board-schema.sql` to Supabase database
 
+**Note**: The schema includes `DROP POLICY IF EXISTS` statements to prevent duplicate policy errors, so it's safe to run multiple times.
+
 ---
 
 ## 📋 Step-by-Step Database Fix

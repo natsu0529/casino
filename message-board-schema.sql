@@ -15,21 +15,25 @@ CREATE INDEX IF NOT EXISTS idx_message_board_user_id ON message_board(user_id);
 ALTER TABLE message_board ENABLE ROW LEVEL SECURITY;
 
 -- 全ユーザーがメッセージを読むことができるポリシー
+DROP POLICY IF EXISTS "Anyone can read messages" ON message_board;
 CREATE POLICY "Anyone can read messages" ON message_board
   FOR SELECT
   USING (true);
 
 -- 認証済みユーザーのみがメッセージを投稿できるポリシー
+DROP POLICY IF EXISTS "Authenticated users can insert messages" ON message_board;
 CREATE POLICY "Authenticated users can insert messages" ON message_board
   FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
 -- ユーザーは自分のメッセージのみ更新・削除できるポリシー
+DROP POLICY IF EXISTS "Users can update their own messages" ON message_board;
 CREATE POLICY "Users can update their own messages" ON message_board
   FOR UPDATE
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own messages" ON message_board;
 CREATE POLICY "Users can delete their own messages" ON message_board
   FOR DELETE
   USING (auth.uid() = user_id);
@@ -43,6 +47,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- 既存のトリガーを削除してから新しいトリガーを作成
+DROP TRIGGER IF EXISTS update_message_board_updated_at ON message_board;
 CREATE TRIGGER update_message_board_updated_at
   BEFORE UPDATE ON message_board
   FOR EACH ROW
