@@ -158,7 +158,7 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     }
 
     setSpinning(true)
-    setMessage(autoSpin ? `連続スピン中... (${autoSpinCount + 1}/${maxAutoSpins})` : 'スピン中...')
+    setMessage(autoSpinRef.current ? `連続スピン中... (${autoSpinCount + 1}/${maxAutoSpins})` : 'スピン中...')
     setLastWin(0)
 
     // 残高から賭け金を引く
@@ -167,7 +167,7 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
     currentBalanceRef.current = newBalance
 
     // アニメーション効果のためのランダム回転
-    const spinDuration = autoSpin ? 1000 : 2000 + Math.random() * 1000 // 連続スピン時は短縮
+    const spinDuration = autoSpinRef.current ? 1000 : 2000 + Math.random() * 1000 // 連続スピン時は短縮
     const spinInterval = 100 // 100msごとに更新
 
     let elapsed = 0
@@ -194,7 +194,7 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
         // 結果判定
         setTimeout(() => {
           checkResult(finalReels)
-        }, autoSpin ? 200 : 500) // 連続スピン時は短縮
+        }, autoSpinRef.current ? 200 : 500) // 連続スピン時は短縮
       }
     }, spinInterval)
   }
@@ -216,7 +216,7 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
       // 内部残高も更新
       currentBalanceRef.current = currentUser.balance + winAmount
       
-      if (!autoSpin) {
+      if (!autoSpinRef.current) {
         // 連続スピン中でない場合のみメッセージを表示
         if (multiplier >= 77) {
           setMessage(`🎉 ラッキーセブン！ ${winAmount.toLocaleString()}コイン獲得！ 🎉`)
@@ -228,19 +228,19 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
           setMessage(`🍒 小当たり！ ${winAmount.toLocaleString()}コイン獲得！`)
         }
       }
-    } else if (!autoSpin) {
+    } else if (!autoSpinRef.current) {
       setMessage('残念！もう一度挑戦してください。')
     }
 
     console.log(`=== 連続スピン条件チェック ===`)
-    console.log(`autoSpin: ${autoSpin}`)
+    console.log(`autoSpin: ${autoSpin}, autoSpinRef.current: ${autoSpinRef.current}`)
     
-    // 連続スピンの処理
-    if (autoSpin) {
+    // 連続スピンの処理 - refの値を使用
+    if (autoSpinRef.current) {
       const newCount = autoSpinCount + 1
       console.log(`=== 連続スピン処理開始 ===`)
       console.log(`現在のカウント: ${autoSpinCount}, 新しいカウント: ${newCount}, 最大回数: ${maxAutoSpins}`)
-      console.log(`autoSpin状態: ${autoSpin}`)
+      console.log(`autoSpin状態: ${autoSpin}, autoSpinRef.current: ${autoSpinRef.current}`)
       
       setAutoSpinCount(newCount)
       
@@ -276,7 +276,7 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
         }, 1000) // 1秒後に次のスピン
       }
     } else {
-      console.log(`連続スピン処理をスキップ（autoSpin: ${autoSpin}）`)
+      console.log(`連続スピン処理をスキップ（autoSpin: ${autoSpin}, autoSpinRef.current: ${autoSpinRef.current}）`)
     }
 
     // ゲーム履歴に追加
