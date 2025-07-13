@@ -62,10 +62,20 @@ BEGIN
   -- 購入しようとしている爵位のインデックスを取得
   new_index := array_position(title_order, NEW.title);
 
+  -- デバッグ用ログ
+  RAISE NOTICE 'Current title: %, Current index: %, New title: %, New index: %', current_title, current_index, NEW.title, new_index;
+
   -- 購入が段階的でない場合はエラーをスロー
-  IF new_index IS NULL OR new_index != current_index + 1 THEN
+  IF current_title IS NULL AND NEW.title != '男爵' THEN
+    RAISE EXCEPTION 'Invalid title purchase: You must start with 男爵.';
+  ELSIF new_index IS NULL THEN
+    RAISE EXCEPTION 'Invalid title purchase: Title does not exist in the order list.';
+  ELSIF new_index != current_index + 1 THEN
     RAISE EXCEPTION 'Invalid title purchase: You can only purchase the next title in order.';
   END IF;
+
+  -- profilesテーブルを更新して爵位を反映
+  UPDATE profiles SET title = NEW.title WHERE id = NEW.user_id;
 
   RETURN NEW;
 END;
