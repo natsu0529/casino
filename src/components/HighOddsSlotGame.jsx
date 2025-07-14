@@ -53,6 +53,17 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     pausedAutoSpinRef.current = pausedAutoSpin
   }, [pausedAutoSpin])
 
+  // freeSpinsの変化を監視し、フリースピンがセットされた瞬間に自動開始
+  useEffect(() => {
+    if (freeSpins > 0 && !spinning && bonusRound) {
+      console.log('フリースピンが検出されました。自動スピンを開始します:', freeSpins)
+      // 少し遅延を入れてからスピンを開始（UIの更新を確実にするため）
+      setTimeout(() => {
+        spin()
+      }, 100)
+    }
+  }, [freeSpins, spinning, bonusRound])
+
   // 重み付きランダム選択
   const getWeightedRandomSymbol = () => {
     const totalWeight = symbols.reduce((sum, symbol) => sum + symbol.weight, 0)
@@ -262,15 +273,15 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       pausedAutoSpinRef.current = true
       setMessage('🎰 ボーナスラウンド開始！フリースピン10回！ 🎰')
       
-      // フリースピンを自動で開始（少し遅延してfreeSpinsが確実にセットされるのを待つ）
-      setTimeout(() => {
-        console.log(`=== フリースピン自動開始チェック ===`)
-        console.log(`現在のfreeSpins: ${freeSpins}`)
-        if (freeSpins > 0 && !spinning) {
-          console.log(`=== フリースピン自動開始実行 ===`)
-          spin()
-        }
-      }, 3000) // 3秒待機してからフリースピン開始
+      // フリースピンの自動開始はuseEffectで処理（重複を避けるためコメントアウト）
+      // setTimeout(() => {
+      //   console.log(`=== フリースピン自動開始チェック ===`)
+      //   console.log(`現在のfreeSpins: ${freeSpins}`)
+      //   if (freeSpins > 0 && !spinning) {
+      //     console.log(`=== フリースピン自動開始実行 ===`)
+      //     spin()
+      //   }
+      // }, 3000)
       
       return // 早期リターンでこれ以上の処理を停止
     }
