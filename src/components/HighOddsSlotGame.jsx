@@ -67,8 +67,8 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       }, 2500) // 2.5秒待機
       
       return () => clearTimeout(timer) // クリーンアップ
-    } else if (freeSpins === 0 && bonusRound && pausedAutoSpinRef.current) {
-      console.log('useEffectでフリースピン終了を検出しました')
+    } else if (freeSpins === 1 && bonusRound && pausedAutoSpinRef.current) {
+      console.log('useEffectでフリースピン終了を検出しました（最後の1回）')
       // フリースピン終了時の処理は checkResult で行うため、ここでは何もしない
     }
   }, [freeSpins, spinning, bonusRound])
@@ -272,16 +272,6 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     console.log('spinning状態をfalseに設定')
     setSpinning(false) // 確実にspinning状態を解除
     
-    // フリースピンの場合は回数を減算
-    if (freeSpins > 0) {
-      console.log(`フリースピン減算前: ${freeSpins}`)
-      setFreeSpins(prev => {
-        const newCount = prev - 1
-        console.log(`フリースピン減算後: ${newCount}`)
-        return newCount
-      })
-    }
-    
     const { totalMultiplier, winningLines } = checkPaylines(finalReels)
     const bonusTriggered = checkBonus(finalReels)
     
@@ -354,8 +344,8 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     //   return
     // }
     
-    // フリースピン終了後の連続スピン再開チェック（減算後に0になった場合）
-    if (freeSpins === 0 && bonusRound && pausedAutoSpinRef.current) {
+    // フリースピン終了後の連続スピン再開チェック（減算前に1の場合、減算後に0になる）
+    if (freeSpins === 1 && bonusRound && pausedAutoSpinRef.current) {
       console.log(`=== フリースピン終了、連続スピン再開準備 ===`)
       console.log(`pausedAutoSpinCount: ${pausedAutoSpinCount}, pausedMaxAutoSpins: ${pausedMaxAutoSpins}`)
       
@@ -452,8 +442,8 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       console.log(`高オッズ連続スピン処理をスキップ（autoSpin: ${autoSpin}, autoSpinRef.current: ${autoSpinRef.current}, freeSpins: ${freeSpins}）`)
     }
 
-    // フリースピン終了チェック（減算後に0になった場合）
-    if (freeSpins === 0 && bonusRound) {
+    // フリースピン終了チェック（減算前に1の場合、減算後に0になる）
+    if (freeSpins === 1 && bonusRound) {
       if (pausedAutoSpinRef.current) {
         // 連続スピンが一時停止中の場合は、フリースピン終了後の再開処理で処理される
         console.log(`=== フリースピン終了（連続スピン一時停止中） ===`)
@@ -483,6 +473,16 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         winAmount,
         winAmount > originalBetAmount ? 'win' : 'lose'
       )
+    }
+
+    // フリースピンの場合は回数を減算（処理の最後に実行）
+    if (freeSpins > 0) {
+      console.log(`フリースピン減算前: ${freeSpins}`)
+      setFreeSpins(prev => {
+        const newCount = prev - 1
+        console.log(`フリースピン減算後: ${newCount}`)
+        return newCount
+      })
     }
   }
 
