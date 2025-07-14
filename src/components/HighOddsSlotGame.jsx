@@ -35,6 +35,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
   const autoSpinRef = useRef(false)
   const autoSpinCountRef = useRef(0)
   const pausedAutoSpinRef = useRef(false)
+  const maxAutoSpinsRef = useRef(0) // 追加: maxAutoSpinsのref版
   
   // 残高とautoSpinの更新を追跡
   useEffect(() => {
@@ -52,6 +53,10 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
   useEffect(() => {
     pausedAutoSpinRef.current = pausedAutoSpin
   }, [pausedAutoSpin])
+
+  useEffect(() => {
+    maxAutoSpinsRef.current = maxAutoSpins
+  }, [maxAutoSpins])
 
   // freeSpinsの変化を監視し、フリースピンがセットされた瞬間に自動開始
   useEffect(() => {
@@ -87,6 +92,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       // 連続スピンが残っている場合は再開設定
       if (pausedAutoSpinCount < pausedMaxAutoSpins) {
         console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}`)
+        console.log(`復元する値 - autoSpinCount: ${pausedAutoSpinCount}, maxAutoSpins: ${pausedMaxAutoSpins}`)
         setAutoSpin(true)
         autoSpinRef.current = true
         setAutoSpinCount(pausedAutoSpinCount)
@@ -348,9 +354,10 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     // ボーナス発生時に連続スピンを一時停止（フリースピンがセットされる前にキャッチ）
     if (bonusTriggered && autoSpinRef.current && !pausedAutoSpinRef.current) {
       console.log(`=== ボーナス発生により連続スピンを一時停止 ===`)
+      console.log(`保存する値 - pausedAutoSpinCount: ${autoSpinCountRef.current}, pausedMaxAutoSpins: ${maxAutoSpinsRef.current}`)
       setPausedAutoSpin(true)
       setPausedAutoSpinCount(autoSpinCountRef.current)
-      setPausedMaxAutoSpins(maxAutoSpins)
+      setPausedMaxAutoSpins(maxAutoSpinsRef.current) // refの値を使用
       pausedAutoSpinRef.current = true
       setMessage('🎰 ボーナスラウンド開始！フリースピン10回！ 🎰')
       
@@ -519,6 +526,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     setAutoSpinCount(0)
     autoSpinCountRef.current = 0
     setMaxAutoSpins(count)
+    maxAutoSpinsRef.current = count // refも更新
     spin()
   }
 
