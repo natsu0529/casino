@@ -55,12 +55,21 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
 
   // freeSpinsの変化を監視し、フリースピンがセットされた瞬間に自動開始
   useEffect(() => {
-    if (freeSpins > 0 && !spinning && bonusRound) {
+    if (freeSpins > 0 && !spinning && bonusRound && pausedAutoSpinRef.current) {
       console.log('フリースピンが検出されました。自動スピンを開始します:', freeSpins)
       // 少し遅延を入れてからスピンを開始（UIの更新を確実にするため）
-      setTimeout(() => {
-        spin()
-      }, 100)
+      const timer = setTimeout(() => {
+        // 再度フリースピンの状態をチェックして確実に実行
+        if (freeSpins > 0 && !spinning && bonusRound) {
+          console.log('useEffectでフリースピンを実行:', freeSpins)
+          spin()
+        }
+      }, 2500) // 2.5秒待機
+      
+      return () => clearTimeout(timer) // クリーンアップ
+    } else if (freeSpins === 0 && bonusRound && pausedAutoSpinRef.current) {
+      console.log('useEffectでフリースピン終了を検出しました')
+      // フリースピン終了時の処理は checkResult で行うため、ここでは何もしない
     }
   }, [freeSpins, spinning, bonusRound])
 
@@ -140,8 +149,14 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
 
   // ボーナス判定（上位3シンボルでボーナス発生）
   const checkBonus = (reels) => {
+    // フリースピン中は新しいボーナスを発生させない
+    if (freeSpins > 0 || bonusRound) {
+      return false
+    }
+    
     const bonusSymbols = reels.filter(s => s <= 2).length // 💎、🔥、⭐（上位3シンボル）
     if (bonusSymbols >= 3) {
+      console.log(`ボーナス発生！bonusSymbols: ${bonusSymbols}`)
       setFreeSpins(10)
       setBonusRound(true)
       setMessage('ボーナス発生！フリースピン10回獲得！')
@@ -180,9 +195,8 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       const newBalance = currentBalanceRef.current - currentBet
       onUpdateBalance(newBalance)
       currentBalanceRef.current = newBalance
-    } else {
-      setFreeSpins(prev => prev - 1)
     }
+    // フリースピンの減算は checkResult() で結果確定後に行う
 
     // スピンアニメーション（連続スピン時は短縮）
     const spinDuration = (autoSpin && freeSpins === 0) ? 1500 : 3000 + Math.random() * 1000
@@ -228,6 +242,16 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     console.log(`freeSpins: ${freeSpins}`)
     console.log('spinning状態をfalseに設定')
     setSpinning(false) // 確実にspinning状態を解除
+    
+    // フリースピンの場合は回数を減算
+    if (freeSpins > 0) {
+      console.log(`フリースピン減算前: ${freeSpins}`)
+      setFreeSpins(prev => {
+        const newCount = prev - 1
+        console.log(`フリースピン減算後: ${newCount}`)
+        return newCount
+      })
+    }
     
     const { totalMultiplier, winningLines } = checkPaylines(finalReels)
     const bonusTriggered = checkBonus(finalReels)
@@ -286,30 +310,33 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       return // 早期リターンでこれ以上の処理を停止
     }
     
-    // フリースピン中の自動回転処理
-    if (freeSpins > 0 && pausedAutoSpinRef.current && !spinning) {
-      console.log(`=== フリースピン中、次のフリースピンをスケジュール ===`)
-      console.log(`現在のfreeSpins: ${freeSpins}`)
-      setTimeout(() => {
-        console.log(`=== フリースピンタイマー実行 ===`)
-        console.log(`現在のfreeSpins（タイマー内）: ${freeSpins}, spinning: ${spinning}`)
-        if (freeSpins > 0 && !spinning) {
-          console.log(`=== 次のフリースピン実行 ===`)
-          spin()
-        }
-      }, 2500) // 2.5秒後に次のフリースピン
-      return
-    }
+    // フリースピン中の自動回転はuseEffectで処理（重複を避けるためコメントアウト）
+    // if (freeSpins > 0 && pausedAutoSpinRef.current && !spinning) {
+    //   console.log(`=== フリースピン中、次のフリースピンをスケジュール ===`)
+    //   console.log(`現在のfreeSpins: ${freeSpins}`)
+    //   setTimeout(() => {
+    //     console.log(`=== フリースピンタイマー実行 ===`)
+    //     console.log(`現在のfreeSpins（タイマー内）: ${freeSpins}, spinning: ${spinning}`)
+    //     if (freeSpins > 0 && !spinning) {
+    //       console.log(`=== 次のフリースピン実行 ===`)
+    //       spin()
+    //     }
+    //   }, 2500) // 2.5秒後に次のフリースピン
+    //   return
+    // }
     
-    // フリースピン終了後の連続スピン再開チェック
-    if (freeSpins === 1 && bonusRound && pausedAutoSpinRef.current) {
+    // フリースピン終了後の連続スピン再開チェック（減算後に0になった場合）
+    if (freeSpins === 0 && bonusRound && pausedAutoSpinRef.current) {
       console.log(`=== フリースピン終了、連続スピン再開準備 ===`)
+      console.log(`pausedAutoSpinCount: ${pausedAutoSpinCount}, pausedMaxAutoSpins: ${pausedMaxAutoSpins}`)
+      
       setBonusRound(false)
       setPausedAutoSpin(false)
       pausedAutoSpinRef.current = false
       
       // 連続スピンが残っている場合は再開
       if (pausedAutoSpinCount < pausedMaxAutoSpins) {
+        console.log(`連続スピン再開: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}`)
         setAutoSpin(true)
         autoSpinRef.current = true
         setAutoSpinCount(pausedAutoSpinCount)
@@ -319,11 +346,14 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         
         // 次のスピンをスケジュール
         setTimeout(() => {
-          if (autoSpinRef.current && betAmount <= currentBalanceRef.current) {
+          console.log(`連続スピン再開タイマー実行: autoSpinRef.current=${autoSpinRef.current}`)
+          if (autoSpinRef.current && betAmount <= currentBalanceRef.current && freeSpins === 0) {
+            console.log(`連続スピン再開実行`)
             spin()
           }
         }, 2000)
       } else {
+        console.log(`連続スピン完了: ${pausedAutoSpinCount} >= ${pausedMaxAutoSpins}`)
         setMessage('ボーナス終了！連続スピン完了！')
         // リセット
         setPausedAutoSpinCount(0)
@@ -400,8 +430,8 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       console.log(`高オッズ連続スピン処理をスキップ（autoSpin: ${autoSpin}, autoSpinRef.current: ${autoSpinRef.current}, freeSpins: ${freeSpins}）`)
     }
 
-    // フリースピン終了チェック
-    if (freeSpins === 1 && bonusRound) {
+    // フリースピン終了チェック（減算後に0になった場合）
+    if (freeSpins === 0 && bonusRound) {
       if (pausedAutoSpinRef.current) {
         // 連続スピンが一時停止中の場合は、フリースピン終了後の再開処理で処理される
         console.log(`=== フリースピン終了（連続スピン一時停止中） ===`)
@@ -444,6 +474,12 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     
     console.log(`=== 高オッズ連続スピン開始 ===`)
     console.log(`回数: ${count}回`)
+    
+    // 前回の一時停止状態をリセット
+    setPausedAutoSpin(false)
+    setPausedAutoSpinCount(0)
+    setPausedMaxAutoSpins(0)
+    pausedAutoSpinRef.current = false
     
     setAutoSpin(true)
     autoSpinRef.current = true
