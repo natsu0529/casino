@@ -25,10 +25,16 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
   const [autoSpinCount, setAutoSpinCount] = useState(0)
   const [maxAutoSpins, setMaxAutoSpins] = useState(10)
   
+  // 連続スピン中にボーナスが発生した場合の状態保存
+  const [pausedAutoSpin, setPausedAutoSpin] = useState(false)
+  const [pausedAutoSpinCount, setPausedAutoSpinCount] = useState(0)
+  const [pausedMaxAutoSpins, setPausedMaxAutoSpins] = useState(0)
+  
   // 最新の残高を追跡するref
   const currentBalanceRef = useRef(currentUser.balance)
   const autoSpinRef = useRef(false)
   const autoSpinCountRef = useRef(0)
+  const pausedAutoSpinRef = useRef(false)
   
   // 残高とautoSpinの更新を追跡
   useEffect(() => {
@@ -42,6 +48,10 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
   useEffect(() => {
     autoSpinCountRef.current = autoSpinCount
   }, [autoSpinCount])
+
+  useEffect(() => {
+    pausedAutoSpinRef.current = pausedAutoSpin
+  }, [pausedAutoSpin])
 
   // 重み付きランダム選択
   const getWeightedRandomSymbol = () => {
@@ -241,6 +251,50 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
 
     console.log(`=== 高オッズ連続スピン条件チェック ===`)
     console.log(`autoSpin: ${autoSpin}, autoSpinRef.current: ${autoSpinRef.current}, freeSpins: ${freeSpins}`)
+    console.log(`pausedAutoSpin: ${pausedAutoSpin}, bonusTriggered: ${bonusTriggered}`)
+    
+    // ボーナス発生時に連続スピンを一時停止
+    if (bonusTriggered && autoSpinRef.current && freeSpins > 0) {
+      console.log(`=== ボーナス発生により連続スピンを一時停止 ===`)
+      setPausedAutoSpin(true)
+      setPausedAutoSpinCount(autoSpinCountRef.current)
+      setPausedMaxAutoSpins(maxAutoSpins)
+      pausedAutoSpinRef.current = true
+      // 連続スピンを一時停止（完全には停止しない）
+      setMessage('🎰 ボーナスラウンド開始！フリースピン10回！ 🎰')
+      return // 早期リターンでこれ以上の処理を停止
+    }
+    
+    // フリースピン終了後の連続スピン再開チェック
+    if (freeSpins === 1 && bonusRound && pausedAutoSpinRef.current) {
+      console.log(`=== フリースピン終了、連続スピン再開準備 ===`)
+      setBonusRound(false)
+      setPausedAutoSpin(false)
+      pausedAutoSpinRef.current = false
+      
+      // 連続スピンが残っている場合は再開
+      if (pausedAutoSpinCount < pausedMaxAutoSpins) {
+        setAutoSpin(true)
+        autoSpinRef.current = true
+        setAutoSpinCount(pausedAutoSpinCount)
+        autoSpinCountRef.current = pausedAutoSpinCount
+        setMaxAutoSpins(pausedMaxAutoSpins)
+        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedMaxAutoSpins})`)
+        
+        // 次のスピンをスケジュール
+        setTimeout(() => {
+          if (autoSpinRef.current && betAmount <= currentBalanceRef.current) {
+            spin()
+          }
+        }, 2000)
+      } else {
+        setMessage('ボーナス終了！連続スピン完了！')
+        // リセット
+        setPausedAutoSpinCount(0)
+        setPausedMaxAutoSpins(0)
+      }
+      return
+    }
     
     // 連続スピンの処理（フリースピン中は除く） - refの値を使用
     if (autoSpinRef.current && freeSpins === 0) {
@@ -311,7 +365,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     }
 
     // フリースピン終了チェック
-    if (freeSpins === 1 && bonusRound) {
+    if (freeSpins === 1 && bonusRound && !pausedAutoSpinRef.current) {
       setBonusRound(false)
       setMessage('ボーナスラウンド終了！')
     }
@@ -363,6 +417,13 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     autoSpinRef.current = false
     setAutoSpinCount(0)
     autoSpinCountRef.current = 0
+    
+    // 一時停止状態もクリア
+    setPausedAutoSpin(false)
+    pausedAutoSpinRef.current = false
+    setPausedAutoSpinCount(0)
+    setPausedMaxAutoSpins(0)
+    
     setMessage('連続スピンを停止しました。')
   }
 
@@ -468,7 +529,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
               {/* 連続スピンコントロール */}
               {freeSpins === 0 && (
                 <div className="flex flex-col items-center gap-2">
-                  {!autoSpinRef.current ? (
+                  {!autoSpinRef.current && !pausedAutoSpinRef.current ? (
                     <div className="flex gap-2">
                       <button
                         onClick={() => startAutoSpin(10)}
@@ -507,7 +568,10 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                   ) : (
                     <div className="flex flex-col items-center gap-2">
                       <div className="text-white text-sm bg-blue-600/30 px-3 py-1 rounded">
-                        連続スピン: {autoSpinCount}/{maxAutoSpins}
+                        {pausedAutoSpinRef.current 
+                          ? `連続スピン一時停止: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}`
+                          : `連続スピン: ${autoSpinCount}/${maxAutoSpins}`
+                        }
                       </div>
                       <button
                         onClick={stopAutoSpin}
@@ -517,6 +581,24 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                       </button>
                     </div>
                   )}
+                </div>
+              )}
+              
+              {/* フリースピン中の連続スピン状況表示 */}
+              {freeSpins > 0 && pausedAutoSpinRef.current && (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="text-white text-sm bg-purple-600/30 px-3 py-1 rounded">
+                    連続スピン一時停止中: {pausedAutoSpinCount}/${pausedMaxAutoSpins}
+                  </div>
+                  <div className="text-white text-xs text-center">
+                    フリースピン終了後に連続スピンを再開します
+                  </div>
+                  <button
+                    onClick={stopAutoSpin}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-medium text-sm"
+                  >
+                    連続スピン停止
+                  </button>
                 </div>
               )}
             </div>
