@@ -73,6 +73,35 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     }
   }, [freeSpins, spinning, bonusRound])
 
+  // 連続スピンの自動再開を監視
+  useEffect(() => {
+    // フリースピン終了後に連続スピンを自動再開
+    if (autoSpin && autoSpinRef.current && !spinning && freeSpins === 0 && !bonusRound) {
+      console.log('連続スピン自動再開の条件をチェック:', {
+        autoSpin,
+        autoSpinRefCurrent: autoSpinRef.current,
+        spinning,
+        freeSpins,
+        bonusRound,
+        autoSpinCount: autoSpinCountRef.current,
+        maxAutoSpins
+      })
+      
+      // 連続スピンが残っている場合のみ自動実行
+      if (autoSpinCountRef.current < maxAutoSpins) {
+        console.log(`連続スピン自動継続: ${autoSpinCountRef.current}/${maxAutoSpins}`)
+        const timer = setTimeout(() => {
+          if (autoSpinRef.current && !spinning && freeSpins === 0 && betAmount <= currentBalanceRef.current) {
+            console.log('連続スピン自動継続実行')
+            spin()
+          }
+        }, 2000) // 2秒後に自動実行
+        
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [autoSpin, spinning, freeSpins, bonusRound, maxAutoSpins])
+
   // 重み付きランダム選択
   const getWeightedRandomSymbol = () => {
     const totalWeight = symbols.reduce((sum, symbol) => sum + symbol.weight, 0)
@@ -334,9 +363,9 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       setPausedAutoSpin(false)
       pausedAutoSpinRef.current = false
       
-      // 連続スピンが残っている場合は再開
+      // 連続スピンが残っている場合は再開設定
       if (pausedAutoSpinCount < pausedMaxAutoSpins) {
-        console.log(`連続スピン再開: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}`)
+        console.log(`連続スピン再開設定: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}`)
         setAutoSpin(true)
         autoSpinRef.current = true
         setAutoSpinCount(pausedAutoSpinCount)
@@ -344,14 +373,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         setMaxAutoSpins(pausedMaxAutoSpins)
         setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedMaxAutoSpins})`)
         
-        // 次のスピンをスケジュール
-        setTimeout(() => {
-          console.log(`連続スピン再開タイマー実行: autoSpinRef.current=${autoSpinRef.current}`)
-          if (autoSpinRef.current && betAmount <= currentBalanceRef.current && freeSpins === 0) {
-            console.log(`連続スピン再開実行`)
-            spin()
-          }
-        }, 2000)
+        // useEffectで自動実行されるため、ここでのタイマーは不要
       } else {
         console.log(`連続スピン完了: ${pausedAutoSpinCount} >= ${pausedMaxAutoSpins}`)
         setMessage('ボーナス終了！連続スピン完了！')
