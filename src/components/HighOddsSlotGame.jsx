@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
 
 const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }) => {
-  // 高級シンボル（プレイヤー有利版 RTP119.4%）
+  // 高級シンボル（調整版 RTP102.5%）
   const symbols = [
-    { symbol: '💎', name: 'ダイヤモンド', value: 12, weight: 8 },     // 12倍（25→12）
-    { symbol: '🔥', name: 'ファイア', value: 10, weight: 10 },        // 10倍（新規）
-    { symbol: '⭐', name: 'ゴールドスター', value: 8, weight: 12 },   // 8倍（8→8）
-    { symbol: '🍒', name: 'チェリー', value: 6, weight: 15 },         // 6倍（新規）
-    { symbol: '🍋', name: 'レモン', value: 4, weight: 20 },           // 4倍（新規）
-    { symbol: '🍊', name: 'オレンジ', value: 3, weight: 25 },         // 3倍（新規）
+    { symbol: '💎', name: 'ダイヤモンド', value: 6, weight: 8 },      // 6倍（12→6）
+    { symbol: '🔥', name: 'ファイア', value: 5, weight: 10 },         // 5倍（10→5）
+    { symbol: '⭐', name: 'ゴールドスター', value: 4, weight: 12 },   // 4倍（8→4）
+    { symbol: '🍒', name: 'チェリー', value: 3, weight: 15 },         // 3倍（6→3）
+    { symbol: '🍋', name: 'レモン', value: 2, weight: 20 },           // 2倍（4→2）
+    { symbol: '🍊', name: 'オレンジ', value: 1.5, weight: 25 },       // 1.5倍（3→1.5）
   ]
 
   // ゲーム状態
@@ -205,11 +205,11 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       const symbol = symbols[firstSymbol]
       const baseMultiplier = symbol.value
       
-      // 連続数に応じて倍率アップ（適度な倍率）
+      // 連続数に応じて倍率アップ（調整版）
       let countMultiplier = 1
-      if (consecutiveCount === 5) countMultiplier = 5      // 5つ揃い：5倍
-      else if (consecutiveCount === 4) countMultiplier = 3 // 4つ揃い：3倍
-      else if (consecutiveCount === 3) countMultiplier = 1 // 3つ揃い：1倍
+      if (consecutiveCount === 5) countMultiplier = 20     // 5つ揃い：20倍
+      else if (consecutiveCount === 4) countMultiplier = 8 // 4つ揃い：8倍
+      else if (consecutiveCount === 3) countMultiplier = 3 // 3つ揃い：3倍
       
       const winAmount = baseMultiplier * countMultiplier
       console.log(`Win: ${symbol.symbol} x${consecutiveCount} = ${winAmount}`)
@@ -230,9 +230,9 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     const bonusSymbols = reels.filter(s => s <= 2).length // 💎、🔥、⭐（上位3シンボル）
     if (bonusSymbols >= 3) {
       console.log(`ボーナス発生！bonusSymbols: ${bonusSymbols}`)
-      setFreeSpins(10)
+      setFreeSpins(5)
       setBonusRound(true)
-      setMessage('ボーナス発生！フリースピン10回獲得！')
+      setMessage('ボーナス発生！フリースピン5回獲得！')
       return true
     }
     return false
@@ -341,7 +341,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         }
       }
     } else if (bonusTriggered) {
-      setMessage('🎰 ボーナスラウンド開始！フリースピン10回！ 🎰')
+      setMessage('🎰 ボーナスラウンド開始！フリースピン5回！ 🎰')
     } else if (!autoSpinRef.current || freeSpins > 0) {
       const defaultMessage = freeSpins > 0 ? `フリースピン残り: ${freeSpins}回` : '残念！もう一度挑戦してください。'
       setMessage(defaultMessage)
@@ -359,7 +359,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       setPausedAutoSpinCount(autoSpinCountRef.current)
       setPausedMaxAutoSpins(maxAutoSpinsRef.current) // refの値を使用
       pausedAutoSpinRef.current = true
-      setMessage('🎰 ボーナスラウンド開始！フリースピン10回！ 🎰')
+      setMessage('🎰 ボーナスラウンド開始！フリースピン5回！ 🎰')
       
       // フリースピンの自動開始はuseEffectで処理（重複を避けるためコメントアウト）
       // setTimeout(() => {
@@ -750,7 +750,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                 <div className="border-t border-white/30 pt-1 mt-1">
                   <div className="flex justify-between text-white text-xs">
                     <span>{symbols[0].symbol}{symbols[1].symbol}{symbols[2].symbol} 3個以上</span>
-                    <span className="text-purple-300">フリースピン10回</span>
+                    <span className="text-purple-300">フリースピン5回</span>
                   </div>
                 </div>
               </div>
