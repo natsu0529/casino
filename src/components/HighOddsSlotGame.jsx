@@ -67,15 +67,53 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       }, 2500) // 2.5秒待機
       
       return () => clearTimeout(timer) // クリーンアップ
-    } else if (freeSpins === 1 && bonusRound && pausedAutoSpinRef.current) {
-      console.log('useEffectでフリースピン終了を検出しました（最後の1回）')
-      // フリースピン終了時の処理は checkResult で行うため、ここでは何もしない
+    } else if (freeSpins === 0 && bonusRound && pausedAutoSpinRef.current) {
+      console.log('useEffectでフリースピン終了を検出しました（減算後に0）')
+      // フリースピン終了時の処理は下のuseEffectで行うため、ここでは何もしない
     }
   }, [freeSpins, spinning, bonusRound])
 
   // 連続スピンの自動再開を監視
   useEffect(() => {
-    // フリースピン終了後に連続スピンを自動再開
+    // フリースピン終了時の連続スピン再開処理
+    if (freeSpins === 0 && bonusRound && pausedAutoSpinRef.current) {
+      console.log(`=== useEffectでフリースピン終了、連続スピン再開準備 ===`)
+      console.log(`pausedAutoSpinCount: ${pausedAutoSpinCount}, pausedMaxAutoSpins: ${pausedMaxAutoSpins}`)
+      
+      setBonusRound(false)
+      setPausedAutoSpin(false)
+      pausedAutoSpinRef.current = false
+      
+      // 連続スピンが残っている場合は再開設定
+      if (pausedAutoSpinCount < pausedMaxAutoSpins) {
+        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}`)
+        setAutoSpin(true)
+        autoSpinRef.current = true
+        setAutoSpinCount(pausedAutoSpinCount)
+        autoSpinCountRef.current = pausedAutoSpinCount
+        setMaxAutoSpins(pausedMaxAutoSpins)
+        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedMaxAutoSpins})`)
+        
+        // 少し遅延してから自動実行
+        const timer = setTimeout(() => {
+          if (autoSpinRef.current && !spinning && freeSpins === 0 && betAmount <= currentBalanceRef.current) {
+            console.log('useEffectで連続スピン自動継続実行')
+            spin()
+          }
+        }, 2000) // 2秒後に自動実行
+        
+        return () => clearTimeout(timer)
+      } else {
+        console.log(`useEffectで連続スピン完了: ${pausedAutoSpinCount} >= ${pausedMaxAutoSpins}`)
+        setMessage('ボーナス終了！連続スピン完了！')
+        // リセット
+        setPausedAutoSpinCount(0)
+        setPausedMaxAutoSpins(0)
+      }
+      return
+    }
+    
+    // フリースピン終了後に連続スピンを自動再開（従来の処理）
     if (autoSpin && autoSpinRef.current && !spinning && freeSpins === 0 && !bonusRound) {
       console.log('連続スピン自動再開の条件をチェック:', {
         autoSpin,
@@ -100,7 +138,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         return () => clearTimeout(timer)
       }
     }
-  }, [autoSpin, spinning, freeSpins, bonusRound, maxAutoSpins])
+  }, [autoSpin, spinning, freeSpins, bonusRound, maxAutoSpins, pausedAutoSpinCount, pausedMaxAutoSpins])
 
   // 重み付きランダム選択
   const getWeightedRandomSymbol = () => {
@@ -344,35 +382,8 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     //   return
     // }
     
-    // フリースピン終了後の連続スピン再開チェック（減算前に1の場合、減算後に0になる）
-    if (freeSpins === 1 && bonusRound && pausedAutoSpinRef.current) {
-      console.log(`=== フリースピン終了、連続スピン再開準備 ===`)
-      console.log(`pausedAutoSpinCount: ${pausedAutoSpinCount}, pausedMaxAutoSpins: ${pausedMaxAutoSpins}`)
-      
-      setBonusRound(false)
-      setPausedAutoSpin(false)
-      pausedAutoSpinRef.current = false
-      
-      // 連続スピンが残っている場合は再開設定
-      if (pausedAutoSpinCount < pausedMaxAutoSpins) {
-        console.log(`連続スピン再開設定: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}`)
-        setAutoSpin(true)
-        autoSpinRef.current = true
-        setAutoSpinCount(pausedAutoSpinCount)
-        autoSpinCountRef.current = pausedAutoSpinCount
-        setMaxAutoSpins(pausedMaxAutoSpins)
-        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedMaxAutoSpins})`)
-        
-        // useEffectで自動実行されるため、ここでのタイマーは不要
-      } else {
-        console.log(`連続スピン完了: ${pausedAutoSpinCount} >= ${pausedMaxAutoSpins}`)
-        setMessage('ボーナス終了！連続スピン完了！')
-        // リセット
-        setPausedAutoSpinCount(0)
-        setPausedMaxAutoSpins(0)
-      }
-      return
-    }
+    // フリースピン中は連続スピン再開処理をしない（減算後のuseEffectで処理）
+    // フリースピン終了は減算後にuseEffectで検出・処理される
     
     // 連続スピンの処理（フリースピン中は除く） - refの値を使用
     if (autoSpinRef.current && freeSpins === 0) {
