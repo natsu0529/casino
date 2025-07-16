@@ -31,7 +31,7 @@ export default function VipMessageBoard() {
 
   // メッセージ取得
   const fetchMessages = async () => {
-    if (!getMessages) {
+    if (typeof getMessages !== 'function') {
       setMessages([]);
       return;
     }
@@ -41,7 +41,6 @@ export default function VipMessageBoard() {
 
   // useEffectの依存配列を空配列にして初回のみ実行
   useEffect(() => {
-    if (typeof getMessages !== 'function') return;
     fetchMessages();
     // ポーリングで新着取得（5秒ごと）
     const timer = setInterval(fetchMessages, 5000);
@@ -58,7 +57,7 @@ export default function VipMessageBoard() {
   // 投稿処理
   const handlePost = async (e) => {
     e.preventDefault();
-    if (!input.trim() || !postMessage) return;
+    if (!input.trim() || typeof postMessage !== 'function') return;
     setSending(true);
     setError("");
     try {
