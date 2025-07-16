@@ -169,14 +169,19 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
       const symbol = symbols[lineSymbols[0]]
       // 💎はジャックポット判定で処理済みなのでここは通常配当
       if (lineSymbols[0] === 0) {
+        // 中段以外の💎3つ揃いは通常配当
         console.log(`ライン${lineIndex+1}: 💎3つ揃い 通常配当`)
-        return betAmount * 500
+        return betAmount * symbol.value
       }
       // 通常マーク
       console.log(`ライン${lineIndex+1}: ${symbol.symbol}3つ揃い 通常配当`)
       return betAmount * symbol.value
     }
-    // チェリーの特別ルール（3つ揃い以外は厳密に判定）
+    // 左2つだけチェリー: 🍒, 🍒, 非🍒
+    if (lineSymbols[0] === 4 && lineSymbols[1] === 4 && lineSymbols[2] !== 4) {
+      console.log(`ライン${lineIndex+1}: 左2つだけチェリー特別配当`)
+      return betAmount
+    }
     // 左端だけチェリー: 🍒, 非🍒, 非🍒 かつ 残り2つが同じでない
     if (
       lineSymbols[0] === 4 &&
@@ -187,12 +192,8 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
       console.log(`ライン${lineIndex+1}: 左端だけチェリー特別配当`)
       return betAmount * 0.5
     }
-    // 左2つだけチェリー: 🍒, 🍒, 非🍒
-    if (lineSymbols[0] === 4 && lineSymbols[1] === 4 && lineSymbols[2] !== 4) {
-      console.log(`ライン${lineIndex+1}: 左2つだけチェリー特別配当`)
-      return betAmount
-    }
     // それ以外は配当なし
+    console.log(`ライン${lineIndex+1}: 配当なし`, lineSymbols)
     return 0
   }
 
