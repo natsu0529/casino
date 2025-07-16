@@ -23,14 +23,14 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
       </div>
     )
   }
-  // MEGA BUCKS風シンボル（期待値150%調整版）
+  // MEGA BUCKS風シンボル（期待値200%調整版）
   const symbols = [
-    { symbol: '💎', name: 'ダイヤモンド', value: 500, weight: 5 },     // 超高配当
-    { symbol: '💰', name: 'マネーバッグ', value: 200, weight: 8 },     // 高配当
-    { symbol: '🔔', name: 'ベル', value: 100, weight: 12 },           // 中高配当
-    { symbol: '⭐', name: 'スター', value: 50, weight: 15 },          // 中配当
-    { symbol: '🍒', name: 'チェリー', value: 20, weight: 25 },        // 中配当
-    { symbol: '🍋', name: 'レモン', value: 10, weight: 35 },          // 低配当
+    { symbol: '💎', name: 'ダイヤモンド', value: 300, weight: 5 },     // 超高配当
+    { symbol: '💰', name: 'マネーバッグ', value: 120, weight: 8 },     // 高配当
+    { symbol: '🔔', name: 'ベル', value: 60, weight: 12 },             // 中高配当
+    { symbol: '⭐', name: 'スター', value: 30, weight: 15 },            // 中配当
+    { symbol: '🍒', name: 'チェリー', value: 15, weight: 25 },          // 中配当
+    { symbol: '🍋', name: 'レモン', value: 6, weight: 35 },            // 低配当
   ]
 
   // ベット額オプション（VIP専用高額）
