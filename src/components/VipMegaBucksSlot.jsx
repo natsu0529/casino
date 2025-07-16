@@ -137,7 +137,9 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
           await resetJackpot('vip_mega_bucks', JACKPOT_INITIAL); // DBリセット
           setJackpotPool(JACKPOT_INITIAL); // ローカルリセット
         } catch (e) {
-          setMessage('ジャックポットリセットに失敗しました');
+          console.error('ジャックポットリセットエラー:', e);
+          // エラー時でもローカルはリセット
+          setJackpotPool(JACKPOT_INITIAL);
         }
         break;
       }
@@ -231,7 +233,9 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
       const latest = await getJackpotAmount('vip_mega_bucks');
       setJackpotPool(latest);
     } catch (e) {
-      setMessage('ジャックポット加算に失敗しました');
+      console.error('ジャックポット加算エラー:', e);
+      // エラー時はローカルで加算のみ
+      setJackpotPool(prev => prev + Math.floor(betAmount * 0.01));
     }
 
     // リール結果生成

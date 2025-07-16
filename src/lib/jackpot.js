@@ -13,10 +13,18 @@ export async function getJackpotAmount(gameType = 'vip_mega_bucks') {
 
 // ジャックポット額を増やす（加算）
 export async function incrementJackpot(gameType = 'vip_mega_bucks', addAmount = 0) {
-  const { data, error } = await supabase.rpc('increment_jackpot', {
-    game_type: gameType,
-    add_amount: addAmount
-  })
+  // 現在の額を取得
+  const currentAmount = await getJackpotAmount(gameType)
+  const newAmount = currentAmount + addAmount
+  
+  // 新しい額で更新
+  const { data, error } = await supabase
+    .from('jackpot_pool')
+    .update({ amount: newAmount, updated_at: new Date().toISOString() })
+    .eq('game_type', gameType)
+    .select()
+    .single()
+  
   if (error) throw error
   return data
 }
