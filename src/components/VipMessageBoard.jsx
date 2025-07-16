@@ -47,6 +47,13 @@ export default function VipMessageBoard() {
     return () => clearInterval(timer);
   }, [getMessages]);
 
+  // messagesがundefinedやnullになった場合、必ず空配列に戻す
+  useEffect(() => {
+    if (!Array.isArray(messages)) {
+      setMessages([]);
+    }
+  }, [messages]);
+
   // 投稿処理
   const handlePost = async (e) => {
     e.preventDefault();
