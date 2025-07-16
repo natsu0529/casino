@@ -39,13 +39,14 @@ export default function VipMessageBoard() {
     setMessages(Array.isArray(msgs) ? msgs : []);
   };
 
+  // useEffectの依存配列を空配列にして初回のみ実行
   useEffect(() => {
     if (typeof getMessages !== 'function') return;
     fetchMessages();
     // ポーリングで新着取得（5秒ごと）
     const timer = setInterval(fetchMessages, 5000);
     return () => clearInterval(timer);
-  }, []); // 依存配列を空配列にして初回のみ実行
+  }, []);
 
   // messagesがundefinedやnullになった場合、必ず空配列に戻す
   useEffect(() => {
