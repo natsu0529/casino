@@ -185,7 +185,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
   }
 
   // 連続スピン制御
-  const startAutoSpin = (count) => {
+  const startAutoSpin = async (count) => {
     if (spinning || autoSpin) return
     if (currentBalanceRef.current < betAmount) {
       setMessage('残高が不足しています。')
@@ -198,7 +198,13 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     autoSpinCountRef.current = 0
     setMaxAutoSpins(count)
     maxAutoSpinsRef.current = count
-    spin()
+    
+    try {
+      await spin()
+    } catch (error) {
+      console.error('連続スピン開始エラー:', error)
+      stopAutoSpin()
+    }
   }
 
   const stopAutoSpin = () => {
@@ -327,9 +333,14 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
             autoSpinCountRef.current = newCount
 
             if (newCount < maxAutoSpinsRef.current && currentBalanceRef.current >= betAmount) {
-              setTimeout(() => {
+              setTimeout(async () => {
                 if (autoSpinRef.current) {
-                  spin()
+                  try {
+                    await spin()
+                  } catch (error) {
+                    console.error('連続スピンエラー:', error)
+                    stopAutoSpin()
+                  }
                 }
               }, 2000)
             } else {

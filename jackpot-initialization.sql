@@ -10,8 +10,23 @@ CREATE TABLE IF NOT EXISTS jackpot_pool (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- UNIQUE制約を確実に追加（既に存在する場合はスキップ）
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint 
+        WHERE conname = 'jackpot_pool_game_type_key'
+    ) THEN
+        ALTER TABLE jackpot_pool ADD CONSTRAINT jackpot_pool_game_type_key UNIQUE (game_type);
+    END IF;
+END $$;
+
 -- RLS設定
 ALTER TABLE jackpot_pool ENABLE ROW LEVEL SECURITY;
+
+-- 既存のポリシーを削除（存在する場合）
+DROP POLICY IF EXISTS "Allow public read access" ON jackpot_pool;
+DROP POLICY IF EXISTS "Allow authenticated users to update" ON jackpot_pool;
 
 -- 読み取り権限（全ユーザー）
 CREATE POLICY "Allow public read access" 
