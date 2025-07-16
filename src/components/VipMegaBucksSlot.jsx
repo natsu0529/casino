@@ -205,7 +205,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     // 左2つだけチェリー: 🍒, 🍒, 非🍒
     if (lineSymbols[0] === 4 && lineSymbols[1] === 4 && lineSymbols[2] !== 4) {
       console.log(`ライン${lineIndex+1}: 左2つだけチェリー特別配当`)
-      return betAmount
+      return betAmount * 0.5 // ← 0.5倍に変更
     }
     // 左端だけチェリー: 🍒, 非🍒, 非🍒 かつ 残り2つが同じでない
     if (
@@ -215,7 +215,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
       lineSymbols[1] !== lineSymbols[2]
     ) {
       console.log(`ライン${lineIndex+1}: 左端だけチェリー特別配当`)
-      return betAmount * 0.5
+      return betAmount * 0.25 // ← 0.25倍に変更
     }
     // それ以外は配当なし
     console.log(`ライン${lineIndex+1}: 配当なし`, lineSymbols)
@@ -567,9 +567,9 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
         <div className="mt-4 p-2 bg-purple-900 rounded text-xs text-purple-200">
           <div className="font-bold text-yellow-300 mb-1">🍒 チェリーの特別配当</div>
           <ul className="list-disc ml-5">
-            <li>左端だけチェリー：ベット額の<strong>0.5倍</strong>（例：2万コイン賭け→1万コイン返還）</li>
-            <li>左2つチェリー：ベット額の<strong>1倍</strong>（例：2万コイン賭け→2万コイン返還）</li>
-            <li>3つ揃いは通常配当（ベット額 × 20倍）</li>
+            <li>左端だけチェリー：ベット額の<strong>0.25倍</strong>（例：2万コイン賭け→5,000コイン返還）</li>
+            <li>左2つチェリー：ベット額の<strong>0.5倍</strong>（例：2万コイン賭け→1万コイン返還）</li>
+            <li>3つ揃いは通常配当（ベット額 × 6倍）</li>
           </ul>
           <div className="mt-1 text-purple-400">※チェリー配当は他のシンボルと重複しません</div>
         </div>
