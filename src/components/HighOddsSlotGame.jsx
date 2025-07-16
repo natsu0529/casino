@@ -111,7 +111,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         setAutoSpinCount(pausedAutoSpinCount)
         autoSpinCountRef.current = pausedAutoSpinCount
         setMaxAutoSpins(pausedMaxAutoSpins)
-        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedMaxAutoSpins})`)
+        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedAutoSpins})`)
         
         // 少し遅延してから自動実行
         const timer = setTimeout(() => {
