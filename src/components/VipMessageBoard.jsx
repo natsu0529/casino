@@ -11,23 +11,7 @@ export default function VipMessageBoard() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
 
-  // VIP以外はガード
-  if (!user) {
-    return (
-      <div className="p-4 bg-yellow-50 border border-yellow-300 rounded text-yellow-700">
-        VIPユーザーのみ掲示板を利用できます。
-      </div>
-    );
-  }
-  if (!profile?.title) {
-    return (
-      <div className="p-4 bg-yellow-50 border border-yellow-300 rounded text-yellow-700">
-        VIPユーザーのみ掲示板を利用できます。
-      </div>
-    );
-  }
-
-  // メッセージ取得
+  // メッセージ取得（フックを条件分岐の前に移動）
   const fetchMessages = React.useCallback(async () => {
     if (typeof getMessages !== "function") {
       setMessages([]);
@@ -48,6 +32,29 @@ export default function VipMessageBoard() {
     return () => clearInterval(timer);
   }, [fetchMessages]); // fetchMessagesをメモ化したので安全
 
+  // messagesがundefinedやnullになった場合、必ず空配列に戻す
+  useEffect(() => {
+    if (!Array.isArray(messages)) {
+      setMessages([]);
+    }
+  }, [messages]);
+
+  // VIP以外はガード
+  if (!user) {
+    return (
+      <div className="p-4 bg-yellow-50 border border-yellow-300 rounded text-yellow-700">
+        VIPユーザーのみ掲示板を利用できます。
+      </div>
+    );
+  }
+  if (!profile?.title) {
+    return (
+      <div className="p-4 bg-yellow-50 border border-yellow-300 rounded text-yellow-700">
+        VIPユーザーのみ掲示板を利用できます。
+      </div>
+    );
+  }
+
   // 投稿処理
   const handlePost = async (e) => {
     e.preventDefault();
@@ -64,6 +71,13 @@ export default function VipMessageBoard() {
       setSending(false);
     }
   };
+
+  // messagesがundefinedやnullになった場合、必ず空配列に戻す
+  useEffect(() => {
+    if (!Array.isArray(messages)) {
+      setMessages([]);
+    }
+  }, [messages]);
 
   // messagesがundefinedやnullになった場合、必ず空配列に戻す
   useEffect(() => {
