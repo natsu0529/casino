@@ -104,8 +104,8 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       
       // 連続スピンが残っている場合は再開設定
       if (pausedAutoSpinCount < pausedMaxAutoSpins) {
-        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}`)
-        console.log(`復元する値 - autoSpinCount: ${pausedAutoSpinCount}, maxAutoSpins: ${pausedMaxAutoSpins}`)
+        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedAutoSpins}`)
+        console.log(`復元する値 - autoSpinCount: ${pausedAutoSpinCount}, maxAutoSpins: ${pausedMaxAutoSpンス}`)
         setAutoSpin(true)
         autoSpinRef.current = true
         setAutoSpinCount(pausedAutoSpinCount)
@@ -512,13 +512,15 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     }
 
     // ゲーム履歴に追加
+    const isFreeSpin = freeSpins > 0 || (bonusRound && originalBetAmount === 0);
     const newHistory = {
       reels: finalReels,
-      bet: originalBetAmount,
+      bet: isFreeSpin ? 0 : originalBetAmount,
       win: winAmount,
       multiplier: totalMultiplier,
       winningLines: winningLines,
-      timestamp: new Date().toLocaleTimeString()
+      timestamp: new Date().toLocaleTimeString(),
+      isFreeSpin: isFreeSpin
     }
     setGameHistory(prev => [newHistory, ...prev.slice(0, 4)])
 
@@ -745,9 +747,9 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                   <div className="flex flex-col items-center gap-2">
                     <div className="text-white text-sm bg-blue-600/30 px-3 py-1 rounded">
                       {pausedAutoSpinRef.current 
-                        ? `連続スピン一時停止: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}` +
+                        ? `連続スピン一時停止: ${pausedAutoSpinCount}/${pausedAutoSpンス}` +
                           (freeSpins > 0 ? ` (フリースピン残り${freeSpins}回)` : '')
-                        : `連続スピン: ${autoSpinCount}/${maxAutoSpins}`
+                        : `連続スピン: ${autoSpinCount}/${maxAutoSpンス}`
                       }
                     </div>
                     <button
@@ -832,7 +834,10 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                       </div>
                       <div className="text-right">
                         <div className={`font-bold text-xs xs:text-sm ${game.win > 0 ? 'text-green-300' : 'text-red-300'}`}>
-                          {game.win > 0 ? `+${game.win.toLocaleString()}` : `-${game.bet.toLocaleString()}`}
+                          {game.isFreeSpin
+                            ? (game.win > 0 ? `+${game.win.toLocaleString()}` : '+0')
+                            : (game.win > 0 ? `+${game.win.toLocaleString()}` : `-${game.bet.toLocaleString()}`)
+                          }
                         </div>
                         <div className="text-xs text-gray-300">{game.timestamp}</div>
                       </div>
