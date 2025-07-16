@@ -11,13 +11,14 @@ const HomePage = ({ currentUser, user, onNavigation, onLogout }) => {
 
   // ランキングデータを取得
   useEffect(() => {
+    if (typeof getTopUsers !== 'function') return;
     const fetchTopUsers = async () => {
       const users = await getTopUsers(3)
       setTopUsers(users)
     }
     
     fetchTopUsers()
-  }, [getTopUsers])
+  }, [typeof getTopUsers === 'function' ? getTopUsers : () => {}])
 
   const handleGameClick = (gameId) => {
     if (!currentUser) {
