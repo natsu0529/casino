@@ -363,6 +363,71 @@ export const useProfile = (userId) => {
     }
   }, [userId])
 
+  // VIP専用掲示板メッセージ取得関数
+  const getVipMessages = useCallback(async (limit = 10) => {
+    try {
+      const { data, error } = await supabase
+        .from('vip_message_board')
+        .select(`
+          id,
+          content,
+          created_at,
+          profiles!inner(username, balance, title)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+
+      if (error) {
+        console.error('Failed to fetch VIP messages:', error)
+        return []
+      }
+
+      // データを整形
+      const formattedData = data?.map(message => ({
+        id: message.id,
+        content: message.content,
+        created_at: message.created_at,
+        username: message.profiles.username,
+        balance: message.profiles.balance,
+        title: message.profiles.title
+      })) || []
+
+      return formattedData
+    } catch (error) {
+      console.error('Error in getVipMessages:', error)
+      return []
+    }
+  }, [])
+
+  // VIP専用掲示板メッセージ投稿関数
+  const postVipMessage = useCallback(async (content) => {
+    try {
+      if (!userId) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase
+        .from('vip_message_board')
+        .insert({
+          user_id: userId,
+          content: content.trim()
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Failed to post VIP message:', error)
+        throw error
+      }
+
+      console.log('VIP message posted successfully:', data)
+      return { data, error: null }
+    } catch (error) {
+      console.error('Error in postVipMessage:', error)
+      throw error
+    }
+  }, [userId])
+
   return {
     profile,
     loading,
@@ -372,6 +437,8 @@ export const useProfile = (userId) => {
     getTopUsers,
     getMessages,
     postMessage,
-    purchaseTitle
+    purchaseTitle,
+    getVipMessages,
+    postVipMessage
   }
 }
