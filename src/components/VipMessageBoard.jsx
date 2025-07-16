@@ -6,7 +6,8 @@ export default function VipMessageBoard() {
   const { user } = useAuth();
   // userがいない場合はuseProfileを呼ばない
   const profileData = user ? useProfile(user.id) : {};
-  const { profile, getMessages, postMessage, loading } = profileData;
+  // profileDataがundefinedでもエラーにならないように修正
+  const { profile, getMessages, postMessage, loading } = profileData || {};
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -82,8 +83,8 @@ export default function VipMessageBoard() {
       </form>
       {error && <div className="text-red-600 mb-2">{error}</div>}
       <div className="space-y-2 max-h-64 overflow-y-auto">
-        {(!messages || !Array.isArray(messages) || messages.length === 0) && <div className="text-gray-500">まだメッセージがありません</div>}
-        {(messages && Array.isArray(messages) ? messages : []).map(msg => (
+        {(!Array.isArray(messages) || messages.length === 0) && <div className="text-gray-500">まだメッセージがありません</div>}
+        {(Array.isArray(messages) ? messages : []).map(msg => (
           <div key={msg.id} className="bg-white border border-yellow-200 rounded p-2">
             <div className="text-sm text-yellow-900 font-bold">{msg.username} <span className="text-xs text-yellow-500">({new Date(msg.created_at).toLocaleString()})</span></div>
             <div className="text-yellow-800 whitespace-pre-wrap">{msg.content}</div>
