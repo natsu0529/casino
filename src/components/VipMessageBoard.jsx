@@ -28,22 +28,25 @@ export default function VipMessageBoard() {
   }
 
   // メッセージ取得
-  const fetchMessages = async () => {
+  const fetchMessages = React.useCallback(async () => {
     if (typeof getMessages !== "function") {
       setMessages([]);
       return;
     }
-    const msgs = await getMessages(20);
-    setMessages(Array.isArray(msgs) ? msgs.filter(Boolean) : []);
-  };
-
-  useEffect(() => {
-    if (typeof getMessages === 'function') {
-      fetchMessages();
-      const timer = setInterval(fetchMessages, 5000);
-      return () => clearInterval(timer);
+    try {
+      const msgs = await getMessages(20);
+      setMessages(Array.isArray(msgs) ? msgs.filter(Boolean) : []);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      setMessages([]);
     }
   }, [getMessages]);
+
+  useEffect(() => {
+    fetchMessages();
+    const timer = setInterval(fetchMessages, 5000);
+    return () => clearInterval(timer);
+  }, [fetchMessages]); // fetchMessagesをメモ化したので安全
 
   // 投稿処理
   const handlePost = async (e) => {
