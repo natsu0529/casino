@@ -4,10 +4,8 @@ import { useProfile } from "../hooks/useProfile";
 
 export default function VipMessageBoard() {
   const { user } = useAuth();
-  // userがいない場合はuseProfileを呼ばない
-  const profileData = user ? useProfile(user.id) : {};
-  // profileDataがundefinedでもエラーにならないように修正
-  const { profile, getMessages, postMessage } = profileData || {};
+  // フックは常に呼ぶ（Reactのフックルール）
+  const { profile, getMessages, postMessage } = useProfile(user?.id);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -40,9 +38,11 @@ export default function VipMessageBoard() {
   };
 
   useEffect(() => {
-    fetchMessages();
-    const timer = setInterval(fetchMessages, 5000);
-    return () => clearInterval(timer);
+    if (typeof getMessages === 'function') {
+      fetchMessages();
+      const timer = setInterval(fetchMessages, 5000);
+      return () => clearInterval(timer);
+    }
   }, [getMessages]);
 
   // 投稿処理
