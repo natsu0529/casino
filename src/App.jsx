@@ -59,6 +59,48 @@ function App() {
     }
   }
 
+  const handleRecordGame = async (gameParams) => {
+    console.log('=== App.jsx handleRecordGame 開始 ===')
+    console.log('受信パラメータ:', gameParams)
+    console.log('ユーザー状態:', { user: !!user, profile: !!profile, recordGameHistory: !!recordGameHistory })
+    
+    if (user && profile && recordGameHistory) {
+      try {
+        let gameType, betAmount, winAmount, result
+        
+        // 新しいオブジェクト形式（スロットゲームから）
+        if (gameParams && typeof gameParams === 'object' && gameParams.gameType) {
+          gameType = gameParams.gameType
+          betAmount = gameParams.betAmount
+          winAmount = gameParams.winAmount
+          result = gameParams.result
+        }
+        // 従来のゲーム結果オブジェクト形式（他のゲームから）
+        else if (gameParams && typeof gameParams === 'object' && gameParams.type) {
+          gameType = gameParams.type || 'Unknown'
+          betAmount = gameParams.bet || 0
+          winAmount = gameParams.win || 0
+          result = gameParams.profit >= 0 ? 'win' : 'loss'
+        }
+        // フォールバック
+        else {
+          console.error('❌ 未対応のゲームパラメータ形式:', gameParams)
+          return
+        }
+        
+        console.log('正規化されたパラメータ:', { gameType, betAmount, winAmount, result })
+        
+        await recordGameHistory(gameType, betAmount, winAmount, result)
+        console.log('✅ App.jsx: ゲーム履歴記録成功')
+      } catch (error) {
+        console.error('❌ App.jsx - ゲーム履歴記録エラー:', error)
+        // エラーが発生してもアプリケーションは継続
+      }
+    } else {
+      console.log('⚠️ handleRecordGame スキップ:', { user: !!user, profile: !!profile, recordGameHistory: !!recordGameHistory })
+    }
+  }
+
   // 認証とプロフィールのローディング中
   if (!initialized || authLoading) {
     return (
@@ -107,7 +149,7 @@ function App() {
             user={user}
             onNavigateHome={() => setCurrentPage('home')}
             onUpdateBalance={handleUpdateBalance}
-            onRecordGame={recordGameHistory}
+            onRecordGame={handleRecordGame}
           />
         )
       case 'poker':
@@ -117,7 +159,7 @@ function App() {
             user={user}
             onNavigateHome={() => setCurrentPage('home')}
             onUpdateBalance={handleUpdateBalance}
-            onRecordGame={recordGameHistory}
+            onRecordGame={handleRecordGame}
           />
         )
       case 'slot':
@@ -127,7 +169,7 @@ function App() {
             user={user}
             onNavigateHome={() => setCurrentPage('home')}
             onUpdateBalance={handleUpdateBalance}
-            onRecordGame={recordGameHistory}
+            onRecordGame={handleRecordGame}
           />
         )
       case 'roulette':
@@ -137,7 +179,7 @@ function App() {
             user={user}
             onNavigateHome={() => setCurrentPage('home')}
             onUpdateBalance={handleUpdateBalance}
-            onRecordGame={recordGameHistory}
+            onRecordGame={handleRecordGame}
           />
         )
       case 'baccarat':
@@ -147,7 +189,7 @@ function App() {
             user={user}
             onNavigateHome={() => setCurrentPage('home')}
             onUpdateBalance={handleUpdateBalance}
-            onRecordGame={recordGameHistory}
+            onRecordGame={handleRecordGame}
           />
         )
       case 'high_odds_slot':
@@ -157,7 +199,7 @@ function App() {
             user={user}
             onNavigateHome={() => setCurrentPage('home')}
             onUpdateBalance={handleUpdateBalance}
-            onRecordGame={recordGameHistory}
+            onRecordGame={handleRecordGame}
           />
         )
       case 'high_stakes':
@@ -167,7 +209,7 @@ function App() {
             user={user}
             onBalanceUpdate={handleUpdateBalance} 
             onNavigateHome={() => setCurrentPage('home')}
-            onRecordGame={recordGameHistory}
+            onRecordGame={handleRecordGame}
           />
         )
       case 'bridge':
@@ -198,7 +240,7 @@ function App() {
             onNavigation={handleNavigation}
             onNavigateHome={() => setCurrentPage('home')}
             onUpdateBalance={handleUpdateBalance}
-            onRecordGame={recordGameHistory}
+            onRecordGame={handleRecordGame}
           />
         )
       case 'home':

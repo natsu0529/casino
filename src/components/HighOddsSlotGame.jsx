@@ -1,6 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
 
 const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }) => {
+  // null/undefined チェック（早期リターン）
+  if (!currentUser || typeof currentUser.balance !== 'number') {
+    console.warn('⚠️ 高オッズスロット: currentUserまたはbalanceが無効:', currentUser)
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-white text-center">
+          <h2 className="text-2xl font-bold mb-4">データ読み込み中...</h2>
+          <p>ユーザー情報を読み込んでいます。しばらくお待ちください。</p>
+        </div>
+      </div>
+    )
+  }
+
   // 高級シンボル（期待値150%調整版）
   const symbols = [
     { symbol: '💎', name: 'ダイヤモンド', value: 12, weight: 8 },      // 12倍
@@ -91,14 +104,14 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       
       // 連続スピンが残っている場合は再開設定
       if (pausedAutoSpinCount < pausedMaxAutoSpins) {
-        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedAutoSpins}`)
+        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}`)
         console.log(`復元する値 - autoSpinCount: ${pausedAutoSpinCount}, maxAutoSpins: ${pausedMaxAutoSpins}`)
         setAutoSpin(true)
         autoSpinRef.current = true
         setAutoSpinCount(pausedAutoSpinCount)
         autoSpinCountRef.current = pausedAutoSpinCount
         setMaxAutoSpins(pausedMaxAutoSpins)
-        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedAutoSpins})`)
+        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedMaxAutoSpins})`)
         
         // 少し遅延してから自動実行
         const timer = setTimeout(() => {
@@ -266,8 +279,22 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     // フリースピンでない場合のみ残高を減らす
     if (freeSpins === 0) {
       const newBalance = currentBalanceRef.current - currentBet
-      onUpdateBalance(newBalance)
-      currentBalanceRef.current = newBalance
+      console.log('🎯 高オッズスロット: 残高減算', {
+        oldBalance: currentBalanceRef.current,
+        betAmount: currentBet,
+        newBalance: newBalance
+      })
+      
+      try {
+        onUpdateBalance(newBalance)
+        currentBalanceRef.current = newBalance
+        console.log('✅ 高オッズスロット: 残高減算成功')
+      } catch (error) {
+        console.error('❌ 高オッズスロット: 残高減算失敗:', error)
+        setSpinning(false)
+        setMessage('残高更新に失敗しました')
+        return
+      }
     }
     // フリースピンの減算は checkResult() で結果確定後に行う
 
@@ -324,9 +351,21 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
 
     if (totalMultiplier > 0) {
       setLastWin(winAmount)
-      onUpdateBalance(currentUser.balance + winAmount)
-      // 内部残高も更新
-      currentBalanceRef.current = currentUser.balance + winAmount
+      console.log('🎯 高オッズスロット: 勝利金追加', {
+        currentBalance: currentUser.balance,
+        winAmount: winAmount,
+        newBalance: currentUser.balance + winAmount
+      })
+      
+      try {
+        onUpdateBalance(currentUser.balance + winAmount)
+        // 内部残高も更新
+        currentBalanceRef.current = currentUser.balance + winAmount
+        console.log('✅ 高オッズスロット: 勝利金追加成功')
+      } catch (error) {
+        console.error('❌ 高オッズスロット: 勝利金追加失敗:', error)
+        setMessage('勝利金の追加に失敗しました')
+      }
       
       if (!autoSpinRef.current || freeSpins > 0) {
         // 連続スピン中でない場合、またはフリースピン中の場合のみメッセージを表示
@@ -483,14 +522,33 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     }
     setGameHistory(prev => [newHistory, ...prev.slice(0, 4)])
 
-    // ゲーム記録
-    if (onRecordGame) {
-      onRecordGame(
-        'high_odds_slot',
-        originalBetAmount,
-        winAmount,
-        winAmount > originalBetAmount ? 'win' : 'lose'
-      )
+    // ゲーム記録（安全な方法で）
+    if (onRecordGame && currentUser?.id) {
+      console.log('🎯 高オッズスロット: ゲーム履歴記録開始', {
+        userId: currentUser.id,
+        gameType: 'high_odds_slot',
+        betAmount: originalBetAmount,
+        winAmount: winAmount,
+        result: winAmount > originalBetAmount ? 'win' : 'lose'
+      })
+      
+      try {
+        // オブジェクト形式で個別パラメータとして渡す
+        onRecordGame({
+          gameType: 'high_odds_slot',
+          betAmount: originalBetAmount,
+          winAmount: winAmount,
+          result: winAmount > originalBetAmount ? 'win' : 'lose'
+        })
+        console.log('✅ 高オッズスロット: ゲーム履歴記録成功')
+      } catch (error) {
+        console.error('❌ 高オッズスロット: ゲーム履歴記録失敗:', error)
+      }
+    } else {
+      console.warn('⚠️ 高オッズスロット: ゲーム履歴記録スキップ', {
+        onRecordGame: !!onRecordGame,
+        userId: currentUser?.id
+      })
     }
 
     // フリースピンの場合は回数を減算（処理の最後に実行）
@@ -687,7 +745,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                   <div className="flex flex-col items-center gap-2">
                     <div className="text-white text-sm bg-blue-600/30 px-3 py-1 rounded">
                       {pausedAutoSpinRef.current 
-                        ? `連続スピン一時停止: ${pausedAutoSpinCount}/${pausedAutoSpins}` +
+                        ? `連続スピン一時停止: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}` +
                           (freeSpins > 0 ? ` (フリースピン残り${freeSpins}回)` : '')
                         : `連続スピン: ${autoSpinCount}/${maxAutoSpins}`
                       }

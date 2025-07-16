@@ -112,21 +112,24 @@ export const useProfile = (userId) => {
 
   // ゲーム履歴を記録
   const recordGameHistory = async (gameType, betAmount, winAmount, result) => {
+    console.log('recordGameHistory called with:', { gameType, betAmount, winAmount, result, userId })
     if (!userId) return { data: null, error: 'ユーザーIDが必要です' }
 
     try {
+      const insertData = {
+        user_id: userId,
+        game_type: gameType,
+        bet_amount: betAmount,
+        win_amount: winAmount,
+        result: result,
+        played_at: new Date().toISOString()
+      }
+      
+      console.log('Inserting into game_history:', insertData)
+      
       const { data, error } = await supabase
         .from('game_history')
-        .insert([
-          {
-            user_id: userId,
-            game_type: gameType,
-            bet_amount: betAmount,
-            win_amount: winAmount,
-            result: result,
-            played_at: new Date().toISOString()
-          }
-        ])
+        .insert([insertData])
         .select()
         .single()
 

@@ -1,6 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
 
-const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
+const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }) => {
+  // null/undefined チェック（早期リターン）
+  if (!currentUser || typeof currentUser.balance !== 'number') {
+    console.warn('⚠️ 通常スロット: currentUserまたはbalanceが無効:', currentUser)
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-white text-center">
+          <h2 className="text-2xl font-bold mb-4">データ読み込み中...</h2>
+          <p>ユーザー情報を読み込んでいます。しばらくお待ちください。</p>
+        </div>
+      </div>
+    )
+  }
+
   // スロットシンボル（期待値200%調整版）
   const symbols = [
     { symbol: '🍒', name: 'チェリー', value: 2, weight: 35 },  // 高確率・小当たり
@@ -176,8 +189,22 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
 
     // 残高から賭け金を引く
     const newBalance = currentBalanceRef.current - betAmount
-    onUpdateBalance(newBalance)
-    currentBalanceRef.current = newBalance
+    console.log('🎯 通常スロット: 残高減算', {
+      oldBalance: currentBalanceRef.current,
+      betAmount: betAmount,
+      newBalance: newBalance
+    })
+    
+    try {
+      onUpdateBalance(newBalance)
+      currentBalanceRef.current = newBalance
+      console.log('✅ 通常スロット: 残高減算成功')
+    } catch (error) {
+      console.error('❌ 通常スロット: 残高減算失敗:', error)
+      setSpinning(false)
+      setMessage('残高更新に失敗しました')
+      return
+    }
 
     // アニメーション効果のためのランダム回転
     const spinDuration = autoSpinRef.current ? 1000 : 2000 + Math.random() * 1000 // 連続スピン時は短縮
@@ -225,9 +252,21 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
 
     if (multiplier > 0) {
       setLastWin(winAmount)
-      onUpdateBalance(currentUser.balance + winAmount)
-      // 内部残高も更新
-      currentBalanceRef.current = currentUser.balance + winAmount
+      console.log('🎯 通常スロット: 勝利金追加', {
+        currentBalance: currentUser.balance,
+        winAmount: winAmount,
+        newBalance: currentUser.balance + winAmount
+      })
+      
+      try {
+        onUpdateBalance(currentUser.balance + winAmount)
+        // 内部残高も更新
+        currentBalanceRef.current = currentUser.balance + winAmount
+        console.log('✅ 通常スロット: 勝利金追加成功')
+      } catch (error) {
+        console.error('❌ 通常スロット: 勝利金追加失敗:', error)
+        setMessage('勝利金の追加に失敗しました')
+      }
       
       if (!autoSpinRef.current) {
         // 連続スピン中でない場合のみメッセージを表示
@@ -243,6 +282,35 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
       }
     } else if (!autoSpinRef.current) {
       setMessage('残念！もう一度挑戦してください。')
+    }
+
+    // ゲーム記録（安全な方法で）
+    if (onRecordGame && currentUser?.id) {
+      console.log('🎯 通常スロット: ゲーム履歴記録開始', {
+        userId: currentUser.id,
+        gameType: 'slot',
+        betAmount: betAmount,
+        winAmount: winAmount,
+        result: winAmount > betAmount ? 'win' : 'lose'
+      })
+      
+      try {
+        // オブジェクト形式で個別パラメータとして渡す
+        onRecordGame({
+          gameType: 'slot',
+          betAmount: betAmount,
+          winAmount: winAmount,
+          result: winAmount > betAmount ? 'win' : 'lose'
+        })
+        console.log('✅ 通常スロット: ゲーム履歴記録成功')
+      } catch (error) {
+        console.error('❌ 通常スロット: ゲーム履歴記録失敗:', error)
+      }
+    } else {
+      console.warn('⚠️ 通常スロット: ゲーム履歴記録スキップ', {
+        onRecordGame: !!onRecordGame,
+        userId: currentUser?.id
+      })
     }
 
     console.log(`=== 連続スピン条件チェック ===`)
