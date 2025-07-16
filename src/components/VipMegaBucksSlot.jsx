@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { getJackpotAmount, resetJackpot, incrementJackpot } from '../lib/jackpot'
 
+const JACKPOT_INITIAL = 10000000
+
 const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateBalance, onRecordGame }) => {
   // 安全なbalanceアクセス
   const safeBalance = currentUser?.balance || 0
@@ -126,14 +128,15 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     })
 
     // ジャックポット判定（中段に💎💎💎）
-    const centerLine = [[0,1], [1,1], [2,1]]
-    const centerSymbols = centerLine.map(([reel, pos]) => reelResults[reel][pos])
-    if (centerSymbols.every(symbol => symbol === 0)) { // 全てダイヤモンド
-      totalWin += jackpotPool
-      setMessage(`🎉 MEGA BUCKS JACKPOT! ${jackpotPool.toLocaleString()}コイン獲得！`)
-      setJackpotPool(JACKPOT_INITIAL) // ローカルリセット
-      // DBもリセット
-      resetJackpot('vip_mega_bucks', JACKPOT_INITIAL)
+    const centerLine = [[0,1], [1,1], [2,1]];
+    const centerSymbols = centerLine.map(([reel, pos]) => reelResults[reel][pos]);
+    const isJackpot = centerSymbols.every(symbol => symbol === 0); // 全てダイヤモンド
+
+    if (isJackpot) {
+      totalWin += jackpotPool;
+      setMessage(`🎉 MEGA BUCKS JACKPOT! ${jackpotPool.toLocaleString()}コイン獲得！`);
+      setJackpotPool(JACKPOT_INITIAL); // ローカルリセット
+      resetJackpot('vip_mega_bucks', JACKPOT_INITIAL); // DBリセット
     }
 
     return { totalWin, winningLines }
