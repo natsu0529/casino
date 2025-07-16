@@ -20,12 +20,20 @@ export default function VipPage() {
   return (
     <div className="max-w-2xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4 text-yellow-800">VIPルーム</h1>
-      <button
-        className="mb-4 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition"
-        onClick={() => window.location.href = '/'}
-      >
-        ホームに戻る
-      </button>
+      <div className="flex gap-4 mb-6">
+        <button
+          className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition"
+          onClick={() => window.location.href = '/'}
+        >
+          ホームに戻る
+        </button>
+        <button
+          className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition"
+          onClick={() => window.location.hash = '#vip-mega-bucks'}
+        >
+          💰 VIP MEGA BUCKS スロット
+        </button>
+      </div>
       <VipMessageBoard />
     </div>
   );

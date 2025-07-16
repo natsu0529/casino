@@ -14,12 +14,33 @@ import HighStakesBlackjack from './components/HighStakesBlackjack.jsx'
 import BridgeGame from './components/BridgeGame.jsx'
 import TexasPokerGame from './components/TexasPokerGame.jsx'
 import VipPage from './components/VipPage.jsx'
+import VipMegaBucksSlot from './components/VipMegaBucksSlot.jsx'
 import './App.css'
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const { user, loading: authLoading, initialized, signOut } = useAuth()
   const { profile, loading: profileLoading, updateBalance, updateUsername, recordGameHistory } = useProfile(user?.id)
+
+  // ハッシュベースのルーティング
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1) // #を除去
+      if (hash) {
+        setCurrentPage(hash)
+      }
+    }
+    
+    // 初期ロード時のハッシュチェック
+    handleHashChange()
+    
+    // ハッシュ変更イベントリスナー
+    window.addEventListener('hashchange', handleHashChange)
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange)
+    }
+  }, [])
 
   // デバッグ用ログ
   useEffect(() => {
@@ -181,6 +202,15 @@ function App() {
       case 'vip':
         return (
           <VipPage />
+        )
+      case 'vip-mega-bucks':
+        return (
+          <VipMegaBucksSlot 
+            currentUser={profile}
+            onNavigateHome={() => setCurrentPage('home')}
+            onUpdateBalance={handleUpdateBalance}
+            onRecordGame={recordGameHistory}
+          />
         )
       case 'home':
       default:
