@@ -169,19 +169,28 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
       const symbol = symbols[lineSymbols[0]]
       // 💎はジャックポット判定で処理済みなのでここは通常配当
       if (lineSymbols[0] === 0) {
+        console.log(`ライン${lineIndex+1}: 💎3つ揃い 通常配当`)
         return betAmount * 500
       }
       // 通常マーク
+      console.log(`ライン${lineIndex+1}: ${symbol.symbol}3つ揃い 通常配当`)
       return betAmount * symbol.value
     }
     // チェリーの特別ルール（3つ揃い以外は厳密に判定）
-    // 左端だけチェリー
-    if (lineSymbols[0] === 4 && lineSymbols[1] !== 4 && lineSymbols[2] !== 4) {
-      return betAmount * symbols[4].value * 0.2
+    // 左端だけチェリー: 🍒, 非🍒, 非🍒 かつ 残り2つが同じでない
+    if (
+      lineSymbols[0] === 4 &&
+      lineSymbols[1] !== 4 &&
+      lineSymbols[2] !== 4 &&
+      lineSymbols[1] !== lineSymbols[2]
+    ) {
+      console.log(`ライン${lineIndex+1}: 左端だけチェリー特別配当`)
+      return betAmount * 0.5
     }
-    // 左2つだけチェリー
+    // 左2つだけチェリー: 🍒, 🍒, 非🍒
     if (lineSymbols[0] === 4 && lineSymbols[1] === 4 && lineSymbols[2] !== 4) {
-      return betAmount * symbols[4].value * 0.5
+      console.log(`ライン${lineIndex+1}: 左2つだけチェリー特別配当`)
+      return betAmount
     }
     // それ以外は配当なし
     return 0
@@ -532,10 +541,11 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
         <div className="mt-4 p-2 bg-purple-900 rounded text-xs text-purple-200">
           <div className="font-bold text-yellow-300 mb-1">🍒 チェリーの特別配当</div>
           <ul className="list-disc ml-5">
-            <li>左端だけチェリー：ベット額 × 20 × 0.2（4倍）</li>
-            <li>左2つチェリー：ベット額 × 20 × 0.5（10倍）</li>
+            <li>左端だけチェリー：ベット額の50%（例：2万コイン賭け→1万コイン返還）</li>
+            <li>左2つチェリー：ベット額全額返還（例：2万コイン賭け→2万コイン返還）</li>
             <li>3つ揃いは通常配当（ベット額 × 20倍）</li>
           </ul>
+          <div className="mt-1 text-purple-400">※チェリー配当は他のシンボルと重複しません</div>
         </div>
         {/* ▲▲▲ ここまで ▲▲▲ */}
       </div>
