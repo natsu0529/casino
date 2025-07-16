@@ -21,7 +21,7 @@ export default function VipMessageBoard() {
       setMessages([]);
       return;
     }
-    const msgs = await getMessages(20, true); // true: VIP専用
+    const msgs = await getMessages(20); // VIP専用フラグ削除
     setMessages(Array.isArray(msgs) ? msgs : []);
   };
 
@@ -38,7 +38,7 @@ export default function VipMessageBoard() {
     setSending(true);
     setError("");
     try {
-      await postMessage(input, true); // true: VIP専用
+      await postMessage(input); // VIP専用フラグ削除
       setInput("");
       fetchMessages();
     } catch (err) {
