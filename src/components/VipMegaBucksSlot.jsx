@@ -121,6 +121,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     let totalWin = 0
     let winningLines = []
     let jackpotHit = false
+    let specialPayouts = [] // チェリー特別配当候補
 
     // ジャックポット判定（中段に💎💎💎）
     const centerLine = [[0,1], [1,1], [2,1]];
@@ -151,12 +152,32 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
       }
       // 💎💎💎が他のラインなら通常配当
       if (!jackpotHit) {
+        // チェリー特別配当かどうか判定
         const lineWin = calculateLineWin(lineSymbols, lineIndex)
-        if (lineWin > 0) {
+        // チェリー特別配当のみ抽出
+        if (
+          // 左2つだけチェリー: 🍒, 🍒, 非🍒
+          (lineSymbols[0] === 4 && lineSymbols[1] === 4 && lineSymbols[2] !== 4) ||
+          // 左端だけチェリー: 🍒, 非🍒, 非🍒 かつ 残り2つが同じでない
+          (lineSymbols[0] === 4 && lineSymbols[1] !== 4 && lineSymbols[2] !== 4 && lineSymbols[1] !== lineSymbols[2])
+        ) {
+          if (lineWin > 0) {
+            specialPayouts.push({ line: lineIndex + 1, win: lineWin, symbols: lineSymbols })
+          }
+        } else if (lineWin > 0) {
+          // 通常配当（3つ揃い）は複数ラインOK
           totalWin += lineWin
           winningLines.push({ line: lineIndex + 1, win: lineWin, symbols: lineSymbols })
         }
       }
+    }
+
+    // チェリー特別配当は重複なしで最大値のみ加算
+    if (!jackpotHit && specialPayouts.length > 0) {
+      // 最も高い配当のみ
+      const maxPayout = specialPayouts.reduce((max, cur) => cur.win > max.win ? cur : max, specialPayouts[0])
+      totalWin += maxPayout.win
+      winningLines.push(maxPayout)
     }
 
     return { totalWin, winningLines }
