@@ -29,7 +29,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     { symbol: '💰', name: 'マネーバッグ', value: 120, weight: 8 },     // 高配当
     { symbol: '🔔', name: 'ベル', value: 60, weight: 12 },             // 中高配当
     { symbol: '⭐', name: 'スター', value: 30, weight: 15 },            // 中配当
-    { symbol: '🍒', name: 'チェリー', value: 15, weight: 25 },          // 中配当
+    { symbol: '🍒', name: 'チェリー', value: 15, weight: 25 },          // 中配当（3つ揃いは15倍）
     { symbol: '🍋', name: 'レモン', value: 6, weight: 35 },            // 低配当
   ]
 
@@ -122,6 +122,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     let winningLines = []
     let jackpotHit = false
     let specialPayouts = [] // チェリー特別配当候補
+    let hasNormalWin = false
 
     // ジャックポット判定（中段に💎💎💎）
     const centerLine = [[0,1], [1,1], [2,1]];
@@ -152,29 +153,32 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
       }
       // 💎💎💎が他のラインなら通常配当
       if (!jackpotHit) {
-        // チェリー特別配当かどうか判定
         const lineWin = calculateLineWin(lineSymbols, lineIndex)
-        // チェリー特別配当のみ抽出
-        if (
-          // 左2つだけチェリー: 🍒, 🍒, 非🍒
-          (lineSymbols[0] === 4 && lineSymbols[1] === 4 && lineSymbols[2] !== 4) ||
-          // 左端だけチェリー: 🍒, 非🍒, 非🍒 かつ 残り2つが同じでない
-          (lineSymbols[0] === 4 && lineSymbols[1] !== 4 && lineSymbols[2] !== 4 && lineSymbols[1] !== lineSymbols[2])
-        ) {
+        // 通常配当（3つ揃い）は複数ラインOK
+        if (lineSymbols[0] === lineSymbols[1] && lineSymbols[1] === lineSymbols[2]) {
           if (lineWin > 0) {
-            specialPayouts.push({ line: lineIndex + 1, win: lineWin, symbols: lineSymbols })
+            totalWin += lineWin
+            winningLines.push({ line: lineIndex + 1, win: lineWin, symbols: lineSymbols })
+            hasNormalWin = true
           }
-        } else if (lineWin > 0) {
-          // 通常配当（3つ揃い）は複数ラインOK
-          totalWin += lineWin
-          winningLines.push({ line: lineIndex + 1, win: lineWin, symbols: lineSymbols })
+        } else {
+          // チェリー特別配当のみ抽出
+          if (
+            // 左2つだけチェリー: 🍒, 🍒, 非🍒
+            (lineSymbols[0] === 4 && lineSymbols[1] === 4 && lineSymbols[2] !== 4) ||
+            // 左端だけチェリー: 🍒, 非🍒, 非🍒 かつ 残り2つが同じでない
+            (lineSymbols[0] === 4 && lineSymbols[1] !== 4 && lineSymbols[2] !== 4 && lineSymbols[1] !== lineSymbols[2])
+          ) {
+            if (lineWin > 0) {
+              specialPayouts.push({ line: lineIndex + 1, win: lineWin, symbols: lineSymbols })
+            }
+          }
         }
       }
     }
 
-    // チェリー特別配当は重複なしで最大値のみ加算
-    if (!jackpotHit && specialPayouts.length > 0) {
-      // 最も高い配当のみ
+    // 通常配当が1つも無い場合のみ、特別配当を最大1つだけ加算
+    if (!jackpotHit && !hasNormalWin && specialPayouts.length > 0) {
       const maxPayout = specialPayouts.reduce((max, cur) => cur.win > max.win ? cur : max, specialPayouts[0])
       totalWin += maxPayout.win
       winningLines.push(maxPayout)
@@ -563,8 +567,8 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
         <div className="mt-4 p-2 bg-purple-900 rounded text-xs text-purple-200">
           <div className="font-bold text-yellow-300 mb-1">🍒 チェリーの特別配当</div>
           <ul className="list-disc ml-5">
-            <li>左端だけチェリー：ベット額の50%（例：2万コイン賭け→1万コイン返還）</li>
-            <li>左2つチェリー：ベット額全額返還（例：2万コイン賭け→2万コイン返還）</li>
+            <li>左端だけチェリー：ベット額の<strong>0.5倍</strong>（例：2万コイン賭け→1万コイン返還）</li>
+            <li>左2つチェリー：ベット額の<strong>1倍</strong>（例：2万コイン賭け→2万コイン返還）</li>
             <li>3つ揃いは通常配当（ベット額 × 20倍）</li>
           </ul>
           <div className="mt-1 text-purple-400">※チェリー配当は他のシンボルと重複しません</div>
