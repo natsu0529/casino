@@ -172,15 +172,16 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
       // 通常マーク
       return betAmount * symbol.value
     }
-    // チェリーの特別ルール（左端だけ or 左2つだけチェリー）
-    if (lineSymbols[0] === 4) { // 左端がチェリー
-      if (lineSymbols[1] === 4 && lineSymbols[2] !== 4) { // 左2つだけチェリー
-        return betAmount * symbols[4].value * 0.5
-      }
-      if (lineSymbols[1] !== 4 && lineSymbols[2] !== 4) { // 左1つだけチェリー
-        return betAmount * symbols[4].value * 0.2
-      }
+    // チェリーの特別ルール（3つ揃い以外は厳密に判定）
+    // 左端だけチェリー
+    if (lineSymbols[0] === 4 && lineSymbols[1] !== 4 && lineSymbols[2] !== 4) {
+      return betAmount * symbols[4].value * 0.2
     }
+    // 左2つだけチェリー
+    if (lineSymbols[0] === 4 && lineSymbols[1] === 4 && lineSymbols[2] !== 4) {
+      return betAmount * symbols[4].value * 0.5
+    }
+    // それ以外は配当なし
     return 0
   }
 
