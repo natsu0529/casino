@@ -105,7 +105,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
   }
 
   // ペイライン判定（MEGA BUCKS風）
-  const checkPaylines = (reelResults) => {
+  const checkPaylines = async (reelResults) => {
     const paylines = [
       [[0,0], [1,0], [2,0]], // 上段ライン
       [[0,1], [1,1], [2,1]], // 中段ライン（メインライン）
@@ -123,8 +123,9 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     const centerSymbols = centerLine.map(([reel, pos]) => reelResults[reel][pos]);
     const isJackpot = centerSymbols.every(symbol => symbol === 0); // 全てダイヤモンド
 
-    paylines.forEach((line, lineIndex) => {
-      const lineSymbols = line.map(([reel, pos]) => reelResults[reel][pos])
+    for (let lineIndex = 0; lineIndex < paylines.length; lineIndex++) {
+      const line = paylines[lineIndex];
+      const lineSymbols = line.map(([reel, pos]) => reelResults[reel][pos]);
       // 💎💎💎中段はジャックポット
       if (lineIndex === 1 && isJackpot) {
         // 中段💎💎💎は他の配当を上書き
@@ -132,9 +133,13 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
         winningLines = [{ line: 2, win: betAmount * 500 + jackpotPool, symbols: [0,0,0] }];
         jackpotHit = true;
         setMessage(`🎉 MEGA BUCKS JACKPOT! ${(betAmount * 500 + jackpotPool).toLocaleString()}コイン獲得！`);
-        setJackpotPool(JACKPOT_INITIAL); // ローカルリセット
-        resetJackpot('vip_mega_bucks', JACKPOT_INITIAL); // DBリセット
-        return;
+        try {
+          await resetJackpot('vip_mega_bucks', JACKPOT_INITIAL); // DBリセット
+          setJackpotPool(JACKPOT_INITIAL); // ローカルリセット
+        } catch (e) {
+          setMessage('ジャックポットリセットに失敗しました');
+        }
+        break;
       }
       // 💎💎💎が他のラインなら通常配当
       if (!jackpotHit) {
@@ -144,7 +149,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
           winningLines.push({ line: lineIndex + 1, win: lineWin, symbols: lineSymbols })
         }
       }
-    })
+    }
 
     return { totalWin, winningLines }
   }
@@ -198,7 +203,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
   }
 
   // スピン実行
-  const spin = () => {
+  const spin = async () => {
     if (spinning) return
     if (currentBalanceRef.current < betAmount) {
       setMessage('残高が不足しています。')
@@ -219,9 +224,14 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     }
 
     // ジャックポット積立（ベット額の1%）
-    setJackpotPool(prev => prev + Math.floor(betAmount * 0.01))
-    // DBも加算
-    incrementJackpot('vip_mega_bucks', Math.floor(betAmount * 0.01)).catch(()=>{})
+    try {
+      await incrementJackpot('vip_mega_bucks', Math.floor(betAmount * 0.01));
+      // DB反映後に最新値取得
+      const latest = await getJackpotAmount('vip_mega_bucks');
+      setJackpotPool(latest);
+    } catch (e) {
+      setMessage('ジャックポット加算に失敗しました');
+    }
 
     // リール結果生成
     const newReels = [
@@ -238,80 +248,83 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
         [getWeightedRandomSymbol(), getWeightedRandomSymbol(), getWeightedRandomSymbol()],
         [getWeightedRandomSymbol(), getWeightedRandomSymbol(), getWeightedRandomSymbol()]
       ])
-      
       spinCount++
       if (spinCount >= 15) {
         clearInterval(spinInterval)
         setReels(newReels)
-        
         // 勝利判定
-        const { totalWin, winningLines } = checkPaylines(newReels)
-        
-        if (totalWin > 0) {
-          const finalBalance = currentBalanceRef.current + totalWin
-          try {
-            onUpdateBalance(finalBalance)
-            currentBalanceRef.current = finalBalance
-          } catch (error) {
-            console.error('残高更新エラー（勝利時）:', error)
-          }
-          setLastWin(totalWin)
-          
-          if (totalWin >= jackpotPool) {
-            setMessage(`🎉 MEGA BUCKS JACKPOT! ${totalWin.toLocaleString()}コイン獲得！`)
-          } else {
-            setMessage(`🎉 ${totalWin.toLocaleString()}コイン獲得！`)
-          }
-        } else {
-          setMessage('ハズレ... 次回に期待！')
-          setLastWin(0)
-        }
-
-        // ゲーム履歴に記録
-        const gameResult = {
-          type: 'VIP MEGA BUCKS',
-          bet: betAmount,
-          win: totalWin,
-          profit: totalWin - betAmount,
-          timestamp: new Date().toLocaleString(),
-          reels: newReels,
-          winningLines
-        }
-        setGameHistory(prev => [gameResult, ...prev.slice(0, 9)])
-        
-        // ゲーム記録（外部関数）
-        if (onRecordGame) {
-          try {
-            onRecordGame(gameResult)
-          } catch (error) {
-            console.error('ゲーム履歴記録エラー:', error)
-            // エラーが発生してもゲームは続行
-          }
-        }
-
-        setSpinning(false)
-
-        // 連続スピン処理
-        if (autoSpinRef.current) {
-          const newCount = autoSpinCountRef.current + 1
-          setAutoSpinCount(newCount)
-          autoSpinCountRef.current = newCount
-
-          if (newCount < maxAutoSpinsRef.current && currentBalanceRef.current >= betAmount) {
-            setTimeout(() => {
-              if (autoSpinRef.current) {
-                spin()
-              }
-            }, 2000)
-          } else {
-            stopAutoSpin()
-            if (newCount >= maxAutoSpinsRef.current) {
-              setMessage('連続スピン完了！')
+        (async () => {
+          const { totalWin, winningLines } = await checkPaylines(newReels)
+          if (totalWin > 0) {
+            const finalBalance = currentBalanceRef.current + totalWin
+            try {
+              onUpdateBalance(finalBalance)
+              currentBalanceRef.current = finalBalance
+            } catch (error) {
+              console.error('残高更新エラー（勝利時）:', error)
+            }
+            setLastWin(totalWin)
+            if (winningLines.some(l => l.line === 2 && l.symbols.every(s => s === 0))) {
+              setMessage(`🎉 MEGA BUCKS JACKPOT! ${totalWin.toLocaleString()}コイン獲得！`)
+              // ジャックポットリセット後の最新値取得
+              try {
+                const latest = await getJackpotAmount('vip_mega_bucks');
+                setJackpotPool(latest);
+              } catch {}
             } else {
-              setMessage('残高不足で連続スピン終了')
+              setMessage(`🎉 ${totalWin.toLocaleString()}コイン獲得！`)
+            }
+          } else {
+            setMessage('ハズレ... 次回に期待！')
+            setLastWin(0)
+          }
+
+          // ゲーム履歴に記録
+          const gameResult = {
+            type: 'VIP MEGA BUCKS',
+            bet: betAmount,
+            win: totalWin,
+            profit: totalWin - betAmount,
+            timestamp: new Date().toLocaleString(),
+            reels: newReels,
+            winningLines
+          }
+          setGameHistory(prev => [gameResult, ...prev.slice(0, 9)])
+          
+          // ゲーム記録（外部関数）
+          if (onRecordGame) {
+            try {
+              onRecordGame(gameResult)
+            } catch (error) {
+              console.error('ゲーム履歴記録エラー:', error)
+              // エラーが発生してもゲームは続行
             }
           }
-        }
+
+          setSpinning(false)
+
+          // 連続スピン処理
+          if (autoSpinRef.current) {
+            const newCount = autoSpinCountRef.current + 1
+            setAutoSpinCount(newCount)
+            autoSpinCountRef.current = newCount
+
+            if (newCount < maxAutoSpinsRef.current && currentBalanceRef.current >= betAmount) {
+              setTimeout(() => {
+                if (autoSpinRef.current) {
+                  spin()
+                }
+              }, 2000)
+            } else {
+              stopAutoSpin()
+              if (newCount >= maxAutoSpinsRef.current) {
+                setMessage('連続スピン完了！')
+              } else {
+                setMessage('残高不足で連続スピン終了')
+              }
+            }
+          }
+        })();
       }
     }, 100)
   }
