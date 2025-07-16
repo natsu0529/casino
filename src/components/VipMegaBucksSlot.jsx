@@ -116,28 +116,35 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
 
     let totalWin = 0
     let winningLines = []
-
-    paylines.forEach((line, lineIndex) => {
-      const lineSymbols = line.map(([reel, pos]) => reelResults[reel][pos])
-      const lineWin = calculateLineWin(lineSymbols, lineIndex)
-      
-      if (lineWin > 0) {
-        totalWin += lineWin
-        winningLines.push({ line: lineIndex + 1, win: lineWin, symbols: lineSymbols })
-      }
-    })
+    let jackpotHit = false
 
     // ジャックポット判定（中段に💎💎💎）
     const centerLine = [[0,1], [1,1], [2,1]];
     const centerSymbols = centerLine.map(([reel, pos]) => reelResults[reel][pos]);
     const isJackpot = centerSymbols.every(symbol => symbol === 0); // 全てダイヤモンド
 
-    if (isJackpot) {
-      totalWin += jackpotPool;
-      setMessage(`🎉 MEGA BUCKS JACKPOT! ${jackpotPool.toLocaleString()}コイン獲得！`);
-      setJackpotPool(JACKPOT_INITIAL); // ローカルリセット
-      resetJackpot('vip_mega_bucks', JACKPOT_INITIAL); // DBリセット
-    }
+    paylines.forEach((line, lineIndex) => {
+      const lineSymbols = line.map(([reel, pos]) => reelResults[reel][pos])
+      // 💎💎💎中段はジャックポット
+      if (lineIndex === 1 && isJackpot) {
+        // 中段💎💎💎は他の配当を上書き
+        totalWin = betAmount * 500 + jackpotPool;
+        winningLines = [{ line: 2, win: betAmount * 500 + jackpotPool, symbols: [0,0,0] }];
+        jackpotHit = true;
+        setMessage(`🎉 MEGA BUCKS JACKPOT! ${(betAmount * 500 + jackpotPool).toLocaleString()}コイン獲得！`);
+        setJackpotPool(JACKPOT_INITIAL); // ローカルリセット
+        resetJackpot('vip_mega_bucks', JACKPOT_INITIAL); // DBリセット
+        return;
+      }
+      // 💎💎💎が他のラインなら通常配当
+      if (!jackpotHit) {
+        const lineWin = calculateLineWin(lineSymbols, lineIndex)
+        if (lineWin > 0) {
+          totalWin += lineWin
+          winningLines.push({ line: lineIndex + 1, win: lineWin, symbols: lineSymbols })
+        }
+      }
+    })
 
     return { totalWin, winningLines }
   }
@@ -147,23 +154,21 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     // 3つ同じシンボルの場合のみ勝利
     if (lineSymbols[0] === lineSymbols[1] && lineSymbols[1] === lineSymbols[2]) {
       const symbol = symbols[lineSymbols[0]]
-      const baseWin = symbol.value
-      
-      // メインライン（中段）は倍率2倍
-      const multiplier = lineIndex === 1 ? 2 : 1
-      
-      return baseWin * multiplier
+      // 💎はジャックポット判定で処理済みなのでここは通常配当
+      if (lineSymbols[0] === 0) {
+        return betAmount * 500
+      }
+      // 通常マーク
+      return betAmount * symbol.value
     }
-    
     // チェリーの特別ルール（左リールのみでも配当）
     if (lineSymbols[0] === 4) { // チェリー
       if (lineSymbols[1] === 4) { // 左2つがチェリー
-        return symbols[4].value * 0.5
+        return betAmount * symbols[4].value * 0.5
       } else { // 左1つだけチェリー
-        return symbols[4].value * 0.2
+        return betAmount * symbols[4].value * 0.2
       }
     }
-
     return 0
   }
 
