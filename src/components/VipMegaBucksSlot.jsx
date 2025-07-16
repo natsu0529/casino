@@ -166,11 +166,12 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
       // 通常マーク
       return betAmount * symbol.value
     }
-    // チェリーの特別ルール（左リールのみでも配当）
-    if (lineSymbols[0] === 4) { // チェリー
-      if (lineSymbols[1] === 4) { // 左2つがチェリー
+    // チェリーの特別ルール（左端だけ or 左2つだけチェリー）
+    if (lineSymbols[0] === 4) { // 左端がチェリー
+      if (lineSymbols[1] === 4 && lineSymbols[2] !== 4) { // 左2つだけチェリー
         return betAmount * symbols[4].value * 0.5
-      } else { // 左1つだけチェリー
+      }
+      if (lineSymbols[1] !== 4 && lineSymbols[2] !== 4) { // 左1つだけチェリー
         return betAmount * symbols[4].value * 0.2
       }
     }
@@ -454,6 +455,16 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
             </div>
           </div>
         </div>
+        {/* ▼▼▼ 特別配当ルール説明を追加 ▼▼▼ */}
+        <div className="mt-4 p-2 bg-purple-900 rounded text-xs text-purple-200">
+          <div className="font-bold text-yellow-300 mb-1">🍒 チェリーの特別配当</div>
+          <ul className="list-disc ml-5">
+            <li>左端だけチェリー：ベット額 × 20 × 0.2（4倍）</li>
+            <li>左2つチェリー：ベット額 × 20 × 0.5（10倍）</li>
+            <li>3つ揃いは通常配当（ベット額 × 20倍）</li>
+          </ul>
+        </div>
+        {/* ▲▲▲ ここまで ▲▲▲ */}
       </div>
 
       {/* 連続スピン状況 */}
