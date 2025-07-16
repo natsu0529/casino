@@ -13,6 +13,7 @@ import BaccaratGame from './components/BaccaratGame.jsx'
 import HighStakesBlackjack from './components/HighStakesBlackjack.jsx'
 import BridgeGame from './components/BridgeGame.jsx'
 import TexasPokerGame from './components/TexasPokerGame.jsx'
+import VipPage from './components/VipPage.jsx'
 import './App.css'
 
 function App() {
@@ -176,6 +177,10 @@ function App() {
             onBalanceUpdate={handleUpdateBalance} 
             onNavigateHome={() => setCurrentPage('home')}
           />
+        )
+      case 'vip':
+        return (
+          <VipPage />
         )
       case 'home':
       default:
