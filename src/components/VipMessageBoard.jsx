@@ -36,14 +36,14 @@ export default function VipMessageBoard() {
       return;
     }
     const msgs = await getMessages(20);
-    setMessages(Array.isArray(msgs) ? msgs : []);
+    setMessages(Array.isArray(msgs) ? msgs.filter(Boolean) : []);
   };
 
   useEffect(() => {
     fetchMessages();
     const timer = setInterval(fetchMessages, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [getMessages]);
 
   // 投稿処理
   const handlePost = async (e) => {
@@ -84,7 +84,7 @@ export default function VipMessageBoard() {
         {(!Array.isArray(messages) || messages.length === 0) && (
           <div className="text-gray-500">まだメッセージがありません</div>
         )}
-        {Array.isArray(messages) && messages.length > 0 && messages.map(msg => (
+        {Array.isArray(messages) && messages.length > 0 && messages.filter(Boolean).map(msg => (
           <div key={msg.id} className="bg-white border border-yellow-200 rounded p-2">
             <div className="text-sm text-yellow-900 font-bold">{msg.username} <span className="text-xs text-yellow-500">({new Date(msg.created_at).toLocaleString()})</span></div>
             <div className="text-yellow-800 whitespace-pre-wrap">{msg.content}</div>
