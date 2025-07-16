@@ -11,7 +11,7 @@ const MessageBoard = ({ currentUser, user }) => {
 
   // メッセージを取得
   useEffect(() => {
-    if (!user?.id) return
+    if (!user?.id || typeof getMessages !== 'function') return
     
     const fetchMessages = async () => {
       setLoading(true)
@@ -29,7 +29,7 @@ const MessageBoard = ({ currentUser, user }) => {
     // 30秒ごとに自動更新
     const interval = setInterval(fetchMessages, 30000)
     return () => clearInterval(interval)
-  }, [user?.id, getMessages]) // getMessagesをuseCallbackで安定化したので依存配列に含める
+  }, [user?.id, typeof getMessages === 'function' ? getMessages : () => {}]) // getMessagesをuseCallbackで安定化したので依存配列に含める
 
   const handleSubmit = async (e) => {
     e.preventDefault()
