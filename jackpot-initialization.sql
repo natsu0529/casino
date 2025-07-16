@@ -14,12 +14,12 @@ CREATE TABLE IF NOT EXISTS jackpot_pool (
 ALTER TABLE jackpot_pool ENABLE ROW LEVEL SECURITY;
 
 -- 読み取り権限（全ユーザー）
-CREATE POLICY IF NOT EXISTS "Allow public read access" 
+CREATE POLICY "Allow public read access" 
 ON jackpot_pool FOR SELECT 
 USING (true);
 
 -- 更新権限（認証済みユーザー）
-CREATE POLICY IF NOT EXISTS "Allow authenticated users to update" 
+CREATE POLICY "Allow authenticated users to update" 
 ON jackpot_pool FOR UPDATE 
 USING (auth.role() = 'authenticated');
 

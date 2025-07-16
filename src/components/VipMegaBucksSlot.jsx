@@ -80,10 +80,14 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     let mounted = true;
     async function fetchJackpot() {
       try {
+        console.log('ジャックポット額を取得中...')
         const amount = await getJackpotAmount('vip_mega_bucks')
+        console.log('取得したジャックポット額:', amount)
         if (mounted) setJackpotPool(amount)
       } catch (e) {
-        // 取得失敗時はローカル値維持
+        console.error('ジャックポット取得失敗:', e)
+        // 取得失敗時はデフォルト値維持
+        if (mounted) setJackpotPool(JACKPOT_INITIAL)
       }
     }
     fetchJackpot()
@@ -227,15 +231,23 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     }
 
     // ジャックポット積立（ベット額の1%）
+    const jackpotAddAmount = Math.floor(betAmount * 0.01);
+    console.log('ジャックポット積立開始:', jackpotAddAmount);
+    
     try {
-      await incrementJackpot('vip_mega_bucks', Math.floor(betAmount * 0.01));
+      await incrementJackpot('vip_mega_bucks', jackpotAddAmount);
       // DB反映後に最新値取得
       const latest = await getJackpotAmount('vip_mega_bucks');
+      console.log('ジャックポット更新後:', latest);
       setJackpotPool(latest);
     } catch (e) {
       console.error('ジャックポット加算エラー:', e);
       // エラー時はローカルで加算のみ
-      setJackpotPool(prev => prev + Math.floor(betAmount * 0.01));
+      setJackpotPool(prev => {
+        const newAmount = prev + jackpotAddAmount;
+        console.log('ローカルジャックポット更新:', prev, '+', jackpotAddAmount, '=', newAmount);
+        return newAmount;
+      });
     }
 
     // リール結果生成
