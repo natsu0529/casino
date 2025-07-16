@@ -45,7 +45,7 @@ export default function VipMessageBoard() {
     // ポーリングで新着取得（5秒ごと）
     const timer = setInterval(fetchMessages, 5000);
     return () => clearInterval(timer);
-  }, [typeof getMessages === 'function' ? getMessages : () => {}]);
+  }, [getMessages ? getMessages : null]);
 
   // messagesがundefinedやnullになった場合、必ず空配列に戻す
   useEffect(() => {
