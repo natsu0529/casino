@@ -49,8 +49,13 @@ function App() {
   }
 
   const handleUpdateBalance = async (newBalance) => {
-    if (user && profile) {
-      await updateBalance(newBalance)
+    if (user && profile && updateBalance) {
+      try {
+        await updateBalance(newBalance)
+      } catch (error) {
+        console.error('App.jsx - 残高更新エラー:', error)
+        // エラーが発生してもアプリケーションは継続
+      }
     }
   }
 

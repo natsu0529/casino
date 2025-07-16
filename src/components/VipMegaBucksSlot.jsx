@@ -1,6 +1,25 @@
 import { useState, useEffect, useRef } from 'react'
 
 const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateBalance, onRecordGame }) => {
+  // 安全なbalanceアクセス
+  const safeBalance = currentUser?.balance || 0
+  
+  // currentUserが存在しない場合の早期リターン
+  if (!currentUser) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 bg-gradient-to-b from-purple-900 via-purple-800 to-black text-white min-h-screen">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">読み込み中...</h1>
+          <button
+            className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition"
+            onClick={onNavigateHome}
+          >
+            ホームに戻る
+          </button>
+        </div>
+      </div>
+    )
+  }
   // MEGA BUCKS風シンボル（期待値150%調整版）
   const symbols = [
     { symbol: '💎', name: 'ダイヤモンド', value: 500, weight: 5 },     // 超高配当
@@ -31,15 +50,15 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
   const [maxAutoSpins, setMaxAutoSpins] = useState(10)
   
   // 最新の残高を追跡するref
-  const currentBalanceRef = useRef(currentUser.balance)
+  const currentBalanceRef = useRef(safeBalance)
   const autoSpinRef = useRef(false)
   const autoSpinCountRef = useRef(0)
   const maxAutoSpinsRef = useRef(10)
   
   // 残高とautoSpinの更新を追跡
   useEffect(() => {
-    currentBalanceRef.current = currentUser.balance
-  }, [currentUser.balance])
+    currentBalanceRef.current = safeBalance
+  }, [safeBalance])
   
   useEffect(() => {
     autoSpinRef.current = autoSpin
@@ -165,8 +184,13 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
 
     // ベット額を残高から差し引き
     const newBalance = currentBalanceRef.current - betAmount
-    onUpdateBalance(newBalance)
-    currentBalanceRef.current = newBalance
+    try {
+      onUpdateBalance(newBalance)
+      currentBalanceRef.current = newBalance
+    } catch (error) {
+      console.error('残高更新エラー（スピン開始時）:', error)
+      // エラーが発生してもゲームは続行
+    }
 
     // ジャックポット積立（ベット額の1%）
     setJackpotPool(prev => prev + Math.floor(betAmount * 0.01))
@@ -197,8 +221,12 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
         
         if (totalWin > 0) {
           const finalBalance = currentBalanceRef.current + totalWin
-          onUpdateBalance(finalBalance)
-          currentBalanceRef.current = finalBalance
+          try {
+            onUpdateBalance(finalBalance)
+            currentBalanceRef.current = finalBalance
+          } catch (error) {
+            console.error('残高更新エラー（勝利時）:', error)
+          }
           setLastWin(totalWin)
           
           if (totalWin >= jackpotPool) {
@@ -225,7 +253,12 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
         
         // ゲーム記録（外部関数）
         if (onRecordGame) {
-          onRecordGame(gameResult)
+          try {
+            onRecordGame(gameResult)
+          } catch (error) {
+            console.error('ゲーム履歴記録エラー:', error)
+            // エラーが発生してもゲームは続行
+          }
         }
 
         setSpinning(false)
@@ -272,7 +305,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="bg-purple-800 p-4 rounded">
           <div className="text-sm text-purple-300">残高</div>
-          <div className="text-xl font-bold">{currentUser.balance.toLocaleString()}コイン</div>
+          <div className="text-xl font-bold">{safeBalance.toLocaleString()}コイン</div>
         </div>
         <div className="bg-purple-800 p-4 rounded">
           <div className="text-sm text-purple-300">最後の勝利</div>
@@ -342,7 +375,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
         <button
           className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded disabled:opacity-50 transition"
           onClick={spin}
-          disabled={spinning || currentUser.balance < betAmount}
+          disabled={spinning || safeBalance < betAmount}
         >
           {spinning ? 'スピン中...' : 'スピン'}
         </button>
@@ -350,7 +383,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
         <button
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded disabled:opacity-50 transition"
           onClick={() => startAutoSpin(maxAutoSpins)}
-          disabled={spinning || autoSpin || currentUser.balance < betAmount}
+          disabled={spinning || autoSpin || safeBalance < betAmount}
         >
           連続スピン開始
         </button>
