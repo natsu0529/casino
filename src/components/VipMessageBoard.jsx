@@ -4,34 +4,20 @@ import { useProfile } from "../hooks/useProfile";
 
 export default function VipMessageBoard() {
   const { user } = useAuth();
-  // userがいない場合はuseProfileを呼ばない
-  const profileData = user ? useProfile(user.id) : {};
-  // profileDataがundefinedでもエラーにならないように修正
-  const { profile, getMessages, postMessage, loading } = profileData || {};
-
+  const { profile, getMessages, postMessage } = useProfile(user?.id);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
 
-  if (!user) {
-    return (
-      <div className="p-4 bg-yellow-50 border border-yellow-300 rounded text-yellow-700">
-        VIPユーザーのみ掲示板を利用できます。
-      </div>
-    );
-  }
-  if (!profile?.title) {
-    return (
-      <div className="p-4 bg-yellow-50 border border-yellow-300 rounded text-yellow-700">
-        VIPユーザーのみ掲示板を利用できます。
-      </div>
-    );
+  // VIP以外はガード
+  if (!user || !profile?.title) {
+    return null;
   }
 
   // メッセージ取得
   const fetchMessages = async () => {
-    if (typeof getMessages !== 'function') {
+    if (typeof getMessages !== "function") {
       setMessages([]);
       return;
     }
@@ -39,25 +25,16 @@ export default function VipMessageBoard() {
     setMessages(Array.isArray(msgs) ? msgs : []);
   };
 
-  // useEffectの依存配列を空配列にして初回のみ実行
   useEffect(() => {
     fetchMessages();
-    // ポーリングで新着取得（5秒ごと）
     const timer = setInterval(fetchMessages, 5000);
     return () => clearInterval(timer);
   }, []);
 
-  // messagesがundefinedやnullになった場合、必ず空配列に戻す
-  useEffect(() => {
-    if (!Array.isArray(messages)) {
-      setMessages([]);
-    }
-  }, [messages]);
-
   // 投稿処理
   const handlePost = async (e) => {
     e.preventDefault();
-    if (!input.trim() || typeof postMessage !== 'function') return;
+    if (!input.trim() || typeof postMessage !== "function") return;
     setSending(true);
     setError("");
     try {

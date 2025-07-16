@@ -194,10 +194,20 @@ const HomePage = ({ currentUser, user, onNavigation, onLogout }) => {
           {/* VIPページ */}
           <div 
             className={`h-full bg-gradient-to-br from-yellow-400 to-yellow-700 border border-yellow-300 rounded-lg hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col items-center justify-center text-white ${!currentUser?.title ? 'opacity-50 pointer-events-none' : ''}`}
-            onClick={() => handleGameClick('vip')}
+            onClick={() => onNavigation('vip')}
           >
             <div className="text-3xl mb-2">👑</div>
             <h3 className="text-lg font-bold">VIPページ</h3>
+            <p className="text-xs opacity-80 text-center">爵位ユーザー限定</p>
+          </div>
+
+          {/* VIPルーム */}
+          <div 
+            className={`h-full bg-gradient-to-br from-yellow-400 to-yellow-700 border border-yellow-300 rounded-lg hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col items-center justify-center text-white ${!currentUser?.title ? 'opacity-50 pointer-events-none' : ''}`}
+            onClick={() => onNavigation('vip')}
+          >
+            <div className="text-3xl mb-2">👑</div>
+            <h3 className="text-lg font-bold">VIPルーム</h3>
             <p className="text-xs opacity-80 text-center">爵位ユーザー限定</p>
           </div>
 
