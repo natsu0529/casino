@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 
-// ジャックポット額を取得	export async function getJackpotAmount(gameType = 'vip_mega_bucks') {
+// ジャックポット額を取得
+export async function getJackpotAmount(gameType = 'vip_mega_bucks') {
   const { data, error } = await supabase
     .from('jackpot_pool')
     .select('amount')
