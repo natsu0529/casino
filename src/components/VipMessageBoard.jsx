@@ -30,7 +30,10 @@ export default function VipMessageBoard() {
 
   // メッセージ取得
   const fetchMessages = async () => {
-    if (!getMessages) return;
+    if (!getMessages) {
+      setMessages([]);
+      return;
+    }
     const msgs = await getMessages(20, true); // true: VIP専用
     setMessages(Array.isArray(msgs) ? msgs : []);
   };
@@ -79,8 +82,8 @@ export default function VipMessageBoard() {
       </form>
       {error && <div className="text-red-600 mb-2">{error}</div>}
       <div className="space-y-2 max-h-64 overflow-y-auto">
-        {(messages ?? []).length === 0 && <div className="text-gray-500">まだメッセージがありません</div>}
-        {(messages ?? []).map(msg => (
+        {(!messages || !Array.isArray(messages) || messages.length === 0) && <div className="text-gray-500">まだメッセージがありません</div>}
+        {(messages && Array.isArray(messages) ? messages : []).map(msg => (
           <div key={msg.id} className="bg-white border border-yellow-200 rounded p-2">
             <div className="text-sm text-yellow-900 font-bold">{msg.username} <span className="text-xs text-yellow-500">({new Date(msg.created_at).toLocaleString()})</span></div>
             <div className="text-yellow-800 whitespace-pre-wrap">{msg.content}</div>
