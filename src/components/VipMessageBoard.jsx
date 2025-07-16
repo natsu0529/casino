@@ -4,15 +4,29 @@ import { useProfile } from "../hooks/useProfile";
 
 export default function VipMessageBoard() {
   const { user } = useAuth();
-  const { profile, getMessages, postMessage } = useProfile(user?.id);
+  // userがいない場合はuseProfileを呼ばない
+  const profileData = user ? useProfile(user.id) : {};
+  // profileDataがundefinedでもエラーにならないように修正
+  const { profile, getMessages, postMessage } = profileData || {};
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
 
   // VIP以外はガード
-  if (!user || !profile?.title) {
-    return null;
+  if (!user) {
+    return (
+      <div className="p-4 bg-yellow-50 border border-yellow-300 rounded text-yellow-700">
+        VIPユーザーのみ掲示板を利用できます。
+      </div>
+    );
+  }
+  if (!profile?.title) {
+    return (
+      <div className="p-4 bg-yellow-50 border border-yellow-300 rounded text-yellow-700">
+        VIPユーザーのみ掲示板を利用できます。
+      </div>
+    );
   }
 
   // メッセージ取得
@@ -21,7 +35,7 @@ export default function VipMessageBoard() {
       setMessages([]);
       return;
     }
-    const msgs = await getMessages(20); // VIP専用フラグ削除
+    const msgs = await getMessages(20);
     setMessages(Array.isArray(msgs) ? msgs : []);
   };
 
@@ -38,7 +52,7 @@ export default function VipMessageBoard() {
     setSending(true);
     setError("");
     try {
-      await postMessage(input); // VIP専用フラグ削除
+      await postMessage(input);
       setInput("");
       fetchMessages();
     } catch (err) {
