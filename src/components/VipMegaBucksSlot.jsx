@@ -130,6 +130,8 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     for (let lineIndex = 0; lineIndex < paylines.length; lineIndex++) {
       const line = paylines[lineIndex];
       const lineSymbols = line.map(([reel, pos]) => reelResults[reel][pos]);
+      // デバッグ出力: 各ラインのシンボル
+      console.log(`ライン${lineIndex+1}:`, lineSymbols.map(i => symbols[i].symbol).join(''), lineSymbols)
       // 💎💎💎中段はジャックポット
       if (lineIndex === 1 && isJackpot) {
         // 中段💎💎💎は他の配当を上書き
