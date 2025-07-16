@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
 
 const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }) => {
-  // 高級シンボル（調整版 RTP102.5%）
+  // 高級シンボル（期待値150%調整版）
   const symbols = [
-    { symbol: '💎', name: 'ダイヤモンド', value: 6, weight: 8 },      // 6倍（12→6）
-    { symbol: '🔥', name: 'ファイア', value: 5, weight: 10 },         // 5倍（10→5）
-    { symbol: '⭐', name: 'ゴールドスター', value: 4, weight: 12 },   // 4倍（8→4）
-    { symbol: '🍒', name: 'チェリー', value: 3, weight: 15 },         // 3倍（6→3）
-    { symbol: '🍋', name: 'レモン', value: 2, weight: 20 },           // 2倍（4→2）
-    { symbol: '🍊', name: 'オレンジ', value: 1.5, weight: 25 },       // 1.5倍（3→1.5）
+    { symbol: '💎', name: 'ダイヤモンド', value: 12, weight: 8 },      // 12倍
+    { symbol: '🔥', name: 'ファイア', value: 10, weight: 10 },         // 10倍
+    { symbol: '⭐', name: 'ゴールドスター', value: 8, weight: 12 },   // 8倍
+    { symbol: '🍒', name: 'チェリー', value: 6, weight: 15 },         // 6倍
+    { symbol: '🍋', name: 'レモン', value: 4, weight: 20 },           // 4倍
+    { symbol: '🍊', name: 'オレンジ', value: 3, weight: 25 },       // 3倍
   ]
 
   // ゲーム状態
@@ -91,14 +91,14 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       
       // 連続スピンが残っている場合は再開設定
       if (pausedAutoSpinCount < pausedMaxAutoSpins) {
-        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}`)
+        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedAutoSpins}`)
         console.log(`復元する値 - autoSpinCount: ${pausedAutoSpinCount}, maxAutoSpins: ${pausedMaxAutoSpins}`)
         setAutoSpin(true)
         autoSpinRef.current = true
         setAutoSpinCount(pausedAutoSpinCount)
         autoSpinCountRef.current = pausedAutoSpinCount
         setMaxAutoSpins(pausedMaxAutoSpins)
-        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedMaxAutoSpins})`)
+        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedAutoSpins})`)
         
         // 少し遅延してから自動実行
         const timer = setTimeout(() => {
@@ -687,7 +687,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                   <div className="flex flex-col items-center gap-2">
                     <div className="text-white text-sm bg-blue-600/30 px-3 py-1 rounded">
                       {pausedAutoSpinRef.current 
-                        ? `連続スピン一時停止: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}` +
+                        ? `連続スピン一時停止: ${pausedAutoSpinCount}/${pausedAutoSpins}` +
                           (freeSpins > 0 ? ` (フリースピン残り${freeSpins}回)` : '')
                         : `連続スピン: ${autoSpinCount}/${maxAutoSpins}`
                       }

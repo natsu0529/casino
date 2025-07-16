@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from 'react'
 
 const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance }) => {
-  // スロットシンボル（期待値1.1調整版）
+  // スロットシンボル（期待値200%調整版）
   const symbols = [
-    { symbol: '🍒', name: 'チェリー', value: 1, weight: 35 },  // 高確率
-    { symbol: '🍋', name: 'レモン', value: 2, weight: 30 },    // 高確率
-    { symbol: '🍊', name: 'オレンジ', value: 3, weight: 20 }, // 中確率
-    { symbol: '🍇', name: 'ブドウ', value: 4, weight: 10 },   // 中確率
-    { symbol: '🔔', name: 'ベル', value: 5, weight: 4 },      // 低確率
-    { symbol: '⭐', name: 'スター', value: 10, weight: 0.8 }, // 超低確率
-    { symbol: '💎', name: 'ダイヤ', value: 15, weight: 0.15 }, // 激レア
-    { symbol: '7️⃣', name: 'ラッキーセブン', value: 50, weight: 0.05 } // 超激レア
+    { symbol: '🍒', name: 'チェリー', value: 2, weight: 35 },  // 高確率・小当たり
+    { symbol: '🍋', name: 'レモン', value: 4, weight: 30 },    // 高確率
+    { symbol: '🍊', name: 'オレンジ', value: 6, weight: 20 }, // 中確率
+    { symbol: '🍇', name: 'ブドウ', value: 10, weight: 10 },   // 中確率
+    { symbol: '🔔', name: 'ベル', value: 20, weight: 4 },      // 低確率
+    { symbol: '⭐', name: 'スター', value: 50, weight: 0.8 }, // 超低確率
+    { symbol: '💎', name: 'ダイヤ', value: 100, weight: 0.15 }, // 激レア
+    { symbol: '7️⃣', name: 'ラッキーセブン', value: 200, weight: 0.05 } // 超激レア
   ]
 
   // 重み付きランダム選択
