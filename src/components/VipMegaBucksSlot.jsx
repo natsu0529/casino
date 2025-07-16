@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { getJackpotAmount, resetJackpot, incrementJackpot } from '../lib/jackpot'
 
 const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateBalance, onRecordGame }) => {
   // 安全なbalanceアクセス
@@ -72,6 +73,21 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     maxAutoSpinsRef.current = maxAutoSpins
   }, [maxAutoSpins])
 
+  // ジャックポット額をDBから取得
+  useEffect(() => {
+    let mounted = true;
+    async function fetchJackpot() {
+      try {
+        const amount = await getJackpotAmount('vip_mega_bucks')
+        if (mounted) setJackpotPool(amount)
+      } catch (e) {
+        // 取得失敗時はローカル値維持
+      }
+    }
+    fetchJackpot()
+    return () => { mounted = false }
+  }, [])
+
   // 重み付きランダム選択
   const getWeightedRandomSymbol = () => {
     const totalWeight = symbols.reduce((sum, symbol) => sum + symbol.weight, 0)
@@ -115,7 +131,9 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     if (centerSymbols.every(symbol => symbol === 0)) { // 全てダイヤモンド
       totalWin += jackpotPool
       setMessage(`🎉 MEGA BUCKS JACKPOT! ${jackpotPool.toLocaleString()}コイン獲得！`)
-      setJackpotPool(10000000) // ジャックポットリセット
+      setJackpotPool(JACKPOT_INITIAL) // ローカルリセット
+      // DBもリセット
+      resetJackpot('vip_mega_bucks', JACKPOT_INITIAL)
     }
 
     return { totalWin, winningLines }
@@ -194,6 +212,8 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
 
     // ジャックポット積立（ベット額の1%）
     setJackpotPool(prev => prev + Math.floor(betAmount * 0.01))
+    // DBも加算
+    incrementJackpot('vip_mega_bucks', Math.floor(betAmount * 0.01)).catch(()=>{})
 
     // リール結果生成
     const newReels = [
@@ -295,7 +315,6 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
         <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">
           VIP MEGA BUCKS
         </h1>
-        <p className="text-yellow-300">ラスベガス風プログレッシブスロット</p>
         <div className="mt-4 p-4 bg-yellow-600 rounded-lg">
           <div className="text-2xl font-bold">💰 JACKPOT: {jackpotPool.toLocaleString()}コイン</div>
         </div>

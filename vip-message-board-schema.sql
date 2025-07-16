@@ -43,3 +43,14 @@ CREATE INDEX idx_vip_message_board_user_id ON vip_message_board(user_id);
 -- ALTER TABLE vip_message_board DROP CONSTRAINT IF EXISTS vip_message_board_user_id_fkey;
 -- ALTER TABLE vip_message_board ADD CONSTRAINT vip_message_board_user_id_fkey 
 --   FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE;
+
+-- ジャックポット賞金額を保存するテーブル
+CREATE TABLE IF NOT EXISTS jackpot_pool (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    game_type TEXT NOT NULL, -- 例: 'vip_mega_bucks'
+    amount BIGINT NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ジャックポット額の取得・更新はアプリ側で行う
+-- ジャックポット当選時はamountを初期値にリセットする
