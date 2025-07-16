@@ -22,26 +22,6 @@ function App() {
   const { user, loading: authLoading, initialized, signOut } = useAuth()
   const { profile, loading: profileLoading, updateBalance, updateUsername, recordGameHistory } = useProfile(user?.id)
 
-  // ハッシュベースのルーティング
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1) // #を除去
-      if (hash) {
-        setCurrentPage(hash)
-      }
-    }
-    
-    // 初期ロード時のハッシュチェック
-    handleHashChange()
-    
-    // ハッシュ変更イベントリスナー
-    window.addEventListener('hashchange', handleHashChange)
-    
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange)
-    }
-  }, [])
-
   // デバッグ用ログ
   useEffect(() => {
     console.log('=== App State Debug ===')
@@ -201,12 +181,16 @@ function App() {
         )
       case 'vip':
         return (
-          <VipPage />
+          <VipPage 
+            onNavigation={handleNavigation}
+            onNavigateHome={() => setCurrentPage('home')}
+          />
         )
       case 'vip-mega-bucks':
         return (
           <VipMegaBucksSlot 
             currentUser={profile}
+            onNavigation={handleNavigation}
             onNavigateHome={() => setCurrentPage('home')}
             onUpdateBalance={handleUpdateBalance}
             onRecordGame={recordGameHistory}

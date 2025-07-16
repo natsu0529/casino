@@ -3,7 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useProfile } from "../hooks/useProfile";
 import VipMessageBoard from "./VipMessageBoard";
 
-export default function VipPage() {
+export default function VipPage({ onNavigation, onNavigateHome }) {
   const { user } = useAuth();
   const { profile, loading } = useProfile(user?.id);
 
@@ -23,13 +23,13 @@ export default function VipPage() {
       <div className="flex gap-4 mb-6">
         <button
           className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition"
-          onClick={() => window.location.href = '/'}
+          onClick={onNavigateHome}
         >
           ホームに戻る
         </button>
         <button
           className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition"
-          onClick={() => window.location.hash = '#vip-mega-bucks'}
+          onClick={() => onNavigation('vip-mega-bucks')}
         >
           💰 VIP MEGA BUCKS スロット
         </button>

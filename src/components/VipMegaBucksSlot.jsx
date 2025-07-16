@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 
-const VipMegaBucksSlot = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }) => {
+const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateBalance, onRecordGame }) => {
   // MEGA BUCKS風シンボル（期待値150%調整版）
   const symbols = [
     { symbol: '💎', name: 'ダイヤモンド', value: 500, weight: 5 },     // 超高配当
@@ -397,7 +397,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       <div className="flex gap-4">
         <button
           className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition"
-          onClick={() => window.location.href = '/vip'}
+          onClick={() => onNavigation('vip')}
         >
           VIPルームに戻る
         </button>
