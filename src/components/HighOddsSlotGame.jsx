@@ -104,14 +104,14 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       
       // 連続スピンが残っている場合は再開設定
       if (pausedAutoSpinCount < pausedMaxAutoSpins) {
-        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}`)
+        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedAutoSpins}`)
         console.log(`復元する値 - autoSpinCount: ${pausedAutoSpinCount}, maxAutoSpins: ${pausedMaxAutoSpins}`)
         setAutoSpin(true)
         autoSpinRef.current = true
         setAutoSpinCount(pausedAutoSpinCount)
         autoSpinCountRef.current = pausedAutoSpinCount
         setMaxAutoSpins(pausedMaxAutoSpins)
-        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedMaxAutoSpins})`)
+        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedAutoSpins})`)
         
         // 少し遅延してから自動実行
         const timer = setTimeout(() => {
@@ -352,15 +352,15 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     if (totalMultiplier > 0) {
       setLastWin(winAmount)
       console.log('🎯 高オッズスロット: 勝利金追加', {
-        currentBalance: currentUser.balance,
+        currentBalance: currentBalanceRef.current,
         winAmount: winAmount,
-        newBalance: currentUser.balance + winAmount
+        newBalance: currentBalanceRef.current + winAmount
       })
       
       try {
-        onUpdateBalance(currentUser.balance + winAmount)
+        onUpdateBalance(currentBalanceRef.current + winAmount)
         // 内部残高も更新
-        currentBalanceRef.current = currentUser.balance + winAmount
+        currentBalanceRef.current = currentBalanceRef.current + winAmount
         console.log('✅ 高オッズスロット: 勝利金追加成功')
       } catch (error) {
         console.error('❌ 高オッズスロット: 勝利金追加失敗:', error)
@@ -428,7 +428,6 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     //   return
     // }
     
-    // フリースピン中は連続スピン再開処理をしない（減算後のuseEffectで処理）
     // フリースピン終了は減算後にuseEffectで検出・処理される
     
     // 連続スピンの処理（フリースピン中は除く） - refの値を使用
