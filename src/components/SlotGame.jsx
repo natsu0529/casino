@@ -172,29 +172,30 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }
   const spin = () => {
     // 既にスピン中の場合は処理しない
     if (spinning) {
+      console.warn('スピン多重実行防止: 既にspinning中');
       return
     }
-    
-    if (betAmount > currentBalanceRef.current) {
+    setSpinning(true)
+    // 連続スピン中はベット額を固定
+    const fixedBetAmount = betAmount
+    if (fixedBetAmount > currentBalanceRef.current) {
       setMessage('残高が不足しています。')
       setAutoSpin(false)
       autoSpinRef.current = false
       setAutoSpinCount(0)
+      autoSpinCountRef.current = 0
+      setSpinning(false)
       return
     }
-
-    setSpinning(true)
     setMessage(autoSpinRef.current ? `連続スピン中... (${autoSpinCount + 1}/${maxAutoSpins})` : 'スピン中...')
     setLastWin(0)
-
     // 残高から賭け金を引く
-    const newBalance = currentBalanceRef.current - betAmount
+    const newBalance = currentBalanceRef.current - fixedBetAmount
     console.log('🎯 通常スロット: 残高減算', {
       oldBalance: currentBalanceRef.current,
-      betAmount: betAmount,
+      betAmount: fixedBetAmount,
       newBalance: newBalance
     })
-    
     try {
       onUpdateBalance(newBalance)
       currentBalanceRef.current = newBalance
@@ -205,11 +206,9 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }
       setMessage('残高更新に失敗しました')
       return
     }
-
     // アニメーション効果のためのランダム回転
     const spinDuration = autoSpinRef.current ? 1000 : 2000 + Math.random() * 1000 // 連続スピン時は短縮
     const spinInterval = 100 // 100msごとに更新
-
     let elapsed = 0
     const spinTimer = setInterval(() => {
       setReels([
@@ -217,39 +216,32 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }
         Math.floor(Math.random() * symbols.length),
         Math.floor(Math.random() * symbols.length)
       ])
-
       elapsed += spinInterval
       if (elapsed >= spinDuration) {
         clearInterval(spinTimer)
-        
         // 最終結果を決定（重み付きランダム）
         const finalReels = [
           getWeightedRandomSymbol(),
           getWeightedRandomSymbol(),
           getWeightedRandomSymbol()
         ]
-        
         setReels(finalReels)
-        
         // 結果判定
         setTimeout(() => {
-          checkResult(finalReels)
+          checkResult(finalReels, fixedBetAmount)
         }, autoSpinRef.current ? 200 : 500) // 連続スピン時は短縮
       }
     }, spinInterval)
   }
 
   // 結果判定
-  const checkResult = (finalReels) => {
+  const checkResult = (finalReels, usedBetAmount) => {
     console.log(`=== checkResult関数開始 ===`)
     console.log(`autoSpin状態: ${autoSpin}, autoSpinRef.current: ${autoSpinRef.current}`)
     console.log(`autoSpinCount: ${autoSpinCount}, maxAutoSpins: ${maxAutoSpins}`)
-    
     setSpinning(false) // 確実にspinning状態を解除
-    
     const multiplier = getPayoutMultiplier(finalReels[0], finalReels[1], finalReels[2])
-    const winAmount = betAmount * multiplier
-
+    const winAmount = usedBetAmount * multiplier
     if (multiplier > 0) {
       setLastWin(winAmount)
       console.log('🎯 通常スロット: 勝利金追加', {
@@ -257,19 +249,15 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }
         winAmount: winAmount,
         newBalance: currentUser.balance + winAmount
       })
-      
       try {
         onUpdateBalance(currentUser.balance + winAmount)
-        // 内部残高も更新
         currentBalanceRef.current = currentUser.balance + winAmount
         console.log('✅ 通常スロット: 勝利金追加成功')
       } catch (error) {
         console.error('❌ 通常スロット: 勝利金追加失敗:', error)
         setMessage('勝利金の追加に失敗しました')
       }
-      
       if (!autoSpinRef.current) {
-        // 連続スピン中でない場合のみメッセージを表示
         if (multiplier >= 77) {
           setMessage(`🎉 ラッキーセブン！ ${winAmount.toLocaleString()}コイン獲得！ 🎉`)
         } else if (multiplier >= 20) {
@@ -537,23 +525,23 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }
               <div className="text-white font-bold border-b border-white/30 pb-1 xs:pb-2">3つ揃い</div>
               <div className="flex justify-between text-white">
                 <span>7️⃣ ラッキーセブン</span>
-                <span className="text-yellow-300 font-bold">77倍</span>
+                <span className="text-yellow-300 font-bold">100倍</span>
               </div>
               <div className="flex justify-between text-white">
                 <span>💎 ダイヤ</span>
-                <span className="text-purple-300 font-bold">20倍</span>
+                <span className="text-purple-300 font-bold">50倍</span>
               </div>
               <div className="flex justify-between text-white">
                 <span>⭐ スター</span>
-                <span className="text-blue-300">15倍</span>
+                <span className="text-blue-300">25倍</span>
               </div>
               <div className="flex justify-between text-white">
                 <span>🔔 ベル</span>
-                <span>10倍</span>
+                <span>20倍</span>
               </div>
               <div className="flex justify-between text-white">
                 <span>🍇 ブドウ</span>
-                <span>8倍</span>
+                <span>10倍</span>
               </div>
               <div className="flex justify-between text-white">
                 <span>🍊 オレンジ</span>
@@ -561,13 +549,12 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }
               </div>
               <div className="flex justify-between text-white">
                 <span>🍋 レモン</span>
-                <span>4倍</span>
+                <span>10倍</span>
               </div>
               <div className="flex justify-between text-white">
                 <span>🍒 チェリー</span>
-                <span>2倍</span>
+                <span>20倍</span>
               </div>
-              
               <div className="border-t border-white/30 pt-1 xs:pt-2 mt-1 xs:mt-2">
                 <div className="text-white font-bold text-xs xs:text-sm">特別ルール</div>
                 <div className="flex justify-between text-white text-xs">
@@ -576,12 +563,9 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }
                 </div>
                 <div className="flex justify-between text-white text-xs">
                   <span>🍒 左リール2個</span>
-                  <span>4倍</span>
+                  <span>5倍</span>
                 </div>
-                <div className="flex justify-between text-white text-xs">
-                  <span>🔔 ベル2個以上</span>
-                  <span>3倍</span>
-                </div>
+                {/* ベル2個以上の特別ルールはロジック上存在しないため削除 */}
               </div>
             </div>
           </div>
