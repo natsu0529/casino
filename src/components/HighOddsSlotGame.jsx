@@ -110,7 +110,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         autoSpinRef.current = true
         setAutoSpinCount(pausedAutoSpinCount)
         autoSpinCountRef.current = pausedAutoSpinCount
-        setMaxAutoSpins(pausedAutoSpins)
+        setMaxAutoSpins(pausedAutoSpンス)
         setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedAutoSpンス})`)
         
         // 少し遅延してから自動実行
@@ -127,7 +127,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         setMessage('ボーナス終了！連続スピン完了！')
         // リセット
         setPausedAutoSpinCount(0)
-        setPausedMaxAutoSpスン(0)
+        setPausedMaxAutoSpンス(0)
       }
       return
     }
@@ -724,7 +724,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                   <div className="flex flex-col items-center gap-2">
                     <div className="text-white text-sm bg-blue-600/30 px-3 py-1 rounded">
                       {pausedAutoSpinRef.current 
-                        ? `連続スピン一時停止: ${pausedAutoSpinCount}/${pausedAutoSpンス}` +
+                        ? `連続スピン一時停止: ${pausedAutoSpinCount}/${pausedMaxAutoSpンス}` +
                           (freeSpins > 0 ? ` (フリースピン残り${freeSpins}回)` : '')
                         : `連続スピン: ${autoSpinCount}/${maxAutoSpンス}`
                       }
