@@ -14,14 +14,14 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     )
   }
 
-  // 高級シンボル（期待値150%調整版）
+  // 高級シンボル（期待値200%→約133%調整版）
   const symbols = [
-    { symbol: '💎', name: 'ダイヤモンド', value: 12, weight: 8 },      // 12倍
-    { symbol: '🔥', name: 'ファイア', value: 10, weight: 10 },         // 10倍
-    { symbol: '⭐', name: 'ゴールドスター', value: 8, weight: 12 },   // 8倍
-    { symbol: '🍒', name: 'チェリー', value: 6, weight: 15 },         // 6倍
-    { symbol: '🍋', name: 'レモン', value: 4, weight: 20 },           // 4倍
-    { symbol: '🍊', name: 'オレンジ', value: 3, weight: 25 },       // 3倍
+    { symbol: '💎', name: 'ダイヤモンド', value: 8, weight: 8 },      // 8倍
+    { symbol: '🔥', name: 'ファイア', value: 7, weight: 10 },         // 7倍
+    { symbol: '⭐', name: 'ゴールドスター', value: 5, weight: 12 },   // 5倍
+    { symbol: '🍒', name: 'チェリー', value: 4, weight: 15 },         // 4倍
+    { symbol: '🍋', name: 'レモン', value: 3, weight: 20 },           // 3倍
+    { symbol: '🍊', name: 'オレンジ', value: 2, weight: 25 },         // 2倍
   ]
 
   // ゲーム状態
@@ -746,7 +746,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                   <div className="flex flex-col items-center gap-2">
                     <div className="text-white text-sm bg-blue-600/30 px-3 py-1 rounded">
                       {pausedAutoSpinRef.current 
-                        ? `連続スピン一時停止: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}` +
+                        ? `連続スピン一時停止: ${pausedAutoSpinCount}/${pausedAutoSpins}` +
                           (freeSpins > 0 ? ` (フリースピン残り${freeSpins}回)` : '')
                         : `連続スピン: ${autoSpinCount}/${maxAutoSpins}`
                       }
