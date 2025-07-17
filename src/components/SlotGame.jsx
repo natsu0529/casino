@@ -245,13 +245,13 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }
     if (multiplier > 0) {
       setLastWin(winAmount)
       console.log('🎯 通常スロット: 勝利金追加', {
-        currentBalance: currentUser.balance,
+        currentBalance: currentBalanceRef.current,
         winAmount: winAmount,
-        newBalance: currentUser.balance + winAmount
+        newBalance: currentBalanceRef.current + winAmount
       })
       try {
-        onUpdateBalance(currentUser.balance + winAmount)
-        currentBalanceRef.current = currentUser.balance + winAmount
+        onUpdateBalance(currentBalanceRef.current + winAmount)
+        currentBalanceRef.current = currentBalanceRef.current + winAmount
         console.log('✅ 通常スロット: 勝利金追加成功')
       } catch (error) {
         console.error('❌ 通常スロット: 勝利金追加失敗:', error)
@@ -394,7 +394,7 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }
           <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white flex items-center gap-1 xs:gap-2 order-2 xs:order-none text-center">🎰 スロット 🎰</h1>
           <div className="text-white text-center xs:text-right order-3 xs:order-none">
             <div className="text-xs xs:text-sm sm:text-lg font-bold">👤 {currentUser.username}</div>
-            <div className="text-xs xs:text-sm sm:text-xl font-bold text-yellow-300">💰 {currentUser.balance.toLocaleString()}コイン</div>
+            <div className="text-xs xs:text-sm sm:text-xl font-bold text-yellow-300">💰 {currentBalanceRef.current.toLocaleString()}コイン</div>
           </div>
         </div>
 
