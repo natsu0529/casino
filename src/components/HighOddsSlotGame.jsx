@@ -104,14 +104,14 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       
       // 連続スピンが残っている場合は再開設定
       if (pausedAutoSpinCount < pausedMaxAutoSpins) {
-        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedAutoSpins}`)
-        console.log(`復元する値 - autoSpinCount: ${pausedAutoSpinCount}, maxAutoSpins: ${pausedMaxAutoSpンス}`)
+        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}`)
+        console.log(`復元する値 - autoSpinCount: ${pausedAutoSpinCount}, maxAutoSpins: ${pausedMaxAutoSpins}`)
         setAutoSpin(true)
         autoSpinRef.current = true
         setAutoSpinCount(pausedAutoSpinCount)
         autoSpinCountRef.current = pausedAutoSpinCount
-        setMaxAutoSpins(pausedAutoSpンス)
-        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedAutoSpンス})`)
+        setMaxAutoSpins(pausedMaxAutoSpins)
+        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedMaxAutoSpins})`)
         
         // 少し遅延してから自動実行
         const timer = setTimeout(() => {
@@ -145,7 +145,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       })
       
       // 連続スピンが残っている場合のみ自動実行
-      if (autoSpinCountRef.current < maxAutoSpins) {
+      if (autoSpinCountRef.current < maxAutoSpンス) {
         console.log(`連続スピン自動継続: ${autoSpinCountRef.current}/${maxAutoSpンス}`)
         const timer = setTimeout(() => {
           if (autoSpinRef.current && !spinning && freeSpins === 0 && betAmount <= currentBalanceRef.current) {
@@ -399,17 +399,6 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       setPausedMaxAutoSpンス(maxAutoSpンスRef.current) // refの値を使用
       pausedAutoSpinRef.current = true
       setMessage('🎰 ボーナスラウンド開始！フリースピン5回！ 🎰')
-      
-      // フリースピンの自動開始はuseEffectで処理（重複を避けるためコメントアウト）
-      // setTimeout(() => {
-      //   console.log(`=== フリースピン自動開始チェック ===`)
-      //   console.log(`現在のfreeSpins: ${freeSpins}`)
-      //   if (freeSpins > 0 && !spinning) {
-      //     console.log(`=== フリースピン自動開始実行 ===`)
-      //     spin()
-      //   }
-      // }, 3000)
-      
       return // 早期リターンでこれ以上の処理を停止
     }
     
@@ -436,14 +425,9 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       console.log(`=== 高オッズ連続スピン処理開始 ===`)
       console.log(`現在のカウント: ${autoSpinCountRef.current}, 新しいカウント: ${newCount}, 最大回数: ${maxAutoSpンスRef.current}`)
       console.log(`autoSpin状態: ${autoSpin}, autoSpinRef.current: ${autoSpinRef.current}`)
-      
-      // 先にカウントを更新（stateとref両方）
       setAutoSpinCount(newCount)
       autoSpinCountRef.current = newCount
-      
-      // 終了条件を厳密にチェック - refの値を使用
       if (newCount >= maxAutoSpンスRef.current) {
-        // 連続スピン終了
         console.log(`連続スピン終了: ${newCount} >= ${maxAutoSpンスRef.current}`)
         setAutoSpin(false)
         autoSpinRef.current = false
@@ -451,22 +435,16 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         autoSpinCountRef.current = 0
         setMessage(`連続スピン完了！ ${maxAutoSpンスRef.current}回実行しました。`)
       } else {
-        // 連続スピン中のメッセージを更新
         setMessage(`連続スピン中... (${newCount}/${maxAutoSpンスRef.current})`)
         console.log(`次のスピンをスケジュール: ${newCount}/${maxAutoSpンスRef.current}`)
-        
-        // タイマー前に再度終了条件チェック - refの値を使用
         const shouldContinue = newCount < maxAutoSpンスRef.current && autoSpinRef.current && freeSpins === 0
         if (shouldContinue) {
-          // 次のスピンを実行
           setTimeout(() => {
             console.log(`=== 高オッズタイマー実行 ===`)
             console.log(`現在の残高: ${currentBalanceRef.current}, ベット額: ${betAmount}`)
             console.log(`autoSpin状態（タイマー内）: ${autoSpinRef.current}`)
             console.log(`現在のカウント（タイマー内）: ${autoSpinCountRef.current}, 最大回数: ${maxAutoSpンスRef.current}`)
             console.log(`フリースピン状態: ${freeSpins}`)
-            
-            // 四重チェック: 残高・autoSpin状態・回数制限・フリースピン（refの値を使用）
             if (betAmount <= currentBalanceRef.current && autoSpinRef.current && autoSpinCountRef.current < maxAutoSpンスRef.current && freeSpins === 0) {
               console.log(`全条件OK、次のスピンを実行`)
               spin()
@@ -484,7 +462,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                 setMessage(`連続スピン完了！`)
               }
             }
-          }, 1500) // 1.5秒後に次のスピン
+          }, 1500)
         } else {
           console.log(`継続条件不満足で連続スピン即時停止`)
           setAutoSpin(false)
