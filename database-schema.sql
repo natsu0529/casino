@@ -59,3 +59,7 @@ CREATE TRIGGER update_profiles_updated_at
 CREATE INDEX idx_game_history_user_id ON game_history(user_id);
 CREATE INDEX idx_game_history_played_at ON game_history(played_at);
 CREATE INDEX idx_profiles_username ON profiles(username);
+
+-- ゲーム履歴を3時間経過で自動削除するSQL（Supabaseスケジューラ等で定期実行）
+DELETE FROM game_history
+WHERE played_at < NOW() - INTERVAL '3 hours';
