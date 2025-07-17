@@ -110,7 +110,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         autoSpinRef.current = true
         setAutoSpinCount(pausedAutoSpinCount)
         autoSpinCountRef.current = pausedAutoSpinCount
-        setMaxAutoSpins(pausedMaxAutoSpins)
+        setMaxAutoSpins(pausedAutoSpinCount)
         setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedAutoSpins})`)
         
         // 少し遅延してから自動実行
@@ -396,7 +396,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       console.log(`保存する値 - pausedAutoSpinCount: ${autoSpinCountRef.current}, pausedMaxAutoSpins: ${maxAutoSpinsRef.current}`)
       setPausedAutoSpin(true)
       setPausedAutoSpinCount(autoSpinCountRef.current)
-      setPausedMaxAutoSpインス(maxAutoSpinsRef.current) // refの値を使用
+      setPausedMaxAutoSpins(maxAutoSpinsRef.current) // ← ここで必ず保存
       pausedAutoSpinRef.current = true
       setMessage('🎰 ボーナスラウンド開始！フリースピン5回！ 🎰')
       return // 早期リターンでこれ以上の処理を停止
