@@ -46,7 +46,7 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }
   const [gameHistory, setGameHistory] = useState([])
   const [autoSpin, setAutoSpin] = useState(false)
   const [autoSpinCount, setAutoSpinCount] = useState(0)
-  const [maxAutoSpins, setMaxAutoSpins] = useState(10)
+  const [maxAutoSpins, setmaxAutoSpins] = useState(10)
   const [autoSpinInterval, setAutoSpinInterval] = useState(null)
   
   // 最新の残高を追跡するref
@@ -87,7 +87,7 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }
     autoSpinRef.current = true
     setAutoSpinCount(0)
     autoSpinCountRef.current = 0
-    setMaxAutoSpins(count)
+    setmaxAutoSpins(count)
     maxAutoSpinsRef.current = count // refも更新
     spin()
   }

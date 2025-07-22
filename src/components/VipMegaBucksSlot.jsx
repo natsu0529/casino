@@ -50,7 +50,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
   const [jackpotPool, setJackpotPool] = useState(10000000) // 1000万コインジャックポット
   const [autoSpin, setAutoSpin] = useState(false)
   const [autoSpinCount, setAutoSpinCount] = useState(0)
-  const [maxAutoSpins, setMaxAutoSpins] = useState(10)
+  const [maxAutoSpins, setmaxAutoSpins] = useState(10)
   
   // 最新の残高を追跡するref
   const currentBalanceRef = useRef(safeBalance)
@@ -234,7 +234,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
     autoSpinRef.current = true
     setAutoSpinCount(0)
     autoSpinCountRef.current = 0
-    setMaxAutoSpins(count)
+    setmaxAutoSpins(count)
     maxAutoSpinsRef.current = count
     
     try {
@@ -507,7 +507,7 @@ const VipMegaBucksSlot = ({ currentUser, onNavigation, onNavigateHome, onUpdateB
           <div className="text-sm text-purple-300 mb-2">連続スピン</div>
           <select
             value={maxAutoSpins}
-            onChange={(e) => setMaxAutoSpins(Number(e.target.value))}
+            onChange={(e) => setmaxAutoSpins(Number(e.target.value))}
             className="w-full p-2 bg-purple-700 border border-purple-600 rounded text-white"
             disabled={spinning || autoSpin}
           >
