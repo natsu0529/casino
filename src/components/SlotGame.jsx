@@ -16,14 +16,11 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }
 
   // スロットシンボル（期待値200%調整版）
   const symbols = [
-    { symbol: '🍒', name: 'チェリー', value: 2, weight: 35 },  // 高確率・小当たり
-    { symbol: '🍋', name: 'レモン', value: 4, weight: 30 },    // 高確率
-    { symbol: '🍊', name: 'オレンジ', value: 6, weight: 20 }, // 中確率
-    { symbol: '🍇', name: 'ブドウ', value: 10, weight: 10 },   // 中確率
-    { symbol: '🔔', name: 'ベル', value: 20, weight: 4 },      // 低確率
-    { symbol: '⭐', name: 'スター', value: 50, weight: 0.8 }, // 超低確率
-    { symbol: '💎', name: 'ダイヤ', value: 100, weight: 0.15 }, // 激レア
-    { symbol: '7️⃣', name: 'ラッキーセブン', value: 200, weight: 0.05 } // 超激レア
+    { symbol: '7️⃣', name: 'セブン', value: 8.5, weight: 8 },      // 8.5倍
+    { symbol: '💎', name: 'ダイヤモンド', value: 7, weight: 10 },         // 7倍
+    { symbol: '🍒', name: 'チェリー', value: 5, weight: 12 },   // 5倍
+    { symbol: '🍋', name: 'レモン', value: 4, weight: 15 },         // 4倍
+    { symbol: '🍊', name: 'オレンジ', value: 2.5, weight: 20 },           // 2.5倍
   ]
 
   // 重み付きランダム選択
@@ -556,16 +553,19 @@ const SlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onRecordGame }
                 <span>20倍</span>
               </div>
               <div className="border-t border-white/30 pt-1 xs:pt-2 mt-1 xs:mt-2">
-                <div className="text-white font-bold text-xs xs:text-sm">特別ルール</div>
+                <div className="text-white font-bold text-xs xs:text-sm">連続数による倍率アップ</div>
                 <div className="flex justify-between text-white text-xs">
-                  <span>🍒 左リール1個</span>
-                  <span>2倍</span>
+                  <span>5つ連続</span>
+                  <span className="text-yellow-300">基本倍率 × 25</span>
                 </div>
                 <div className="flex justify-between text-white text-xs">
-                  <span>🍒 左リール2個</span>
-                  <span>5倍</span>
+                  <span>4つ連続</span>
+                  <span className="text-yellow-300">基本倍率 × 10</span>
                 </div>
-                {/* ベル2個以上の特別ルールはロジック上存在しないため削除 */}
+                <div className="flex justify-between text-white text-xs">
+                  <span>3つ連続</span>
+                  <span className="text-yellow-300">基本倍率 × 4</span>
+                </div>
               </div>
             </div>
           </div>

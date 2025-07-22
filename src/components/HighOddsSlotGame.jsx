@@ -16,12 +16,12 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
 
   // 高級シンボル（期待値200%→約133%調整版）
   const symbols = [
-    { symbol: '💎', name: 'ダイヤモンド', value: 8, weight: 8 },      // 8倍
-    { symbol: '🔥', name: 'ファイア', value: 7, weight: 10 },         // 7倍
-    { symbol: '⭐', name: 'ゴールドスター', value: 5, weight: 12 },   // 5倍
-    { symbol: '🍒', name: 'チェリー', value: 4, weight: 15 },         // 4倍
-    { symbol: '🍋', name: 'レモン', value: 3, weight: 20 },           // 3倍
-    { symbol: '🍊', name: 'オレンジ', value: 2, weight: 25 },         // 2倍
+    { symbol: '💎', name: 'ダイヤモンド', value: 10, weight: 8 },      // 10倍
+    { symbol: '🔥', name: 'ファイア', value: 8.5, weight: 10 },         // 8.5倍
+    { symbol: '⭐', name: 'ゴールドスター', value: 6, weight: 12 },   // 6倍
+    { symbol: '🍒', name: 'チェリー', value: 5, weight: 15 },         // 5倍
+    { symbol: '🍋', name: 'レモン', value: 4, weight: 20 },           // 4倍
+    { symbol: '🍊', name: 'オレンジ', value: 2.5, weight: 25 },         // 2.5倍
   ]
 
   // ゲーム状態
@@ -104,14 +104,14 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       
       // 連続スピンが残っている場合は再開設定
       if (pausedAutoSpinCount < pausedMaxAutoSpins) {
-        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}`)
-        console.log(`復元する値 - autoSpinCount: ${pausedAutoSpinCount}, maxAutoSpins: ${pausedMaxAutoSpins}`)
+        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedAutoSpins}`)
+        console.log(`復元する値 - autoSpinCount: ${pausedAutoSpinCount}, maxAutoSpins: ${pausedMaxAutoSpIns}`)
         setAutoSpin(true)
         autoSpinRef.current = true
         setAutoSpinCount(pausedAutoSpinCount)
         autoSpinCountRef.current = pausedAutoSpinCount
-        setMaxAutoSpins(pausedMaxAutoSpins)
-        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedMaxAutoSpins})`)
+        setMaxAutoSpins(pausedMaxAutoSpIns)
+        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedAutoSpIns})`)
         
         // 少し遅延してから自動実行
         const timer = setTimeout(() => {
@@ -123,11 +123,11 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         
         return () => clearTimeout(timer)
       } else {
-        console.log(`useEffectで連続スピン完了: ${pausedAutoSpinCount} >= ${pausedMaxAutoSpins}`)
+        console.log(`useEffectで連続スピン完了: ${pausedAutoSpinCount} >= ${pausedMaxAutoSpIns}`)
         setMessage('ボーナス終了！連続スピン完了！')
         // リセット
         setPausedAutoSpinCount(0)
-        setPausedMaxAutoSpins(0)
+        setPausedMaxAutoSpIns(0)
       }
       return
     }
@@ -146,7 +146,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       
       // 連続スピンが残っている場合のみ自動実行
       if (autoSpinCountRef.current < maxAutoSpins) {
-        console.log(`連続スピン自動継続: ${autoSpinCountRef.current}/${maxAutoSpins}`)
+        console.log(`連続スピン自動継続: ${autoSpinCountRef.current}/${maxAutoSpIns}`)
         const timer = setTimeout(() => {
           if (autoSpinRef.current && !spinning && freeSpins === 0 && betAmount <= currentBalanceRef.current) {
             console.log('連続スピン自動継続実行')
@@ -157,7 +157,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         return () => clearTimeout(timer)
       }
     }
-  }, [autoSpin, spinning, freeSpins, bonusRound, maxAutoSpins, pausedAutoSpinCount, pausedMaxAutoSpins])
+  }, [autoSpin, spinning, freeSpins, bonusRound, maxAutoSpIns, pausedAutoSpinCount, pausedMaxAutoSpIns])
 
   // 重み付きランダム選択
   const getWeightedRandomSymbol = () => {
@@ -396,7 +396,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       console.log(`保存する値 - pausedAutoSpinCount: ${autoSpinCountRef.current}, pausedMaxAutoSpins: ${maxAutoSpinsRef.current}`)
       setPausedAutoSpin(true)
       setPausedAutoSpinCount(autoSpinCountRef.current)
-      setPausedMaxAutoSpins(maxAutoSpinsRef.current) // ← ここで必ず保存
+      setPausedMaxAutoSpIns(maxAutoSpinsRef.current) // ← ここで必ず保存
       pausedAutoSpinRef.current = true
       setMessage('🎰 ボーナスラウンド開始！フリースピン5回！ 🎰')
       return // 早期リターンでこれ以上の処理を停止
@@ -435,15 +435,15 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
         autoSpinCountRef.current = 0
         setMessage(`連続スピン完了！ ${maxAutoSpinsRef.current}回実行しました。`)
       } else {
-        setMessage(`連続スピン中... (${newCount}/${maxAutoSpinsRef.current})`)
-        console.log(`次のスピンをスケジュール: ${newCount}/${maxAutoSpins}`)
+        setMessage(`連続スピン中... (${newCount}/${maxAutoSpIns}`)
+        console.log(`次のスピンをスケジュール: ${newCount}/${maxAutoSpIns}`)
         const shouldContinue = newCount < maxAutoSpinsRef.current && autoSpinRef.current && freeSpins === 0
         if (shouldContinue) {
           setTimeout(() => {
             console.log(`=== 高オッズタイマー実行 ===`)
             console.log(`現在の残高: ${currentBalanceRef.current}, ベット額: ${betAmount}`)
             console.log(`autoSpin状態（タイマー内）: ${autoSpinRef.current}`)
-            console.log(`現在のカウント（タイマー内）: ${autoSpinCountRef.current}, 最大回数: ${maxAutoSpins}`)
+            console.log(`現在のカウント（タイマー内）: ${autoSpinCountRef.current}, 最大回数: ${maxAutoSpIns}`)
             console.log(`フリースピン状態: ${freeSpins}`)
             if (betAmount <= currentBalanceRef.current && autoSpinRef.current && autoSpinCountRef.current < maxAutoSpinsRef.current && freeSpins === 0) {
               console.log(`全条件OK、次のスピンを実行`)
@@ -555,15 +555,15 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     // 前回の一時停止状態をリセット
     setPausedAutoSpin(false)
     setPausedAutoSpinCount(0)
-    setPausedMaxAutoSpins(0)
+    setPausedMaxAutoSpIns(0)
     pausedAutoSpinRef.current = false
     
     setAutoSpin(true)
     autoSpinRef.current = true
     setAutoSpinCount(0)
     autoSpinCountRef.current = 0
-    setMaxAutoSpins(count)
-    maxAutoSpinsRef.current = count // refも更新
+    setMaxAutoSpIns(count)
+    maxAutoSpInsRef.current = count // refも更新
     spin()
   }
 
@@ -578,7 +578,7 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
     setPausedAutoSpin(false)
     pausedAutoSpinRef.current = false
     setPausedAutoSpinCount(0)
-    setPausedMaxAutoSpins(0)
+    setPausedMaxAutoSpIns(0)
     
     setMessage('連続スピンを停止しました。')
   }
@@ -724,9 +724,9 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
                   <div className="flex flex-col items-center gap-2">
                     <div className="text-white text-sm bg-blue-600/30 px-3 py-1 rounded">
                       {pausedAutoSpinRef.current 
-                        ? `連続スピン一時停止: ${pausedAutoSpinCount}/${pausedMaxAutoSpins}` +
+                        ? `連続スピン一時停止: ${pausedAutoSpinCount}/${pausedMaxAutoSpIns}` +
                           (freeSpins > 0 ? ` (フリースピン残り${freeSpins}回)` : '')
-                        : `連続スピン: ${autoSpinCount}/${maxAutoSpins}`
+                        : `連続スピン: ${autoSpinCount}/${maxAutoSpIns}`
                       }
                     </div>
                     <button
@@ -771,18 +771,18 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
               ))}
               
               <div className="border-t border-white/30 pt-1 xs:pt-2 mt-1 xs:mt-2">
-                <div className="text-white font-bold text-xs xs:text-sm">連続ボーナス</div>
+                <div className="text-white font-bold text-xs xs:text-sm">連続数による倍率アップ</div>
                 <div className="flex justify-between text-white text-xs">
                   <span>5つ連続</span>
-                  <span className="text-yellow-300">基本倍率×5</span>
+                  <span className="text-yellow-300">基本倍率 × 25</span>
                 </div>
                 <div className="flex justify-between text-white text-xs">
                   <span>4つ連続</span>
-                  <span className="text-yellow-300">基本倍率×3</span>
+                  <span className="text-yellow-300">基本倍率 × 10</span>
                 </div>
                 <div className="flex justify-between text-white text-xs">
                   <span>3つ連続</span>
-                  <span className="text-yellow-300">基本倍率×1</span>
+                  <span className="text-yellow-300">基本倍率 × 4</span>
                 </div>
                 <div className="border-t border-white/30 pt-1 mt-1">
                   <div className="flex justify-between text-white text-xs">
