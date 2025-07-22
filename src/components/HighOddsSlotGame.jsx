@@ -104,14 +104,14 @@ const HighOddsSlotGame = ({ currentUser, onNavigateHome, onUpdateBalance, onReco
       
       // 連続スピンが残っている場合は再開設定
       if (pausedAutoSpinCount < pausedmaxAutoSpins) {
-        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedAutoSpins}`)
+        console.log(`useEffectで連続スピン再開設定: ${pausedAutoSpinCount}/${pausedmaxAutoSpins}`)
         console.log(`復元する値 - autoSpinCount: ${pausedAutoSpinCount}, maxAutoSpins: ${pausedmaxAutoSpins}`)
         setAutoSpin(true)
         autoSpinRef.current = true
         setAutoSpinCount(pausedAutoSpinCount)
         autoSpinCountRef.current = pausedAutoSpinCount
         setmaxAutoSpins(pausedmaxAutoSpins)
-        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedAutoSpIns})`)
+        setMessage(`ボーナス終了！連続スピン再開 (${pausedAutoSpinCount}/${pausedmaxAutoSpins})`)
         
         // 少し遅延してから自動実行
         const timer = setTimeout(() => {
